@@ -1,9 +1,9 @@
-﻿plugins {
+plugins {
     alias(libs.plugins.android.application)
 }
 
 android {
-    namespace = "com.example.cleanbanar"
+    namespace = "com.taupik.myapp"
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
@@ -11,7 +11,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.cleanbanar"
+        applicationId = "com.taupik.myapp"
         minSdk = 28
         targetSdk = 36
         versionCode = 1
