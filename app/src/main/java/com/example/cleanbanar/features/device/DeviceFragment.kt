@@ -1,9 +1,9 @@
-package com.taupik.myapp.features.device
+﻿package com.example.cleanbanar.features.device
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import com.taupik.myapp.core.ui.BaseFragment
-import com.taupik.myapp.databinding.FragmentDeviceBinding
+import com.example.cleanbanar.core.ui.BaseFragment
+import com.example.cleanbanar.databinding.FragmentDeviceBinding
 
 class DeviceFragment : BaseFragment<FragmentDeviceBinding>() {
     override fun inflateBinding(inflater: LayoutInflater, container: ViewGroup?): FragmentDeviceBinding {

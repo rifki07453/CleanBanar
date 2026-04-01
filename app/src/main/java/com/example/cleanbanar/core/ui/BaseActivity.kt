@@ -1,4 +1,4 @@
-﻿package com.taupik.myapp.core.ui
+﻿package com.example.cleanbanar.core.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater

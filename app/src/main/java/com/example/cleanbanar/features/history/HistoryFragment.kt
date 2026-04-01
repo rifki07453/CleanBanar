@@ -1,9 +1,9 @@
-package com.taupik.myapp.features.history
+﻿package com.example.cleanbanar.features.history
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import com.taupik.myapp.core.ui.BaseFragment
-import com.taupik.myapp.databinding.FragmentHistoryBinding
+import com.example.cleanbanar.core.ui.BaseFragment
+import com.example.cleanbanar.databinding.FragmentHistoryBinding
 
 class HistoryFragment : BaseFragment<FragmentHistoryBinding>() {
     override fun inflateBinding(inflater: LayoutInflater, container: ViewGroup?): FragmentHistoryBinding {

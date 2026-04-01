@@ -1,9 +1,9 @@
-﻿package com.taupik.myapp.features.auth
+﻿package com.example.cleanbanar.features.auth
 
 import android.os.Bundle
 import android.view.LayoutInflater
-import com.taupik.myapp.core.ui.BaseActivity
-import com.taupik.myapp.databinding.ActivityLoginBinding
+import com.example.cleanbanar.core.ui.BaseActivity
+import com.example.cleanbanar.databinding.ActivityLoginBinding
 
 class LoginActivity : BaseActivity<ActivityLoginBinding>() {
 

@@ -1,12 +1,12 @@
-package com.taupik.myapp.features.dashboard
+﻿package com.example.cleanbanar.features.dashboard
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import com.taupik.myapp.core.ui.BaseFragment
-import com.taupik.myapp.databinding.FragmentPetugasDashboardBinding
+import com.example.cleanbanar.core.ui.BaseFragment
+import com.example.cleanbanar.databinding.FragmentPetugasDashboardBinding
 
 class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>() {
 

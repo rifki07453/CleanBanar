@@ -32,7 +32,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Myapp"
+            android:text="CleanBanar"
             android:textStyle="bold"
             android:textSize="32sp"
             android:textColor="@color/gray_900" />

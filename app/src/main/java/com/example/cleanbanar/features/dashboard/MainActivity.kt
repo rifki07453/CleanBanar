@@ -1,14 +1,14 @@
-package com.taupik.myapp.features.dashboard
+﻿package com.example.cleanbanar.features.dashboard
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.fragment.app.Fragment
-import com.taupik.myapp.R
-import com.taupik.myapp.core.ui.BaseActivity
-import com.taupik.myapp.databinding.ActivityMainBinding
-import com.taupik.myapp.features.device.DeviceFragment
-import com.taupik.myapp.features.history.HistoryFragment
-import com.taupik.myapp.features.profile.ProfileFragment
+import com.example.cleanbanar.R
+import com.example.cleanbanar.core.ui.BaseActivity
+import com.example.cleanbanar.databinding.ActivityMainBinding
+import com.example.cleanbanar.features.device.DeviceFragment
+import com.example.cleanbanar.features.history.HistoryFragment
+import com.example.cleanbanar.features.profile.ProfileFragment
 
 class MainActivity : BaseActivity<ActivityMainBinding>() {
 

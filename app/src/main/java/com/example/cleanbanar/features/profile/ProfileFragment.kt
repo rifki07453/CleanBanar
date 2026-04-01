@@ -1,9 +1,9 @@
-package com.taupik.myapp.features.profile
+﻿package com.example.cleanbanar.features.profile
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import com.taupik.myapp.core.ui.BaseFragment
-import com.taupik.myapp.databinding.FragmentProfileBinding
+import com.example.cleanbanar.core.ui.BaseFragment
+import com.example.cleanbanar.databinding.FragmentProfileBinding
 
 class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
     override fun inflateBinding(inflater: LayoutInflater, container: ViewGroup?): FragmentProfileBinding {
