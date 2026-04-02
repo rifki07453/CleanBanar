@@ -1,9 +1,9 @@
-﻿package com.example.cleanbanar.features.dashboard
+package com.example.cleanbanar.features.dashboard
 
-import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.fragment.app.Fragment
 import com.example.cleanbanar.R
+import com.example.cleanbanar.core.data.AuthManager
 import com.example.cleanbanar.core.ui.BaseActivity
 import com.example.cleanbanar.databinding.ActivityMainBinding
 import com.example.cleanbanar.features.device.DeviceFragment
@@ -12,15 +12,20 @@ import com.example.cleanbanar.features.profile.ProfileFragment
 
 class MainActivity : BaseActivity<ActivityMainBinding>() {
 
+    private lateinit var authManager: AuthManager
+    private var userRole: String = "Admin"
+
     override fun inflateBinding(layoutInflater: LayoutInflater): ActivityMainBinding {
         return ActivityMainBinding.inflate(layoutInflater)
     }
 
     override fun setupViews() {
-        // Assume user role dictates which dashboard is shown (e.g., passed via Intent)
-        val role = intent.getStringExtra("USER_ROLE") ?: "Admin"
-        
-        val fragmentToLoad: Fragment = if (role == "Petugas") {
+        authManager = AuthManager(this)
+
+        // Get role from intent first, fallback to session
+        userRole = intent.getStringExtra("USER_ROLE") ?: authManager.getUserRole()
+
+        val fragmentToLoad: Fragment = if (userRole == "Petugas") {
             PetugasDashboardFragment()
         } else {
             AdminDashboardFragment()
@@ -32,7 +37,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
-                    loadFragment(if (role == "Petugas") PetugasDashboardFragment() else AdminDashboardFragment())
+                    loadFragment(if (userRole == "Petugas") PetugasDashboardFragment() else AdminDashboardFragment())
                     true
                 }
                 R.id.nav_device -> {
