@@ -1,4 +1,4 @@
-﻿pluginManagement {
+pluginManagement {
     repositories {
         google()
         mavenCentral()
@@ -10,9 +10,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url = uri("https://repo.eclipse.org/content/repositories/paho-releases/") }
-        maven { url = uri("https://jitpack.io") }
     }
 }
-rootProject.name = "Myapp"
+rootProject.name = "CleanBanar"
 include(":app")

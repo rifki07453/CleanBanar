@@ -1,0 +1,216 @@
+package com.example.cleanbanar.core.data
+
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+
+/**
+ * Firebase Realtime Database manager for CleanBanar.
+ *
+ * Database structure:
+ * cleanbanar/
+ *   bins/
+ *     organik/   { percentage: Int, status: String, lastUpdate: Long }
+ *     nonOrganik/{ percentage: Int, status: String, lastUpdate: Long }
+ *   device/
+ *     connectionStatus: String ("ONLINE" / "OFFLINE")
+ *     lastSeen: Long
+ *   notifications/
+ *     {id}/ { title: String, message: String, type: String, timestamp: Long, read: Boolean }
+ *   history/
+ *     {id}/ { action: String, bin: String, actor: String, timestamp: Long }
+ *   users/
+ *     {id}/ { name: String, email: String, role: String }
+ *   statistics/
+ *     daily/
+ *       {date}/ { organik: Int, nonOrganik: Int }
+ */
+object FirebaseManager {
+
+    private val database: FirebaseDatabase by lazy {
+        FirebaseDatabase.getInstance()
+    }
+
+    private val rootRef: DatabaseReference by lazy {
+        database.getReference("cleanbanar")
+    }
+
+    // --- Bin Status ---
+    fun listenBinStatus(binType: String, callback: (percentage: Int, status: String, lastUpdate: Long) -> Unit): ValueEventListener {
+        val ref = rootRef.child("bins").child(binType)
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val percentage = snapshot.child("percentage").getValue(Int::class.java) ?: 0
+                val status = snapshot.child("status").getValue(String::class.java) ?: "TERSEDIA"
+                val lastUpdate = snapshot.child("lastUpdate").getValue(Long::class.java) ?: 0L
+                callback(percentage, status, lastUpdate)
+            }
+            override fun onCancelled(error: DatabaseError) {}
+        }
+        ref.addValueEventListener(listener)
+        return listener
+    }
+
+    fun removeBinListener(binType: String, listener: ValueEventListener) {
+        rootRef.child("bins").child(binType).removeEventListener(listener)
+    }
+
+    fun updateBinStatus(binType: String, percentage: Int, status: String) {
+        val ref = rootRef.child("bins").child(binType)
+        ref.child("percentage").setValue(percentage)
+        ref.child("status").setValue(status)
+        ref.child("lastUpdate").setValue(System.currentTimeMillis())
+    }
+
+    // --- Device Status ---
+    fun listenDeviceStatus(callback: (connectionStatus: String, lastSeen: Long) -> Unit): ValueEventListener {
+        val ref = rootRef.child("device")
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val status = snapshot.child("connectionStatus").getValue(String::class.java) ?: "OFFLINE"
+                val lastSeen = snapshot.child("lastSeen").getValue(Long::class.java) ?: 0L
+                callback(status, lastSeen)
+            }
+            override fun onCancelled(error: DatabaseError) {}
+        }
+        ref.addValueEventListener(listener)
+        return listener
+    }
+
+    fun removeDeviceListener(listener: ValueEventListener) {
+        rootRef.child("device").removeEventListener(listener)
+    }
+
+    // --- Notifications ---
+    fun listenNotifications(callback: (List<Map<String, Any>>) -> Unit): ValueEventListener {
+        val ref = rootRef.child("notifications")
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val notifications = mutableListOf<Map<String, Any>>()
+                for (child in snapshot.children.reversed()) {
+                    val map = mutableMapOf<String, Any>()
+                    map["id"] = child.key ?: ""
+                    map["title"] = child.child("title").getValue(String::class.java) ?: ""
+                    map["message"] = child.child("message").getValue(String::class.java) ?: ""
+                    map["type"] = child.child("type").getValue(String::class.java) ?: "info"
+                    map["timestamp"] = child.child("timestamp").getValue(Long::class.java) ?: 0L
+                    map["read"] = child.child("read").getValue(Boolean::class.java) ?: false
+                    notifications.add(map)
+                }
+                callback(notifications)
+            }
+            override fun onCancelled(error: DatabaseError) {}
+        }
+        ref.orderByChild("timestamp").addValueEventListener(listener)
+        return listener
+    }
+
+    fun removeNotificationListener(listener: ValueEventListener) {
+        rootRef.child("notifications").removeEventListener(listener)
+    }
+
+    // --- History ---
+    fun listenHistory(callback: (List<Map<String, Any>>) -> Unit): ValueEventListener {
+        val ref = rootRef.child("history")
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val history = mutableListOf<Map<String, Any>>()
+                for (child in snapshot.children.reversed()) {
+                    val map = mutableMapOf<String, Any>()
+                    map["id"] = child.key ?: ""
+                    map["action"] = child.child("action").getValue(String::class.java) ?: ""
+                    map["bin"] = child.child("bin").getValue(String::class.java) ?: ""
+                    map["actor"] = child.child("actor").getValue(String::class.java) ?: ""
+                    map["timestamp"] = child.child("timestamp").getValue(Long::class.java) ?: 0L
+                    history.add(map)
+                }
+                callback(history)
+            }
+            override fun onCancelled(error: DatabaseError) {}
+        }
+        ref.orderByChild("timestamp").addValueEventListener(listener)
+        return listener
+    }
+
+    fun removeHistoryListener(listener: ValueEventListener) {
+        rootRef.child("history").removeEventListener(listener)
+    }
+
+    fun addHistoryEntry(action: String, bin: String, actor: String) {
+        val ref = rootRef.child("history").push()
+        ref.child("action").setValue(action)
+        ref.child("bin").setValue(bin)
+        ref.child("actor").setValue(actor)
+        ref.child("timestamp").setValue(System.currentTimeMillis())
+    }
+
+    // --- Users (Staff Management) ---
+    fun listenUsers(callback: (List<Map<String, Any>>) -> Unit): ValueEventListener {
+        val ref = rootRef.child("users")
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val users = mutableListOf<Map<String, Any>>()
+                for (child in snapshot.children) {
+                    val map = mutableMapOf<String, Any>()
+                    map["id"] = child.key ?: ""
+                    map["name"] = child.child("name").getValue(String::class.java) ?: ""
+                    map["email"] = child.child("email").getValue(String::class.java) ?: ""
+                    map["role"] = child.child("role").getValue(String::class.java) ?: ""
+                    users.add(map)
+                }
+                callback(users)
+            }
+            override fun onCancelled(error: DatabaseError) {}
+        }
+        ref.addValueEventListener(listener)
+        return listener
+    }
+
+    fun removeUsersListener(listener: ValueEventListener) {
+        rootRef.child("users").removeEventListener(listener)
+    }
+
+    fun addUser(name: String, email: String, role: String) {
+        val ref = rootRef.child("users").push()
+        ref.child("name").setValue(name)
+        ref.child("email").setValue(email)
+        ref.child("role").setValue(role)
+    }
+
+    fun updateUser(userId: String, name: String, email: String) {
+        val ref = rootRef.child("users").child(userId)
+        ref.child("name").setValue(name)
+        ref.child("email").setValue(email)
+    }
+
+    fun deleteUser(userId: String) {
+        rootRef.child("users").child(userId).removeValue()
+    }
+
+    // --- Statistics ---
+    fun listenDailyStats(callback: (List<Map<String, Any>>) -> Unit): ValueEventListener {
+        val ref = rootRef.child("statistics").child("daily")
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val stats = mutableListOf<Map<String, Any>>()
+                for (child in snapshot.children) {
+                    val map = mutableMapOf<String, Any>()
+                    map["date"] = child.key ?: ""
+                    map["organik"] = child.child("organik").getValue(Int::class.java) ?: 0
+                    map["nonOrganik"] = child.child("nonOrganik").getValue(Int::class.java) ?: 0
+                    stats.add(map)
+                }
+                callback(stats)
+            }
+            override fun onCancelled(error: DatabaseError) {}
+        }
+        ref.orderByKey().limitToLast(7).addValueEventListener(listener)
+        return listener
+    }
+
+    fun removeStatsListener(listener: ValueEventListener) {
+        rootRef.child("statistics").child("daily").removeEventListener(listener)
+    }
+}

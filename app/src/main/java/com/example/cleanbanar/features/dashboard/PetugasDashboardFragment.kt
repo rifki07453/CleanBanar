@@ -4,35 +4,56 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Toast
 import com.example.cleanbanar.R
+import com.example.cleanbanar.core.data.AuthManager
+import com.example.cleanbanar.core.data.FirebaseManager
 import com.example.cleanbanar.core.ui.BaseFragment
 import com.example.cleanbanar.databinding.FragmentPetugasDashboardBinding
+import com.google.firebase.database.ValueEventListener
 
 class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>() {
+
+    private var organikListener: ValueEventListener? = null
+    private var nonOrganikListener: ValueEventListener? = null
 
     override fun inflateBinding(inflater: LayoutInflater, container: ViewGroup?): FragmentPetugasDashboardBinding {
         return FragmentPetugasDashboardBinding.inflate(inflater, container, false)
     }
 
     override fun setupViews() {
-        // Set initial status messages based on fill levels
-        updateOrganikStatus(45)
-        updateNonOrganikStatus(85)
-
         binding.btnEmptyOrganik.setOnClickListener {
-            binding.progressOrganik.progress = 0
-            updateOrganikStatus(0)
+            FirebaseManager.updateBinStatus("organik", 0, "TERSEDIA")
+            val authManager = AuthManager(requireContext())
+            FirebaseManager.addHistoryEntry("emptied", "organik", authManager.getUserName())
             Toast.makeText(requireContext(), "Sampah Organik telah dikosongkan", Toast.LENGTH_SHORT).show()
         }
 
         binding.btnEmptyNonOrganik.setOnClickListener {
-            binding.progressNonOrganik.progress = 0
-            updateNonOrganikStatus(0)
+            FirebaseManager.updateBinStatus("nonOrganik", 0, "TERSEDIA")
+            val authManager = AuthManager(requireContext())
+            FirebaseManager.addHistoryEntry("emptied", "nonOrganik", authManager.getUserName())
             Toast.makeText(requireContext(), "Sampah Non-Organik telah dikosongkan", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun updateOrganikStatus(percent: Int) {
+    override fun observeData() {
+        // Listen to Organik bin
+        organikListener = FirebaseManager.listenBinStatus("organik") { percentage, _, lastUpdate ->
+            if (!isAdded) return@listenBinStatus
+            updateOrganikUI(percentage)
+            binding.tvOrganikUpdate.text = formatLastUpdate(lastUpdate)
+        }
+
+        // Listen to Non-Organik bin
+        nonOrganikListener = FirebaseManager.listenBinStatus("nonOrganik") { percentage, _, lastUpdate ->
+            if (!isAdded) return@listenBinStatus
+            updateNonOrganikUI(percentage)
+            binding.tvNonOrganikUpdate.text = formatLastUpdate(lastUpdate)
+        }
+    }
+
+    private fun updateOrganikUI(percent: Int) {
         binding.tvOrganikPercent.text = "$percent%"
+        binding.progressOrganik.progress = percent
         when {
             percent < 50 -> {
                 binding.tvOrganikStatus.text = "Dalam kondisi baik"
@@ -41,6 +62,8 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
                 binding.tvOrganikBadge.setTextColor(resources.getColor(R.color.green_600, null))
                 binding.tvOrganikBadge.setBackgroundResource(R.drawable.badge_green_bg)
                 binding.progressOrganik.progressDrawable = resources.getDrawable(R.drawable.progress_bar_green, null)
+                binding.progressOrganik.progress = percent
+                binding.tvStatus.text = "Normal"
             }
             percent < 80 -> {
                 binding.tvOrganikStatus.text = "Perlu dipantau"
@@ -49,6 +72,8 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
                 binding.tvOrganikBadge.setTextColor(resources.getColor(R.color.amber_600, null))
                 binding.tvOrganikBadge.setBackgroundResource(R.drawable.badge_amber_bg)
                 binding.progressOrganik.progressDrawable = resources.getDrawable(R.drawable.progress_bar_amber, null)
+                binding.progressOrganik.progress = percent
+                binding.tvStatus.text = "Perhatian"
             }
             else -> {
                 binding.tvOrganikStatus.text = "Segera dikosongkan"
@@ -57,12 +82,15 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
                 binding.tvOrganikBadge.setTextColor(resources.getColor(R.color.red_500, null))
                 binding.tvOrganikBadge.setBackgroundResource(R.drawable.badge_red_bg)
                 binding.progressOrganik.progressDrawable = resources.getDrawable(R.drawable.progress_bar_red, null)
+                binding.progressOrganik.progress = percent
+                binding.tvStatus.text = "Perlu Tindakan"
             }
         }
     }
 
-    private fun updateNonOrganikStatus(percent: Int) {
+    private fun updateNonOrganikUI(percent: Int) {
         binding.tvNonOrganikPercent.text = "$percent%"
+        binding.progressNonOrganik.progress = percent
         when {
             percent < 50 -> {
                 binding.tvNonOrganikStatus.text = "Dalam kondisi baik"
@@ -71,6 +99,7 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
                 binding.tvNonOrganikBadge.setTextColor(resources.getColor(R.color.green_600, null))
                 binding.tvNonOrganikBadge.setBackgroundResource(R.drawable.badge_green_bg)
                 binding.progressNonOrganik.progressDrawable = resources.getDrawable(R.drawable.progress_bar_green, null)
+                binding.progressNonOrganik.progress = percent
             }
             percent < 80 -> {
                 binding.tvNonOrganikStatus.text = "Perlu dipantau"
@@ -79,15 +108,34 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
                 binding.tvNonOrganikBadge.setTextColor(resources.getColor(R.color.amber_600, null))
                 binding.tvNonOrganikBadge.setBackgroundResource(R.drawable.badge_amber_bg)
                 binding.progressNonOrganik.progressDrawable = resources.getDrawable(R.drawable.progress_bar_amber, null)
+                binding.progressNonOrganik.progress = percent
             }
             else -> {
                 binding.tvNonOrganikStatus.text = "Segera dikosongkan"
-                binding.tvNonOrganikStatus.setTextColor(resources.getColor(R.color.amber_600, null))
-                binding.tvNonOrganikBadge.text = "HAMPIR PENUH"
-                binding.tvNonOrganikBadge.setTextColor(resources.getColor(R.color.amber_600, null))
-                binding.tvNonOrganikBadge.setBackgroundResource(R.drawable.badge_amber_bg)
-                binding.progressNonOrganik.progressDrawable = resources.getDrawable(R.drawable.progress_bar_amber, null)
+                binding.tvNonOrganikStatus.setTextColor(resources.getColor(R.color.red_500, null))
+                binding.tvNonOrganikBadge.text = "PENUH"
+                binding.tvNonOrganikBadge.setTextColor(resources.getColor(R.color.red_500, null))
+                binding.tvNonOrganikBadge.setBackgroundResource(R.drawable.badge_red_bg)
+                binding.progressNonOrganik.progressDrawable = resources.getDrawable(R.drawable.progress_bar_red, null)
+                binding.progressNonOrganik.progress = percent
             }
         }
+    }
+
+    private fun formatLastUpdate(timestamp: Long): String {
+        if (timestamp == 0L) return "Menunggu data..."
+        val diff = System.currentTimeMillis() - timestamp
+        val minutes = diff / 60000
+        return when {
+            minutes < 1 -> "Baru saja"
+            minutes < 60 -> "Update $minutes menit lalu"
+            else -> "Update ${minutes / 60} jam lalu"
+        }
+    }
+
+    override fun onDestroyView() {
+        organikListener?.let { FirebaseManager.removeBinListener("organik", it) }
+        nonOrganikListener?.let { FirebaseManager.removeBinListener("nonOrganik", it) }
+        super.onDestroyView()
     }
 }

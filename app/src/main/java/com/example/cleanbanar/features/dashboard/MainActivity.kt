@@ -6,9 +6,11 @@ import com.example.cleanbanar.R
 import com.example.cleanbanar.core.data.AuthManager
 import com.example.cleanbanar.core.ui.BaseActivity
 import com.example.cleanbanar.databinding.ActivityMainBinding
-import com.example.cleanbanar.features.device.DeviceFragment
+import com.example.cleanbanar.features.admin.StaffManagementFragment
 import com.example.cleanbanar.features.history.HistoryFragment
+import com.example.cleanbanar.features.notifications.NotificationFragment
 import com.example.cleanbanar.features.profile.ProfileFragment
+import com.example.cleanbanar.features.statistics.StatisticsFragment
 
 class MainActivity : BaseActivity<ActivityMainBinding>() {
 
@@ -21,31 +23,69 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     override fun setupViews() {
         authManager = AuthManager(this)
-
-        // Get role from intent first, fallback to session
         userRole = intent.getStringExtra("USER_ROLE") ?: authManager.getUserRole()
 
-        val fragmentToLoad: Fragment = if (userRole == "Petugas") {
-            PetugasDashboardFragment()
+        // Load role-specific bottom navigation menu
+        if (userRole == "Petugas") {
+            setupStaffNavigation()
         } else {
-            AdminDashboardFragment()
+            setupAdminNavigation()
         }
+    }
 
-        loadFragment(fragmentToLoad)
+    private fun setupAdminNavigation() {
+        binding.bottomNavigation.menu.clear()
+        binding.bottomNavigation.inflateMenu(R.menu.bottom_nav_admin)
 
-        // Bottom Navigation Logic
+        // Default fragment
+        loadFragment(AdminDashboardFragment())
+
+        binding.bottomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_dashboard -> {
+                    loadFragment(AdminDashboardFragment())
+                    true
+                }
+                R.id.nav_staff -> {
+                    loadFragment(StaffManagementFragment())
+                    true
+                }
+                R.id.nav_statistics -> {
+                    loadFragment(StatisticsFragment())
+                    true
+                }
+                R.id.nav_notification -> {
+                    loadFragment(NotificationFragment())
+                    true
+                }
+                R.id.nav_profile -> {
+                    loadFragment(ProfileFragment())
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
+    private fun setupStaffNavigation() {
+        binding.bottomNavigation.menu.clear()
+        binding.bottomNavigation.inflateMenu(R.menu.bottom_nav_staff)
+
+        // Default fragment
+        loadFragment(PetugasDashboardFragment())
+
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
-                    loadFragment(if (userRole == "Petugas") PetugasDashboardFragment() else AdminDashboardFragment())
-                    true
-                }
-                R.id.nav_device -> {
-                    loadFragment(DeviceFragment())
+                    loadFragment(PetugasDashboardFragment())
                     true
                 }
                 R.id.nav_history -> {
                     loadFragment(HistoryFragment())
+                    true
+                }
+                R.id.nav_notification -> {
+                    loadFragment(NotificationFragment())
                     true
                 }
                 R.id.nav_profile -> {
