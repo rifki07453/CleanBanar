@@ -1,8 +1,8 @@
 package com.example.cleanbanar.features.admin
 
 import android.app.AlertDialog
+import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageView
@@ -36,6 +36,11 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
             binding.tvStaffCount.text = "${staffList.size} petugas terdaftar"
             binding.staffListContainer.removeAllViews()
 
+            if (staffList.isEmpty()) {
+                addEmptyState()
+                return@listenUsers
+            }
+
             for (user in staffList) {
                 addStaffCard(
                     user["id"] as String,
@@ -43,19 +48,10 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
                     user["email"] as String
                 )
             }
-
-            if (staffList.isEmpty()) {
-                addEmptyState()
-            }
         }
     }
 
     private fun addStaffCard(userId: String, name: String, email: String) {
-        val card = LayoutInflater.from(requireContext()).inflate(
-            android.R.layout.simple_list_item_2, null
-        )
-
-        // Build card programmatically for full control
         val cardView = com.google.android.material.card.MaterialCardView(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -69,7 +65,7 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
         val row = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.HORIZONTAL
             setPadding(16.dpToPx(), 16.dpToPx(), 16.dpToPx(), 16.dpToPx())
-            gravity = android.view.Gravity.CENTER_VERTICAL
+            gravity = Gravity.CENTER_VERTICAL
         }
 
         // Avatar
@@ -130,14 +126,55 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
     }
 
     private fun addEmptyState() {
+        val container = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            setPadding(0, 48.dpToPx(), 0, 48.dpToPx())
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        // Icon
+        val icon = ImageView(requireContext()).apply {
+            layoutParams = LinearLayout.LayoutParams(64.dpToPx(), 64.dpToPx())
+            setImageResource(android.R.drawable.ic_menu_myplaces)
+            setColorFilter(resources.getColor(R.color.gray_400, null))
+            setPadding(12.dpToPx(), 12.dpToPx(), 12.dpToPx(), 12.dpToPx())
+        }
+
+        // Message
         val tv = TextView(requireContext()).apply {
-            text = "Belum ada petugas terdaftar"
+            text = "Belum ada akun petugas"
             setTextColor(resources.getColor(R.color.gray_400, null))
             textSize = 14f
-            gravity = android.view.Gravity.CENTER
-            setPadding(0, 48.dpToPx(), 0, 0)
+            gravity = Gravity.CENTER
+            setPadding(0, 12.dpToPx(), 0, 4.dpToPx())
         }
-        binding.staffListContainer.addView(tv)
+
+        val tvSub = TextView(requireContext()).apply {
+            text = "Tambahkan petugas untuk mulai mengelola sistem"
+            setTextColor(resources.getColor(R.color.gray_400, null))
+            textSize = 11f
+            gravity = Gravity.CENTER
+            setPadding(24.dpToPx(), 0, 24.dpToPx(), 16.dpToPx())
+        }
+
+        // CTA Button
+        val btnAdd = com.google.android.material.button.MaterialButton(requireContext()).apply {
+            text = "Tambah Petugas"
+            setTextColor(resources.getColor(R.color.white, null))
+            setBackgroundColor(resources.getColor(R.color.emerald_600, null))
+            cornerRadius = 12.dpToPx()
+            setOnClickListener { showAddEditDialog(null, "", "") }
+        }
+
+        container.addView(icon)
+        container.addView(tv)
+        container.addView(tvSub)
+        container.addView(btnAdd)
+        binding.staffListContainer.addView(container)
     }
 
     private fun showAddEditDialog(userId: String?, currentName: String, currentEmail: String) {
@@ -153,9 +190,18 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
         val etEmail = EditText(requireContext()).apply {
             hint = "Email petugas"
             setText(currentEmail)
+            inputType = android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
         }
         layout.addView(etName)
         layout.addView(etEmail)
+
+        // Only show password field for new staff
+        val etPassword = if (!isEdit) {
+            EditText(requireContext()).apply {
+                hint = "Password"
+                inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+            }.also { layout.addView(it) }
+        } else null
 
         AlertDialog.Builder(requireContext())
             .setTitle(if (isEdit) "Edit Petugas" else "Tambah Petugas")
@@ -163,16 +209,23 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
             .setPositiveButton("Simpan") { _, _ ->
                 val name = etName.text.toString().trim()
                 val email = etEmail.text.toString().trim()
+
                 if (name.isEmpty() || email.isEmpty()) {
                     Toast.makeText(requireContext(), "Nama dan email wajib diisi", Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
+
                 if (isEdit) {
                     FirebaseManager.updateUser(userId!!, name, email)
                     Toast.makeText(requireContext(), "Petugas berhasil diupdate", Toast.LENGTH_SHORT).show()
                 } else {
+                    val password = etPassword?.text.toString().trim()
+                    if (password.length < 6) {
+                        Toast.makeText(requireContext(), "Password minimal 6 karakter", Toast.LENGTH_SHORT).show()
+                        return@setPositiveButton
+                    }
                     FirebaseManager.addUser(name, email, "Petugas")
-                    Toast.makeText(requireContext(), "Petugas berhasil ditambahkan", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Akun petugas berhasil dibuat", Toast.LENGTH_SHORT).show()
                 }
             }
             .setNegativeButton("Batal", null)
@@ -196,7 +249,6 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
         super.onDestroyView()
     }
 
-    // Extension helpers
     private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()
     private fun Float.dpToPxF(): Float = this * resources.displayMetrics.density
 }

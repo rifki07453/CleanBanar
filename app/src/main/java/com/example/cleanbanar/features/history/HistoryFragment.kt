@@ -154,14 +154,42 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>() {
     }
 
     private fun addEmptyState() {
-        val tv = TextView(requireContext()).apply {
+        val container = android.widget.LinearLayout(requireContext()).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            setPadding(0, 48.dpToPx(), 0, 48.dpToPx())
+            layoutParams = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        val icon = android.widget.ImageView(requireContext()).apply {
+            layoutParams = android.widget.LinearLayout.LayoutParams(64.dpToPx(), 64.dpToPx())
+            setImageResource(android.R.drawable.ic_menu_recent_history)
+            setColorFilter(resources.getColor(R.color.gray_400, null))
+            setPadding(12.dpToPx(), 12.dpToPx(), 12.dpToPx(), 12.dpToPx())
+        }
+
+        val tv = android.widget.TextView(requireContext()).apply {
             text = "Belum ada riwayat aktivitas"
             setTextColor(resources.getColor(R.color.gray_400, null))
             textSize = 14f
             gravity = Gravity.CENTER
-            setPadding(0, 48.dpToPx(), 0, 0)
+            setPadding(0, 12.dpToPx(), 0, 4.dpToPx())
         }
-        binding.historyListContainer.addView(tv)
+
+        val tvSub = android.widget.TextView(requireContext()).apply {
+            text = "Aktivitas akan muncul saat tong sampah dikosongkan"
+            setTextColor(resources.getColor(R.color.gray_400, null))
+            textSize = 11f
+            gravity = Gravity.CENTER
+        }
+
+        container.addView(icon)
+        container.addView(tv)
+        container.addView(tvSub)
+        binding.historyListContainer.addView(container)
     }
 
     private fun getDayLabel(timestamp: Long): String {

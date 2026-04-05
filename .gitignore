@@ -13,3 +13,17 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+
+# IDE
+.idea/
+*.hprof
+
+# OS
+Thumbs.db
+*.swp
+*~
+
+# Build outputs
+app/build/
+app/release/

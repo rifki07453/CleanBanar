@@ -98,6 +98,13 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
             setPadding(12.dpToPx(), 0, 0, 0)
         }
 
+        // Status badge text
+        val statusLabel = when (type) {
+            "danger", "full" -> "Penuh"
+            "warning" -> "Hampir Penuh"
+            else -> "Info"
+        }
+
         val tvTitle = TextView(requireContext()).apply {
             text = title
             setTextColor(resources.getColor(R.color.gray_800, null))
@@ -112,28 +119,72 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
         info.addView(tvTitle)
         info.addView(tvMessage)
 
+        // Right side: time + status
+        val rightCol = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.END
+        }
         val tvTime = TextView(requireContext()).apply {
             text = formatTime(timestamp)
             setTextColor(resources.getColor(R.color.gray_400, null))
             textSize = 10f
+            gravity = Gravity.END
         }
+        val tvStatus = TextView(requireContext()).apply {
+            text = statusLabel
+            setTextColor(resources.getColor(tintColor, null))
+            textSize = 9f
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            gravity = Gravity.END
+            setPadding(0, 4.dpToPx(), 0, 0)
+        }
+        rightCol.addView(tvTime)
+        rightCol.addView(tvStatus)
 
         row.addView(icon)
         row.addView(info)
-        row.addView(tvTime)
+        row.addView(rightCol)
         cardView.addView(row)
         binding.notifListContainer.addView(cardView)
     }
 
     private fun addEmptyState() {
+        val container = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            setPadding(0, 48.dpToPx(), 0, 48.dpToPx())
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        val icon = ImageView(requireContext()).apply {
+            layoutParams = LinearLayout.LayoutParams(64.dpToPx(), 64.dpToPx())
+            setImageResource(android.R.drawable.ic_popup_reminder)
+            setColorFilter(resources.getColor(R.color.gray_400, null))
+            setPadding(12.dpToPx(), 12.dpToPx(), 12.dpToPx(), 12.dpToPx())
+        }
+
         val tv = TextView(requireContext()).apply {
-            text = "Tidak ada notifikasi"
+            text = "Belum ada notifikasi"
             setTextColor(resources.getColor(R.color.gray_400, null))
             textSize = 14f
             gravity = Gravity.CENTER
-            setPadding(0, 48.dpToPx(), 0, 0)
+            setPadding(0, 12.dpToPx(), 0, 4.dpToPx())
         }
-        binding.notifListContainer.addView(tv)
+
+        val tvSub = TextView(requireContext()).apply {
+            text = "Belum ada aktivitas notifikasi"
+            setTextColor(resources.getColor(R.color.gray_400, null))
+            textSize = 11f
+            gravity = Gravity.CENTER
+        }
+
+        container.addView(icon)
+        container.addView(tv)
+        container.addView(tvSub)
+        binding.notifListContainer.addView(container)
     }
 
     private fun formatTime(timestamp: Long): String {

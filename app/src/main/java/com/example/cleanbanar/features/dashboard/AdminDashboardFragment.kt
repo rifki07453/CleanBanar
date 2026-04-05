@@ -63,10 +63,12 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
                 binding.tvDeviceStatus.setTextColor(resources.getColor(R.color.green_600, null))
                 binding.tvDeviceStatus.setBackgroundResource(R.drawable.badge_green_bg)
                 binding.tvSystemStatus.text = "Semua sistem berjalan normal"
+                binding.tvSystemStatus.setTextColor(resources.getColor(R.color.green_600, null))
             } else {
                 binding.tvDeviceStatus.setTextColor(resources.getColor(R.color.red_500, null))
                 binding.tvDeviceStatus.setBackgroundResource(R.drawable.badge_red_bg)
                 binding.tvSystemStatus.text = "Perangkat terputus!"
+                binding.tvSystemStatus.setTextColor(resources.getColor(R.color.red_500, null))
             }
 
             // Update online count
@@ -86,7 +88,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
     private fun updateBinBadge(badge: android.widget.TextView, percentage: Int) {
         when {
             percentage < 50 -> {
-                badge.text = "TERSEDIA"
+                badge.text = "AMAN"
                 badge.setTextColor(resources.getColor(R.color.green_600, null))
                 badge.setBackgroundResource(R.drawable.badge_green_bg)
             }
