@@ -6,8 +6,8 @@
         android:title="Dashboard" />
     <item
         android:id="@+id/nav_device"
-        android:icon="@android:drawable/ic_dialog_map"
-        android:title="Alat" />
+        android:icon="@android:drawable/ic_menu_manage"
+        android:title="Perangkat" />
     <item
         android:id="@+id/nav_history"
         android:icon="@android:drawable/ic_menu_recent_history"

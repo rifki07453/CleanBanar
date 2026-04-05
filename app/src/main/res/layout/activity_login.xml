@@ -27,7 +27,8 @@
             android:background="@drawable/leaf_bg"
             app:tint="@color/emerald_600"
             android:padding="16dp"
-            android:layout_marginBottom="24dp" />
+            android:layout_marginBottom="24dp"
+            android:contentDescription="Logo CleanBanar" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -90,10 +91,11 @@
                 android:inputType="textEmailAddress"
                 android:background="@drawable/edit_text_bg"
                 android:hint="nama@email.com"
-                android:paddingStart="48dp"
+                android:paddingStart="20dp"
                 android:paddingEnd="16dp"
-                android:textColorHint="@color/gray_500"
-                android:layout_marginBottom="16dp" />
+                android:textColorHint="@color/gray_400"
+                android:layout_marginBottom="16dp"
+                android:autofillHints="emailAddress" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -111,30 +113,21 @@
                 android:inputType="textPassword"
                 android:background="@drawable/edit_text_bg"
                 android:hint="••••••••"
-                android:paddingStart="48dp"
+                android:paddingStart="20dp"
                 android:paddingEnd="16dp"
-                android:textColorHint="@color/gray_500"
-                android:layout_marginBottom="24dp" />
+                android:textColorHint="@color/gray_400"
+                android:layout_marginBottom="24dp"
+                android:autofillHints="password" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnLogin"
                 android:layout_width="match_parent"
-                android:layout_height="64dp"
+                android:layout_height="56dp"
                 android:text="Masuk Sekarang"
                 android:textColor="@color/white"
                 android:textStyle="bold"
-                app:cornerRadius="16dp"
+                app:cornerRadius="12dp"
                 app:backgroundTint="@color/emerald_600" />
-
-            <TextView
-                android:id="@+id/tvRegister"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Belum punya akun? Daftar di sini"
-                android:textAlignment="center"
-                android:textColor="@color/primary"
-                android:textStyle="bold"
-                android:layout_marginTop="32dp" />
 
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>

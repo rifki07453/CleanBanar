@@ -1,20 +1,39 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="primary">#059669</color>
     <color name="primary_dark">#047857</color>
     <color name="secondary">#3b82f6</color>
+
+    <!-- Emerald palette -->
     <color name="emerald_50">#ecfdf5</color>
     <color name="emerald_100">#d1fae5</color>
     <color name="emerald_600">#059669</color>
     <color name="emerald_700">#047857</color>
+
+    <!-- Gray palette -->
     <color name="gray_50">#f9fafb</color>
     <color name="gray_100">#f3f4f6</color>
     <color name="gray_400">#9ca3af</color>
     <color name="gray_500">#6b7280</color>
     <color name="gray_800">#1f2937</color>
     <color name="gray_900">#111827</color>
+
+    <!-- White -->
     <color name="white">#ffffff</color>
-    <color name="red_500">#ef4444</color>
+
+    <!-- Green status -->
     <color name="green_50">#f0fdf4</color>
     <color name="green_600">#16a34a</color>
+
+    <!-- Amber status (warning) -->
+    <color name="amber_50">#fef3c7</color>
+    <color name="amber_600">#d97706</color>
+
+    <!-- Red status (critical) -->
+    <color name="red_50">#fef2f2</color>
+    <color name="red_500">#ef4444</color>
+
+    <!-- Blue accent -->
+    <color name="blue_50">#eff6ff</color>
+    <color name="blue_600">#2563eb</color>
 </resources>

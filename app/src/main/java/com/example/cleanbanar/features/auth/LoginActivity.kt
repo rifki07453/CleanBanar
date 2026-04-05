@@ -43,16 +43,12 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                 Toast.makeText(this, "Email atau password salah", Toast.LENGTH_SHORT).show()
             }
         }
-
-        binding.tvRegister.setOnClickListener {
-            Toast.makeText(this, "Fitur registrasi belum tersedia", Toast.LENGTH_SHORT).show()
-        }
     }
 
     private fun navigateToDashboard(role: String) {
         val intent = Intent(this, MainActivity::class.java)
         intent.putExtra("USER_ROLE", role)
         startActivity(intent)
-        finish() // Close login screen so user can't go back with back button
+        finish()
     }
 }

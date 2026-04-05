@@ -21,12 +21,14 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         // Show logged-in user name in the header
         binding.tvAdminTitle.text = "Halo, ${authManager.getUserName()}"
 
+        // Manage staff card
         binding.cardManageUser.setOnClickListener {
             Toast.makeText(requireContext(), "Membuka halaman Manajemen Petugas", Toast.LENGTH_SHORT).show()
         }
 
-        binding.cardStats.setOnClickListener {
-            Toast.makeText(requireContext(), "Membuka halaman Laporan Analitik", Toast.LENGTH_SHORT).show()
+        // Notification bell
+        binding.btnNotification.setOnClickListener {
+            Toast.makeText(requireContext(), "Tidak ada notifikasi baru", Toast.LENGTH_SHORT).show()
         }
     }
 }

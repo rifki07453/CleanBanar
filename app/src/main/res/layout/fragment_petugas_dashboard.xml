@@ -16,7 +16,7 @@
         <FrameLayout
             android:id="@+id/headerBlock"
             android:layout_width="match_parent"
-            android:layout_height="220dp"
+            android:layout_height="200dp"
             android:background="@drawable/header_gradient_bg"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -29,7 +29,7 @@
             android:textSize="12sp"
             android:textStyle="bold"
             android:layout_marginStart="24dp"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="28dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -48,10 +48,10 @@
             android:id="@+id/tvStatusTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Status Sistem Keseluruhan"
+            android:text="Status Sistem"
             android:textColor="@color/emerald_100"
-            android:textSize="14sp"
-            android:layout_marginTop="24dp"
+            android:textSize="13sp"
+            android:layout_marginTop="8dp"
             app:layout_constraintStart_toStartOf="@id/tvAreaTitle"
             app:layout_constraintTop_toBottomOf="@id/tvAreaTitle" />
 
@@ -61,7 +61,7 @@
             android:layout_height="wrap_content"
             android:text="Normal"
             android:textColor="@color/white"
-            android:textSize="32sp"
+            android:textSize="28sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="@id/tvStatusTitle"
             app:layout_constraintTop_toBottomOf="@id/tvStatusTitle" />
@@ -80,7 +80,7 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="24dp"
+                app:cardCornerRadius="16dp"
                 app:cardElevation="2dp"
                 android:layout_marginBottom="16dp"
                 app:cardBackgroundColor="@color/white">
@@ -103,37 +103,41 @@
                             android:background="@drawable/leaf_bg"
                             app:tint="@color/emerald_600"
                             android:padding="12dp"
-                            android:layout_centerVertical="true" />
+                            android:layout_centerVertical="true"
+                            android:contentDescription="Organik" />
 
-                        <TextView
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Organik"
-                            android:textStyle="bold"
-                            android:textSize="16sp"
-                            android:textColor="@color/gray_800"
-                            android:layout_toEndOf="@id/icOrganik"
-                            android:layout_marginStart="16dp"/>
-                            
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Update 2 min lalu"
-                            android:textSize="10sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/gray_400"
+                            android:orientation="vertical"
                             android:layout_toEndOf="@id/icOrganik"
                             android:layout_marginStart="16dp"
-                            android:layout_below="@+id/icOrganik"
-                            android:layout_marginTop="-24dp"/>
+                            android:layout_centerVertical="true">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Organik"
+                                android:textStyle="bold"
+                                android:textSize="16sp"
+                                android:textColor="@color/gray_800" />
+                            <TextView
+                                android:id="@+id/tvOrganikUpdate"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Update 2 min lalu"
+                                android:textSize="10sp"
+                                android:textColor="@color/gray_400"
+                                android:layout_marginTop="2dp" />
+                        </LinearLayout>
 
                         <TextView
+                            android:id="@+id/tvOrganikBadge"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="TERSEDIA"
                             android:textSize="10sp"
                             android:textStyle="bold"
-                            android:textColor="@color/emerald_600"
+                            android:textColor="@color/green_600"
                             android:background="@drawable/badge_green_bg"
                             android:paddingHorizontal="12dp"
                             android:paddingVertical="6dp"
@@ -154,6 +158,7 @@
                             android:textSize="12sp"
                             android:textColor="@color/gray_500" />
                         <TextView
+                            android:id="@+id/tvOrganikPercent"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="45%"
@@ -169,13 +174,14 @@
                         android:layout_height="12dp"
                         style="?android:attr/progressBarStyleHorizontal"
                         android:progress="45"
-                        android:progressDrawable="@drawable/leaf_bg" 
+                        android:progressDrawable="@drawable/progress_bar_green"
                         android:layout_marginBottom="8dp"/>
 
                     <TextView
+                        android:id="@+id/tvOrganikStatus"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Perkiraan penuh dlm 2 hari"
+                        android:text="Dalam kondisi baik"
                         android:textAlignment="viewEnd"
                         android:textSize="10sp"
                         android:textColor="@color/gray_400"
@@ -204,7 +210,7 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="24dp"
+                app:cardCornerRadius="16dp"
                 app:cardElevation="2dp"
                 app:cardBackgroundColor="@color/white">
                 <LinearLayout
@@ -223,42 +229,45 @@
                             android:layout_width="48dp"
                             android:layout_height="48dp"
                             android:src="@android:drawable/ic_menu_sort_by_size"
-                            android:background="@drawable/edit_text_bg"
+                            android:background="@drawable/badge_blue_bg"
                             app:tint="@color/secondary"
                             android:padding="12dp"
-                            android:layout_centerVertical="true" />
+                            android:layout_centerVertical="true"
+                            android:contentDescription="Non-Organik" />
 
-                        <TextView
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Non-Organik"
-                            android:textStyle="bold"
-                            android:textSize="16sp"
-                            android:textColor="@color/gray_800"
-                            android:layout_toEndOf="@id/icNonOrganik"
-                            android:layout_marginStart="16dp"/>
-                            
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Update 2 min lalu"
-                            android:textSize="10sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/gray_400"
+                            android:orientation="vertical"
                             android:layout_toEndOf="@id/icNonOrganik"
                             android:layout_marginStart="16dp"
-                            android:layout_below="@+id/icNonOrganik"
-                            android:layout_marginTop="-24dp"/>
+                            android:layout_centerVertical="true">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Non-Organik"
+                                android:textStyle="bold"
+                                android:textSize="16sp"
+                                android:textColor="@color/gray_800" />
+                            <TextView
+                                android:id="@+id/tvNonOrganikUpdate"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Update 2 min lalu"
+                                android:textSize="10sp"
+                                android:textColor="@color/gray_400"
+                                android:layout_marginTop="2dp" />
+                        </LinearLayout>
 
                         <TextView
+                            android:id="@+id/tvNonOrganikBadge"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="HAMPIR PENUH"
                             android:textSize="10sp"
                             android:textStyle="bold"
-                            android:textColor="#d97706"
-                            android:background="@drawable/badge_green_bg"
-                            app:backgroundTint="#fef3c7"
+                            android:textColor="@color/amber_600"
+                            android:background="@drawable/badge_amber_bg"
                             android:paddingHorizontal="12dp"
                             android:paddingVertical="6dp"
                             android:layout_alignParentEnd="true"
@@ -278,6 +287,7 @@
                             android:textSize="12sp"
                             android:textColor="@color/gray_500" />
                         <TextView
+                            android:id="@+id/tvNonOrganikPercent"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="85%"
@@ -293,16 +303,17 @@
                         android:layout_height="12dp"
                         style="?android:attr/progressBarStyleHorizontal"
                         android:progress="85"
-                        android:progressTint="@color/secondary"
+                        android:progressDrawable="@drawable/progress_bar_amber"
                         android:layout_marginBottom="8dp"/>
 
                     <TextView
+                        android:id="@+id/tvNonOrganikStatus"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Perlu segera dikosongkan"
+                        android:text="Segera dikosongkan"
                         android:textAlignment="viewEnd"
                         android:textSize="10sp"
-                        android:textColor="@color/gray_400"
+                        android:textColor="@color/amber_600"
                         android:layout_marginBottom="16dp" />
 
                     <View
@@ -318,7 +329,7 @@
                         android:text="Tandai Telah Dikosongkan"
                         android:textColor="@color/secondary"
                         android:textStyle="bold"
-                        app:backgroundTint="#eff6ff"
+                        app:backgroundTint="@color/blue_50"
                         app:elevation="0dp"
                         app:cornerRadius="12dp" />
                 </LinearLayout>
