@@ -2,22 +2,22 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/nav_dashboard"
-        android:icon="@android:drawable/ic_menu_compass"
+        android:icon="@drawable/ic_dashboard"
         android:title="Dashboard" />
     <item
         android:id="@+id/nav_staff"
-        android:icon="@android:drawable/ic_menu_myplaces"
-        android:title="Petugas" />
+        android:icon="@drawable/ic_staff"
+        android:title="Staff Management" />
     <item
         android:id="@+id/nav_statistics"
-        android:icon="@android:drawable/ic_menu_sort_by_size"
-        android:title="Statistik" />
+        android:icon="@drawable/ic_statistics"
+        android:title="Statistics" />
     <item
         android:id="@+id/nav_notification"
-        android:icon="@android:drawable/ic_popup_reminder"
-        android:title="Notifikasi" />
+        android:icon="@drawable/ic_notification"
+        android:title="Notifications" />
     <item
         android:id="@+id/nav_profile"
-        android:icon="@android:drawable/ic_menu_preferences"
-        android:title="Profil" />
+        android:icon="@drawable/ic_profile"
+        android:title="Profile" />
 </menu>

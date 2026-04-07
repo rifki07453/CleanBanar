@@ -17,6 +17,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     private lateinit var authManager: AuthManager
     private var userRole: String = "Admin"
 
+    // ==========================================
+    // Lifecycle & View Setup
+    // ==========================================
     override fun inflateBinding(layoutInflater: LayoutInflater): ActivityMainBinding {
         return ActivityMainBinding.inflate(layoutInflater)
     }
@@ -33,6 +36,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         }
     }
 
+    // ==========================================
+    // Role-Specific Navigation Setup
+    // ==========================================
     private fun setupAdminNavigation() {
         binding.bottomNavigation.menu.clear()
         binding.bottomNavigation.inflateMenu(R.menu.bottom_nav_admin)
@@ -97,6 +103,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         }
     }
 
+    // ==========================================
+    // Utility / Helper Functions
+    // ==========================================
     private fun loadFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragmentContainer, fragment)
