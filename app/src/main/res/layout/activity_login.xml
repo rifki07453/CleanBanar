@@ -21,12 +21,10 @@
         app:layout_constraintEnd_toEndOf="parent">
 
         <ImageView
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:src="@android:drawable/ic_dialog_map"
-            android:background="@drawable/leaf_bg"
-            app:tint="@color/emerald_600"
-            android:padding="16dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@drawable/ic_logo_cleanbanar"
+            android:scaleType="fitCenter"
             android:layout_marginBottom="24dp"
             android:contentDescription="Logo CleanBanar" />
 

@@ -75,6 +75,13 @@ class AuthManager(context: Context) {
     }
 
     /**
+     * Get the currently logged-in user's ID.
+     */
+    fun getUserId(): String {
+        return prefs.getInt(KEY_USER_ID, 0).toString()
+    }
+
+    /**
      * Logout: clear session data.
      */
     fun logout() {

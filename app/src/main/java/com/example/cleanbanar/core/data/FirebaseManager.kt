@@ -349,4 +349,85 @@ object FirebaseManager {
     fun removePenuhListener(listener: ValueEventListener) {
         rootRef?.child("history")?.removeEventListener(listener)
     }
+
+    // ==========================================
+    // Notification Settings - Per User Preferences
+    // ==========================================
+
+    /**
+     * Data class representing user notification preferences.
+     * Default values are all true (all notifications ON).
+     */
+    data class NotificationSettings(
+        val hampirPenuh: Boolean = true,
+        val penuh: Boolean = true,
+        val selesai: Boolean = true,
+        val sistem: Boolean = true
+    )
+
+    /**
+     * Save notification settings for a specific user.
+     * Stored at: users/{userId}/notification_settings/
+     */
+    fun saveNotificationSettings(userId: String, settings: NotificationSettings) {
+        val ref = rootRef?.child("users")?.child(userId)?.child("notification_settings") ?: return
+        ref.child("hampir_penuh").setValue(settings.hampirPenuh)
+        ref.child("penuh").setValue(settings.penuh)
+        ref.child("selesai").setValue(settings.selesai)
+        ref.child("sistem").setValue(settings.sistem)
+    }
+
+    /**
+     * Load notification settings for a user (one-time read).
+     * If data not found, returns defaults (all ON).
+     */
+    fun loadNotificationSettings(userId: String, callback: (NotificationSettings) -> Unit) {
+        val ref = rootRef?.child("users")?.child(userId)?.child("notification_settings") ?: run {
+            callback(NotificationSettings())
+            return
+        }
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val settings = NotificationSettings(
+                    hampirPenuh = snapshot.child("hampir_penuh").getValue(Boolean::class.java) ?: true,
+                    penuh = snapshot.child("penuh").getValue(Boolean::class.java) ?: true,
+                    selesai = snapshot.child("selesai").getValue(Boolean::class.java) ?: true,
+                    sistem = snapshot.child("sistem").getValue(Boolean::class.java) ?: true
+                )
+                callback(settings)
+            }
+            override fun onCancelled(error: DatabaseError) {
+                Log.w(TAG, "loadNotificationSettings cancelled: ${error.message}")
+                callback(NotificationSettings())
+            }
+        })
+    }
+
+    /**
+     * Listen to notification settings changes in real-time.
+     * Returns the listener so it can be removed on cleanup.
+     */
+    fun listenNotificationSettings(userId: String, callback: (NotificationSettings) -> Unit): ValueEventListener? {
+        val ref = rootRef?.child("users")?.child(userId)?.child("notification_settings") ?: return null
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val settings = NotificationSettings(
+                    hampirPenuh = snapshot.child("hampir_penuh").getValue(Boolean::class.java) ?: true,
+                    penuh = snapshot.child("penuh").getValue(Boolean::class.java) ?: true,
+                    selesai = snapshot.child("selesai").getValue(Boolean::class.java) ?: true,
+                    sistem = snapshot.child("sistem").getValue(Boolean::class.java) ?: true
+                )
+                callback(settings)
+            }
+            override fun onCancelled(error: DatabaseError) {
+                Log.w(TAG, "listenNotificationSettings cancelled: ${error.message}")
+            }
+        }
+        ref.addValueEventListener(listener)
+        return listener
+    }
+
+    fun removeNotificationSettingsListener(userId: String, listener: ValueEventListener) {
+        rootRef?.child("users")?.child(userId)?.child("notification_settings")?.removeEventListener(listener)
+    }
 }

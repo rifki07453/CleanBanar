@@ -37,7 +37,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
         // Start BinObserver for automatic threshold notifications
         // (monitors bin capacity and triggers alerts at ≥80% and ≥95%)
-        BinObserver.start()
+        BinObserver.start(authManager.getUserId())
     }
 
     // ==========================================

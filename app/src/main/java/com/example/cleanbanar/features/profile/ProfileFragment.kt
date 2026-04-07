@@ -2,12 +2,15 @@ package com.example.cleanbanar.features.profile
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Toast
 import com.example.cleanbanar.core.data.AuthManager
+import com.example.cleanbanar.core.data.FirebaseManager
 import com.example.cleanbanar.core.ui.BaseFragment
 import com.example.cleanbanar.databinding.FragmentProfileBinding
 import com.example.cleanbanar.features.auth.LoginActivity
@@ -16,10 +19,20 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
 
     private lateinit var authManager: AuthManager
 
+    // ==========================================
+    // Debounce Handler for Notification Toggles
+    // ==========================================
+    private val debounceHandler = Handler(Looper.getMainLooper())
+    private var debounceRunnable: Runnable? = null
+    private var isLoadingSettings = true // Flag to prevent save during initial load
+
     override fun inflateBinding(inflater: LayoutInflater, container: ViewGroup?): FragmentProfileBinding {
         return FragmentProfileBinding.inflate(inflater, container, false)
     }
 
+    // ==========================================
+    // View Setup & User Info
+    // ==========================================
     override fun setupViews() {
         authManager = AuthManager(requireContext())
 
@@ -27,6 +40,12 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         binding.tvProfileName.text = authManager.getUserName()
         binding.tvProfileEmail.text = authManager.getUserEmail()
         binding.tvProfileRole.text = authManager.getUserRole()
+
+        // Load notification settings from Firebase
+        loadNotificationSettings()
+
+        // Setup toggle listeners (with debounce)
+        setupNotificationToggles()
 
         // Change password
         binding.btnChangePassword.setOnClickListener {
@@ -42,6 +61,73 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         }
     }
 
+    // ==========================================
+    // Notification Settings - Firebase Sync
+    // ==========================================
+
+    /**
+     * Load settings from Firebase and apply to toggle switches.
+     * If data not found, defaults to all ON.
+     */
+    private fun loadNotificationSettings() {
+        val userId = authManager.getUserId()
+        isLoadingSettings = true
+
+        FirebaseManager.loadNotificationSettings(userId) { settings ->
+            if (!isAdded) return@loadNotificationSettings
+            binding.switchHampirPenuh.isChecked = settings.hampirPenuh
+            binding.switchPenuh.isChecked = settings.penuh
+            binding.switchSelesai.isChecked = settings.selesai
+            binding.switchSistem.isChecked = settings.sistem
+            isLoadingSettings = false
+        }
+    }
+
+    /**
+     * Wire up toggle switch listeners with 400ms debounce to prevent
+     * rapid toggle spam from flooding Firebase writes.
+     */
+    private fun setupNotificationToggles() {
+        val toggleAction = { _: Any, _: Any ->
+            if (!isLoadingSettings) {
+                scheduleSettingsSave()
+            }
+        }
+
+        binding.switchHampirPenuh.setOnCheckedChangeListener { _, _ -> toggleAction(Unit, Unit) }
+        binding.switchPenuh.setOnCheckedChangeListener { _, _ -> toggleAction(Unit, Unit) }
+        binding.switchSelesai.setOnCheckedChangeListener { _, _ -> toggleAction(Unit, Unit) }
+        binding.switchSistem.setOnCheckedChangeListener { _, _ -> toggleAction(Unit, Unit) }
+    }
+
+    /**
+     * Debounced save: waits 400ms after the last toggle change before writing
+     * to Firebase. Prevents rapid consecutive writes.
+     */
+    private fun scheduleSettingsSave() {
+        debounceRunnable?.let { debounceHandler.removeCallbacks(it) }
+
+        debounceRunnable = Runnable {
+            val settings = FirebaseManager.NotificationSettings(
+                hampirPenuh = binding.switchHampirPenuh.isChecked,
+                penuh = binding.switchPenuh.isChecked,
+                selesai = binding.switchSelesai.isChecked,
+                sistem = binding.switchSistem.isChecked
+            )
+
+            FirebaseManager.saveNotificationSettings(authManager.getUserId(), settings)
+
+            if (isAdded) {
+                Toast.makeText(requireContext(), "Pengaturan notifikasi diperbarui", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        debounceHandler.postDelayed(debounceRunnable!!, 400)
+    }
+
+    // ==========================================
+    // Change Password Dialog
+    // ==========================================
     private fun showChangePasswordDialog() {
         val dpToPx = { dp: Int -> (dp * resources.displayMetrics.density).toInt() }
 
@@ -83,5 +169,13 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             }
             .setNegativeButton("Batal", null)
             .show()
+    }
+
+    // ==========================================
+    // Lifecycle - Cleanup
+    // ==========================================
+    override fun onDestroyView() {
+        debounceRunnable?.let { debounceHandler.removeCallbacks(it) }
+        super.onDestroyView()
     }
 }
