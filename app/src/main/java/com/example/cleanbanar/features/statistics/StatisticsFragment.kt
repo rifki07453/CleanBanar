@@ -14,24 +14,47 @@ import com.google.firebase.database.ValueEventListener
 
 class StatisticsFragment : BaseFragment<FragmentStatisticsBinding>() {
 
+    // ==========================================
+    // Firebase Listener References
+    // ==========================================
     private var statsListener: ValueEventListener? = null
+    private var penuhListener: ValueEventListener? = null
 
     override fun inflateBinding(inflater: LayoutInflater, container: ViewGroup?): FragmentStatisticsBinding {
         return FragmentStatisticsBinding.inflate(inflater, container, false)
     }
 
     override fun setupViews() {
-        // Initial empty state
+        // Initial empty state handled by XML defaults (0%)
     }
 
+    // ==========================================
+    // Firebase Real-Time Listeners
+    // ==========================================
     override fun observeData() {
+        // Listen to daily statistics for chart and averages
         statsListener = FirebaseManager.listenDailyStats { stats ->
             if (!isAdded) return@listenDailyStats
             updateAverages(stats)
+            updateWeeklyAverage(stats)
             updateDailyChart(stats)
+        }
+
+        // Listen to history node for "total penuh" count (last 7 days)
+        penuhListener = FirebaseManager.countPenuhEvents { count ->
+            if (!isAdded) return@countPenuhEvents
+            binding.tvTotalPenuh.text = count.toString()
         }
     }
 
+    // ==========================================
+    // Data Processing - Averages & Summaries
+    // ==========================================
+
+    /**
+     * Calculate and display per-bin type averages from the daily stats.
+     * Uses lightweight computation: simple average of stored daily values.
+     */
     private fun updateAverages(stats: List<Map<String, Any>>) {
         if (stats.isEmpty()) return
 
@@ -41,7 +64,7 @@ class StatisticsFragment : BaseFragment<FragmentStatisticsBinding>() {
         binding.tvOrganikAvg.text = "$avgOrganik%"
         binding.tvNonOrganikAvg.text = "$avgNonOrganik%"
 
-        // Animate bar widths
+        // Animate bar widths proportionally
         binding.barOrganik.post {
             val parentWidth = (binding.barOrganik.parent as View).width
             binding.barOrganik.layoutParams = binding.barOrganik.layoutParams.apply {
@@ -56,6 +79,36 @@ class StatisticsFragment : BaseFragment<FragmentStatisticsBinding>() {
         }
     }
 
+    /**
+     * Calculate the overall weekly average across both bin types.
+     * Formula: average of all daily readings (organik + nonOrganik combined).
+     */
+    private fun updateWeeklyAverage(stats: List<Map<String, Any>>) {
+        if (stats.isEmpty()) {
+            binding.tvWeeklyAvg.text = "0%"
+            return
+        }
+
+        val allValues = stats.flatMap { entry ->
+            listOf(
+                (entry["organik"] as? Int) ?: 0,
+                (entry["nonOrganik"] as? Int) ?: 0
+            )
+        }
+
+        val weeklyAvg = if (allValues.isNotEmpty()) allValues.average().toInt() else 0
+        binding.tvWeeklyAvg.text = "$weeklyAvg%"
+    }
+
+    // ==========================================
+    // Chart Rendering - Daily Bar Chart
+    // ==========================================
+
+    /**
+     * Build the 7-day bar chart programmatically.
+     * Each day shows two side-by-side bars: green (organik), blue (non-organik).
+     * Heights are proportional to stored daily percentage values.
+     */
     private fun updateDailyChart(stats: List<Map<String, Any>>) {
         binding.chartContainer.removeAllViews()
 
@@ -83,7 +136,7 @@ class StatisticsFragment : BaseFragment<FragmentStatisticsBinding>() {
                 )
             }
 
-            // Organik bar
+            // Organik bar (green)
             val orgBar = View(requireContext()).apply {
                 layoutParams = LinearLayout.LayoutParams(
                     12.dpToPx(),
@@ -92,7 +145,7 @@ class StatisticsFragment : BaseFragment<FragmentStatisticsBinding>() {
                 setBackgroundColor(resources.getColor(R.color.emerald_600, null))
             }
 
-            // Non-Organik bar
+            // Non-Organik bar (blue)
             val nonOrgBar = View(requireContext()).apply {
                 layoutParams = LinearLayout.LayoutParams(
                     12.dpToPx(),
@@ -119,10 +172,17 @@ class StatisticsFragment : BaseFragment<FragmentStatisticsBinding>() {
         }
     }
 
+    // ==========================================
+    // Lifecycle - Cleanup
+    // ==========================================
     override fun onDestroyView() {
         statsListener?.let { FirebaseManager.removeStatsListener(it) }
+        penuhListener?.let { FirebaseManager.removePenuhListener(it) }
         super.onDestroyView()
     }
 
+    // ==========================================
+    // Utility
+    // ==========================================
     private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()
 }

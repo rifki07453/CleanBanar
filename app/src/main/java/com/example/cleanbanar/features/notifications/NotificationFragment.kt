@@ -25,6 +25,10 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
 
     override fun setupViews() {}
 
+    // ==========================================
+    // Firebase Real-Time Listeners
+    // ==========================================
+
     override fun observeData() {
         notifListener = FirebaseManager.listenNotifications { notifications ->
             if (!isAdded) return@listenNotifications
@@ -49,6 +53,9 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
         }
     }
 
+    // ==========================================
+    // UI Builder - Notification Cards
+    // ==========================================
     private fun addNotificationCard(title: String, message: String, type: String, timestamp: Long) {
         val cardView = com.google.android.material.card.MaterialCardView(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(
@@ -149,6 +156,9 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
         binding.notifListContainer.addView(cardView)
     }
 
+    // ==========================================
+    // UI Builder - Empty State
+    // ==========================================
     private fun addEmptyState() {
         val container = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL
@@ -188,6 +198,9 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
         binding.notifListContainer.addView(container)
     }
 
+    // ==========================================
+    // Utility / Helper Functions
+    // ==========================================
     private fun formatTime(timestamp: Long): String {
         if (timestamp == 0L) return ""
         val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())

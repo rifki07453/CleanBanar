@@ -26,6 +26,10 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>() {
 
     override fun setupViews() {}
 
+    // ==========================================
+    // Firebase Real-Time Listeners
+    // ==========================================
+
     override fun observeData() {
         historyListener = FirebaseManager.listenHistory { historyList ->
             if (!isAdded) return@listenHistory
@@ -58,6 +62,9 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>() {
         }
     }
 
+    // ==========================================
+    // UI Builder - Day Headers & History Cards
+    // ==========================================
     private fun addDayHeader(label: String) {
         val tv = TextView(requireContext()).apply {
             text = label
@@ -154,6 +161,9 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>() {
         binding.historyListContainer.addView(cardView)
     }
 
+    // ==========================================
+    // UI Builder - Empty State
+    // ==========================================
     private fun addEmptyState() {
         val container = android.widget.LinearLayout(requireContext()).apply {
             orientation = android.widget.LinearLayout.VERTICAL
@@ -193,6 +203,9 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>() {
         binding.historyListContainer.addView(container)
     }
 
+    // ==========================================
+    // Utility / Helper Functions
+    // ==========================================
     private fun getDayLabel(timestamp: Long): String {
         if (timestamp == 0L) return "Tidak diketahui"
         val cal = Calendar.getInstance()

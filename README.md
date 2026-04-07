@@ -1,60 +1,97 @@
 # CleanBanar
 
-**CleanBanar** is a Smart Trash monitoring system designed for modern waste management. It provides a real-time, interactive dashboard for both Admins and Staff to efficiently monitor trash levels, receive critical notifications, and manage personnel.
+**CleanBanar** is a Smart Trash Bin monitoring system built for modern campus waste management. It provides real-time, interactive dashboards for both **Admin** and **Petugas (Staff)** to efficiently monitor trash bin capacity, receive critical notifications, and manage personnel.
 
 ## Features
-- **Monitoring real-time**: Keep track of trash bin capacities constantly.
-- **Notifikasi penuh**: Instant alerts when a bin reaches maximum capacity.
-- **Statistik**: Visual charts detailing waste accumulation and trends.
-- **Manajemen petugas**: Administrative control to manage staff and assignments.
+
+- **Monitoring Real-Time**: Live tracking of Organik & Non-Organik bin capacity via IoT sensors
+- **Notifikasi Otomatis**: Automatic alerts when bins reach ≥80% (Hampir Penuh) and ≥95% (Penuh)
+- **Statistik**: Visual bar charts showing 7-day capacity trends, weekly averages, and total penuh events
+- **Manajemen Petugas**: Admin-only staff management panel (add, edit, remove petugas)
+- **Riwayat Aktivitas**: Full activity log of bin alerts and emptying events
 
 ## Tech Stack
-- Frontend: Android App (Kotlin / XML / ViewBinding)
-- Backend & Database: Firebase (Realtime Database / BoM)
 
-## How to Run the Project
+| Layer           | Technology                        |
+|-----------------|-----------------------------------|
+| **Frontend**    | Android (Kotlin, XML, ViewBinding)|
+| **Database**    | Firebase Realtime Database        |
+| **IoT Device**  | ESP32 (sends raw sensor data)     |
+| **Architecture**| Hybrid — Firebase as logic bridge |
+
+## System Architecture
+
+```
+ESP32 Sensor → Firebase Realtime DB → Android App (Admin / Petugas)
+     ↑                ↑                       ↓
+ Raw data only   Source of truth      Display + User actions
+```
+
+**Responsibility Separation:**
+- **ESP32**: Sends raw sensor data (distance/capacity). No decision logic.
+- **Firebase**: Stores raw data, processed states (status, notifications, history).
+- **Android App**: Handles UI display and user-triggered actions (mark as emptied). Lightweight observers for threshold notifications.
+
+## Firebase Database Structure
+
+```
+cleanbanar/
+  bins/
+    organik/       { percentage: Int, status: String, lastUpdate: Long }
+    nonOrganik/    { percentage: Int, status: String, lastUpdate: Long }
+  device/
+    connectionStatus: String ("ONLINE" / "OFFLINE")
+    lastSeen: Long
+  notifications/
+    {id}/          { title, message, type, timestamp, read }
+  history/
+    {id}/          { action, bin, actor, timestamp }
+  users/
+    {id}/          { name, email, role }
+  statistics/
+    daily/
+      {date}/      { organik: Int, nonOrganik: Int }
+```
+
+## Key System Logic
+
+### Notification Triggers (BinObserver)
+- **≥80%**: "Hampir Penuh" warning notification
+- **≥95%**: "Penuh" danger notification + history alert entry
+- Duplicate prevention via last-state comparison
+- Anomalous data (outside 0-100%) is ignored
+
+### Data Consistency ("Tandai Telah Dikosongkan")
+When a Petugas marks a bin as emptied, `FirebaseManager.emptyBin()` atomically:
+1. Resets capacity to 0% and status to "TERSEDIA"
+2. Writes a history entry ("emptied")
+3. Sends a "dikosongkan" notification
+4. Updates daily statistics
+
+### Edge Cases
+- **Device Offline**: Shows last known data + "Terputus" status
+- **Duplicate Actions**: Buttons are disabled during processing
+- **Sensor Anomaly**: Values outside 0-100% are clamped or ignored
+
+## How to Run
+
 1. Clone the repository:
    ```bash
-   git clone <repository_url>
+   git clone https://github.com/rifki07453/CleanBanar.git
    ```
-2. Open the project in Android Studio.
-3. Sync the Gradle files to download the necessary dependencies.
+2. Open the project in **Android Studio**.
+3. Sync the Gradle files to download dependencies.
 4. Setup Firebase:
-   - Make sure your `google-services.json` is placed in the `app/` directory.
-5. Build and run the project on an Android emulator or a physical device.
+   - Place your `google-services.json` in the `app/` directory.
+   - Ensure Firebase Realtime Database rules allow read/write.
+5. Build and run on an Android emulator or physical device.
 
----
+## Bottom Navigation
 
-# UI/UX Evaluation & Improvement Guide
-
-Based on the provided design reference for the CleanBanar mobile application, here are the targeted improvements for usability, clarity, and interactivity. The primary layout, structure, and color system are strictly maintained.
-
-## 1. UI Improvement Suggestions
-- **Action Feedback**: Add a subtle loading spinner to action buttons (e.g., "Tandai Telah Dikosongkan"). Once completed, temporarily replace the button text with success ("Berhasil dikosongkan") or error ("Gagal, coba lagi") feedback.
-- **Charts (Statistik)**: Preserve the current chart structure but increase chart line thickness for better visibility. Ensure that axis labels use a higher contrast gray. Keep organic and non-organic chart lines strictly green and blue respectively to match the card colors above them.
-- **Profile Page Details**: Add an explicit role label ("Admin" or "Petugas") below the name and a circular avatar placeholder to ground the user's identity. Optionally, display an "Aktivitas Terakhir" (Last login) timestamp.
-- **Dashboard Consistency**: Integrate a subtle real-time update indicator on the dashboard (e.g., a pulsing green dot) and explicitly show "Online" or "Offline" status to confirm system connectivity. 
-
-## 2. UX Improvements
-- **Button Disabling**: Prevent overlapping tasks or duplicate entries by disabling primary action buttons instantly after they are clicked, until the network responds.
-- **History Status Indicators**: Ensure history items explicitly show "Penuh" vs "Dikosongkan" using color-coded chips (e.g., red for full, green for emptied) to make scanning past events instantaneous.
-- **Notification Hierarchy**: Improve notification card layouts by clearly segregating the title (bold), description (regular), and time (light gray, smaller). Use the left-side border indicators systematically (Red = Penuh, Yellow = Hampir Penuh, Green = Selesai).
-
-## 3. Missing States (System States)
-Add the following system states to prevent user confusion when loading or failing to fetch data, using standard Indonesian copy:
-- **Loading State**: Implement skeleton views for the dashboard cards and statistics while data is being fetched.
-- **Empty State**: 
-  - Notifications: "Belum ada notifikasi"
-  - History: "Belum ada riwayat"
-  - General Data: "Data masih kosong"
-- **Error State**: "Gagal memuat data" or "Periksa koneksi Anda" on failed Firebase queries.
-
-## 4. Interaction Improvements
-- **Bottom Navigation State**: Ensure the active tab remains brightly highlighted in the brand's primary green, while inactive tabs remain muted gray.
-  - *Admin Navigation*: Dashboard, Manajemen Petugas, Statistik, Notifikasi, Profil.
-  - *Staff Navigation*: Home, Statistik, History, Notifikasi, Profil.
-
-## 5. Minor Visual Fixes
-- **Spacing Guidelines**: Increase vertical padding slightly between notification cards to prevent clutter.
-- **Alignment**: Ensure that all percentages and subtext on the Dashboard and Statistics pages perfectly align to the left margins of their respective container cards.
-- **Typography Consistency**: Eliminate conflicting font weights. Use bold strictly for titles and medium/regular for subtitles and descriptions.
+| Admin                  | Petugas (Staff)       |
+|------------------------|-----------------------|
+| Dashboard              | Home                  |
+| Manajemen Petugas      | Statistik             |
+| Statistik              | History               |
+| Notifikasi             | Notifikasi            |
+| Profil                 | Profil                |

@@ -20,43 +20,51 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         return FragmentPetugasDashboardBinding.inflate(inflater, container, false)
     }
 
+    // ==========================================
+    // View Setup & Button Actions
+    // ==========================================
     override fun setupViews() {
         authManager = AuthManager(requireContext())
         binding.tvStaffTitle.text = "Halo, ${authManager.getUserName()}"
 
+        // Organik: "Tandai Telah Dikosongkan" button
         binding.btnEmptyOrganik.setOnClickListener {
-            val originalText = binding.btnEmptyOrganik.text
-            binding.btnEmptyOrganik.isEnabled = false
-            binding.btnEmptyOrganik.text = "Memuat..."
-            
-            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                FirebaseManager.updateBinStatus("organik", 0, "TERSEDIA")
-                FirebaseManager.addHistoryEntry("emptied", "organik", authManager.getUserName())
-                if (isAdded) {
-                    binding.btnEmptyOrganik.isEnabled = true
-                    binding.btnEmptyOrganik.text = originalText
-                    Toast.makeText(requireContext(), "Berhasil dikosongkan", Toast.LENGTH_SHORT).show()
-                }
-            }, 800)
+            handleEmptyBin("organik", binding.btnEmptyOrganik)
         }
 
+        // Non-Organik: "Tandai Telah Dikosongkan" button
         binding.btnEmptyNonOrganik.setOnClickListener {
-            val originalText = binding.btnEmptyNonOrganik.text
-            binding.btnEmptyNonOrganik.isEnabled = false
-            binding.btnEmptyNonOrganik.text = "Memuat..."
-            
-            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                FirebaseManager.updateBinStatus("nonOrganik", 0, "TERSEDIA")
-                FirebaseManager.addHistoryEntry("emptied", "nonOrganik", authManager.getUserName())
-                if (isAdded) {
-                    binding.btnEmptyNonOrganik.isEnabled = true
-                    binding.btnEmptyNonOrganik.text = originalText
-                    Toast.makeText(requireContext(), "Berhasil dikosongkan", Toast.LENGTH_SHORT).show()
-                }
-            }, 800)
+            handleEmptyBin("nonOrganik", binding.btnEmptyNonOrganik)
         }
     }
 
+    /**
+     * Unified handler for emptying a bin.
+     * Shows loading state → calls FirebaseManager.emptyBin() → shows success feedback.
+     * The emptyBin() method handles all data writes atomically:
+     *   - Reset capacity to 0%
+     *   - Write history entry
+     *   - Send "dikosongkan" notification
+     *   - Update daily statistics
+     */
+    private fun handleEmptyBin(binType: String, button: android.widget.Button) {
+        val originalText = button.text
+        button.isEnabled = false
+        button.text = "Memuat..."
+
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            FirebaseManager.emptyBin(binType, authManager.getUserName())
+            if (isAdded) {
+                button.isEnabled = true
+                button.text = originalText
+                Toast.makeText(requireContext(), "Berhasil dikosongkan", Toast.LENGTH_SHORT).show()
+            }
+        }, 800)
+    }
+
+    // ==========================================
+    // Firebase Real-Time Listeners
+    // ==========================================
     override fun observeData() {
         organikListener = FirebaseManager.listenBinStatus("organik") { percentage, _, lastUpdate ->
             if (!isAdded) return@listenBinStatus
@@ -73,6 +81,9 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         }
     }
 
+    // ==========================================
+    // UI Update - Bin Cards (Status, Badge, Progress)
+    // ==========================================
     private fun updateOrganikUI(percent: Int) {
         binding.tvOrganikPercent.text = "$percent%"
         binding.progressOrganik.progress = percent
@@ -141,6 +152,9 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         }
     }
 
+    // ==========================================
+    // Overall System Status Computation
+    // ==========================================
     private fun updateOverallStatus() {
         val orgPercent = binding.progressOrganik.progress
         val nonOrgPercent = binding.progressNonOrganik.progress
@@ -162,6 +176,9 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         }
     }
 
+    // ==========================================
+    // Utility / Helper Functions
+    // ==========================================
     private fun formatLastUpdate(timestamp: Long): String {
         if (timestamp == 0L) return "Menunggu data..."
         val diff = System.currentTimeMillis() - timestamp

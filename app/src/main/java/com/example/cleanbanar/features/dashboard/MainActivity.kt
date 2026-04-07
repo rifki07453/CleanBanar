@@ -34,6 +34,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         } else {
             setupAdminNavigation()
         }
+
+        // Start BinObserver for automatic threshold notifications
+        // (monitors bin capacity and triggers alerts at ≥80% and ≥95%)
+        BinObserver.start()
     }
 
     // ==========================================
@@ -86,6 +90,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                     loadFragment(PetugasDashboardFragment())
                     true
                 }
+                R.id.nav_statistics -> {
+                    loadFragment(StatisticsFragment())
+                    true
+                }
                 R.id.nav_history -> {
                     loadFragment(HistoryFragment())
                     true
@@ -110,5 +118,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragmentContainer, fragment)
             .commit()
+    }
+
+    // ==========================================
+    // Lifecycle - Cleanup
+    // ==========================================
+    override fun onDestroy() {
+        BinObserver.stop()
+        super.onDestroy()
     }
 }

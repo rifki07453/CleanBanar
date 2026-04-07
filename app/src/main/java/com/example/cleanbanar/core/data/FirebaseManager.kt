@@ -30,6 +30,10 @@ import com.google.firebase.database.ValueEventListener
  */
 object FirebaseManager {
 
+    // ==========================================
+    // Constants & Firebase References
+    // ==========================================
+
     private const val TAG = "FirebaseManager"
 
     private val database: FirebaseDatabase? by lazy {
@@ -49,7 +53,9 @@ object FirebaseManager {
         return rootRef != null
     }
 
-    // --- Bin Status ---
+    // ==========================================
+    // Bin Status - Read & Write
+    // ==========================================
     fun listenBinStatus(binType: String, callback: (percentage: Int, status: String, lastUpdate: Long) -> Unit): ValueEventListener? {
         val ref = rootRef?.child("bins")?.child(binType) ?: return null
         val listener = object : ValueEventListener {
@@ -71,14 +77,55 @@ object FirebaseManager {
         rootRef?.child("bins")?.child(binType)?.removeEventListener(listener)
     }
 
+    /**
+     * Update bin capacity with validation.
+     * Capacity is clamped between 0-100% to prevent anomalous data.
+     */
     fun updateBinStatus(binType: String, percentage: Int, status: String) {
         val ref = rootRef?.child("bins")?.child(binType) ?: return
-        ref.child("percentage").setValue(percentage)
+        val clampedPercentage = percentage.coerceIn(0, 100)
+        ref.child("percentage").setValue(clampedPercentage)
         ref.child("status").setValue(status)
         ref.child("lastUpdate").setValue(System.currentTimeMillis())
     }
 
-    // --- Device Status ---
+    // ==========================================
+    // Unified Actions - Data Consistency
+    // ==========================================
+
+    /**
+     * Unified "empty bin" action. Ensures data consistency by:
+     * 1. Resetting capacity to 0% and status to "TERSEDIA"
+     * 2. Writing a history entry ("emptied")
+     * 3. Sending a "selesai" notification
+     * 4. Updating daily statistics
+     *
+     * This is the ONLY method that should be called when a petugas
+     * marks a bin as emptied, to avoid fragmented writes.
+     */
+    fun emptyBin(binType: String, actor: String) {
+        val binLabel = if (binType == "organik") "Organik" else "Non-Organik"
+
+        // 1. Reset bin capacity
+        updateBinStatus(binType, 0, "TERSEDIA")
+
+        // 2. Record in history
+        addHistoryEntry("emptied", binType, actor)
+
+        // 3. Send notification
+        addNotification(
+            title = "$binLabel Dikosongkan",
+            message = "Sampah $binLabel telah dikosongkan oleh $actor.",
+            type = "success"
+        )
+
+        // 4. Update daily stats with reset value
+        updateDailyStats(binType, 0)
+    }
+
+    // ==========================================
+    // Device Status - Online/Offline
+    // ==========================================
     fun listenDeviceStatus(callback: (connectionStatus: String, lastSeen: Long) -> Unit): ValueEventListener? {
         val ref = rootRef?.child("device") ?: return null
         val listener = object : ValueEventListener {
@@ -99,7 +146,9 @@ object FirebaseManager {
         rootRef?.child("device")?.removeEventListener(listener)
     }
 
-    // --- Notifications ---
+    // ==========================================
+    // Notifications - Read & Write
+    // ==========================================
     fun listenNotifications(callback: (List<Map<String, Any>>) -> Unit): ValueEventListener? {
         val ref = rootRef?.child("notifications") ?: return null
         val listener = object : ValueEventListener {
@@ -129,7 +178,22 @@ object FirebaseManager {
         rootRef?.child("notifications")?.removeEventListener(listener)
     }
 
-    // --- History ---
+    /**
+     * Write a new notification to Firebase.
+     * Used by both manual actions (emptyBin) and automatic triggers (BinObserver).
+     */
+    fun addNotification(title: String, message: String, type: String) {
+        val ref = rootRef?.child("notifications")?.push() ?: return
+        ref.child("title").setValue(title)
+        ref.child("message").setValue(message)
+        ref.child("type").setValue(type)
+        ref.child("timestamp").setValue(System.currentTimeMillis())
+        ref.child("read").setValue(false)
+    }
+
+    // ==========================================
+    // History - Read & Write
+    // ==========================================
     fun listenHistory(callback: (List<Map<String, Any>>) -> Unit): ValueEventListener? {
         val ref = rootRef?.child("history") ?: return null
         val listener = object : ValueEventListener {
@@ -166,7 +230,9 @@ object FirebaseManager {
         ref.child("timestamp").setValue(System.currentTimeMillis())
     }
 
-    // --- Users (Staff Management) ---
+    // ==========================================
+    // Users / Staff Management
+    // ==========================================
     fun listenUsers(callback: (List<Map<String, Any>>) -> Unit): ValueEventListener? {
         val ref = rootRef?.child("users") ?: return null
         val listener = object : ValueEventListener {
@@ -211,7 +277,9 @@ object FirebaseManager {
         rootRef?.child("users")?.child(userId)?.removeValue()
     }
 
-    // --- Statistics ---
+    // ==========================================
+    // Statistics - Daily Summaries & Aggregation
+    // ==========================================
     fun listenDailyStats(callback: (List<Map<String, Any>>) -> Unit): ValueEventListener? {
         val ref = rootRef?.child("statistics")?.child("daily") ?: return null
         val listener = object : ValueEventListener {
@@ -236,5 +304,49 @@ object FirebaseManager {
 
     fun removeStatsListener(listener: ValueEventListener) {
         rootRef?.child("statistics")?.child("daily")?.removeEventListener(listener)
+    }
+
+    /**
+     * Update the daily statistics summary for a given bin type.
+     * Stores the latest capacity value under today's date key.
+     * This is lightweight aggregation — no heavy computation.
+     */
+    fun updateDailyStats(binType: String, percentage: Int) {
+        val dateKey = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+            .format(java.util.Date())
+        val field = if (binType == "organik") "organik" else "nonOrganik"
+        val ref = rootRef?.child("statistics")?.child("daily")?.child(dateKey) ?: return
+        ref.child(field).setValue(percentage.coerceIn(0, 100))
+    }
+
+    /**
+     * Count the number of "penuh" (alert) events from the history node
+     * within the last 7 days. Used by StatisticsFragment for the summary cards.
+     */
+    fun countPenuhEvents(callback: (Int) -> Unit): ValueEventListener? {
+        val ref = rootRef?.child("history") ?: return null
+        val sevenDaysAgo = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000L)
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                var count = 0
+                for (child in snapshot.children) {
+                    val action = child.child("action").getValue(String::class.java) ?: ""
+                    val timestamp = child.child("timestamp").getValue(Long::class.java) ?: 0L
+                    if (action == "alert" && timestamp >= sevenDaysAgo) {
+                        count++
+                    }
+                }
+                callback(count)
+            }
+            override fun onCancelled(error: DatabaseError) {
+                Log.w(TAG, "countPenuhEvents cancelled: ${error.message}")
+            }
+        }
+        ref.addValueEventListener(listener)
+        return listener
+    }
+
+    fun removePenuhListener(listener: ValueEventListener) {
+        rootRef?.child("history")?.removeEventListener(listener)
     }
 }
