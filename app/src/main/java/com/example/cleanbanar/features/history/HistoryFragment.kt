@@ -29,6 +29,7 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>() {
     override fun observeData() {
         historyListener = FirebaseManager.listenHistory { historyList ->
             if (!isAdded) return@listenHistory
+            binding.progressBar.visibility = android.view.View.GONE
             binding.historyListContainer.removeAllViews()
 
             if (historyList.isEmpty()) {

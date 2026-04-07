@@ -25,15 +25,35 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         binding.tvStaffTitle.text = "Halo, ${authManager.getUserName()}"
 
         binding.btnEmptyOrganik.setOnClickListener {
-            FirebaseManager.updateBinStatus("organik", 0, "TERSEDIA")
-            FirebaseManager.addHistoryEntry("emptied", "organik", authManager.getUserName())
-            Toast.makeText(requireContext(), "Sampah Organik telah dikosongkan", Toast.LENGTH_SHORT).show()
+            val originalText = binding.btnEmptyOrganik.text
+            binding.btnEmptyOrganik.isEnabled = false
+            binding.btnEmptyOrganik.text = "Memuat..."
+            
+            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                FirebaseManager.updateBinStatus("organik", 0, "TERSEDIA")
+                FirebaseManager.addHistoryEntry("emptied", "organik", authManager.getUserName())
+                if (isAdded) {
+                    binding.btnEmptyOrganik.isEnabled = true
+                    binding.btnEmptyOrganik.text = originalText
+                    Toast.makeText(requireContext(), "Berhasil dikosongkan", Toast.LENGTH_SHORT).show()
+                }
+            }, 800)
         }
 
         binding.btnEmptyNonOrganik.setOnClickListener {
-            FirebaseManager.updateBinStatus("nonOrganik", 0, "TERSEDIA")
-            FirebaseManager.addHistoryEntry("emptied", "nonOrganik", authManager.getUserName())
-            Toast.makeText(requireContext(), "Sampah Non-Organik telah dikosongkan", Toast.LENGTH_SHORT).show()
+            val originalText = binding.btnEmptyNonOrganik.text
+            binding.btnEmptyNonOrganik.isEnabled = false
+            binding.btnEmptyNonOrganik.text = "Memuat..."
+            
+            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                FirebaseManager.updateBinStatus("nonOrganik", 0, "TERSEDIA")
+                FirebaseManager.addHistoryEntry("emptied", "nonOrganik", authManager.getUserName())
+                if (isAdded) {
+                    binding.btnEmptyNonOrganik.isEnabled = true
+                    binding.btnEmptyNonOrganik.text = originalText
+                    Toast.makeText(requireContext(), "Berhasil dikosongkan", Toast.LENGTH_SHORT).show()
+                }
+            }, 800)
         }
     }
 

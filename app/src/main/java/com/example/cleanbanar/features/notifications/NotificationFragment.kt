@@ -28,6 +28,7 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
     override fun observeData() {
         notifListener = FirebaseManager.listenNotifications { notifications ->
             if (!isAdded) return@listenNotifications
+            binding.progressBar.visibility = android.view.View.GONE
             binding.notifListContainer.removeAllViews()
 
             if (notifications.isEmpty()) {
