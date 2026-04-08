@@ -129,11 +129,9 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
     // Change Password Dialog
     // ==========================================
     private fun showChangePasswordDialog() {
-        val dpToPx = { dp: Int -> (dp * resources.displayMetrics.density).toInt() }
-
         val layout = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dpToPx(24), dpToPx(16), dpToPx(24), 0)
+            setPadding(24.dpToPx(), 16.dpToPx(), 24.dpToPx(), 0)
         }
         val etCurrent = EditText(requireContext()).apply {
             hint = "Password saat ini"
@@ -178,4 +176,6 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         debounceRunnable?.let { debounceHandler.removeCallbacks(it) }
         super.onDestroyView()
     }
+
+    private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()
 }
