@@ -183,7 +183,7 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>() {
         }
 
         val tv = android.widget.TextView(requireContext()).apply {
-            text = "Belum ada riwayat aktivitas"
+            text = "Belum ada aktivitas"
             setTextColor(resources.getColor(R.color.gray_400, null))
             textSize = 14f
             gravity = Gravity.CENTER
@@ -191,7 +191,7 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>() {
         }
 
         val tvSub = android.widget.TextView(requireContext()).apply {
-            text = "Aktivitas akan muncul saat tong sampah dikosongkan"
+            text = "Mulai kelola sampah untuk melihat riwayat di sini."
             setTextColor(resources.getColor(R.color.gray_400, null))
             textSize = 11f
             gravity = Gravity.CENTER

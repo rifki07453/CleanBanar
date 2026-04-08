@@ -178,7 +178,7 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
         }
 
         val tv = TextView(requireContext()).apply {
-            text = "Belum ada notifikasi"
+            text = "Semua sudah terkendali"
             setTextColor(resources.getColor(R.color.gray_400, null))
             textSize = 14f
             gravity = Gravity.CENTER
@@ -186,7 +186,7 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
         }
 
         val tvSub = TextView(requireContext()).apply {
-            text = "Belum ada aktivitas notifikasi"
+            text = "Tidak ada notifikasi baru."
             setTextColor(resources.getColor(R.color.gray_400, null))
             textSize = 11f
             gravity = Gravity.CENTER
