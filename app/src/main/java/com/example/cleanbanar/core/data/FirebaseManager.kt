@@ -56,14 +56,15 @@ object FirebaseManager {
     // ==========================================
     // Bin Status - Read & Write
     // ==========================================
-    fun listenBinStatus(binType: String, callback: (percentage: Int, status: String, lastUpdate: Long) -> Unit): ValueEventListener? {
+    fun listenBinStatus(binType: String, callback: (percentage: Int, status: String, lastUpdate: Long, lastEmptied: Long) -> Unit): ValueEventListener? {
         val ref = rootRef?.child("bins")?.child(binType) ?: return null
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val percentage = snapshot.child("percentage").getValue(Int::class.java) ?: 0
                 val status = snapshot.child("status").getValue(String::class.java) ?: "TERSEDIA"
                 val lastUpdate = snapshot.child("lastUpdate").getValue(Long::class.java) ?: 0L
-                callback(percentage, status, lastUpdate)
+                val lastEmptied = snapshot.child("lastEmptied").getValue(Long::class.java) ?: 0L
+                callback(percentage, status, lastUpdate, lastEmptied)
             }
             override fun onCancelled(error: DatabaseError) {
                 Log.w(TAG, "listenBinStatus cancelled: ${error.message}")
@@ -109,17 +110,20 @@ object FirebaseManager {
         // 1. Reset bin capacity
         updateBinStatus(binType, 0, "TERSEDIA")
 
-        // 2. Record in history
+        // 2. Write lastEmptied timestamp
+        rootRef?.child("bins")?.child(binType)?.child("lastEmptied")?.setValue(System.currentTimeMillis())
+
+        // 3. Record in history
         addHistoryEntry("emptied", binType, actor)
 
-        // 3. Send notification
+        // 4. Send notification
         addNotification(
             title = "$binLabel Dikosongkan",
             message = "Sampah $binLabel telah dikosongkan oleh $actor.",
             type = "success"
         )
 
-        // 4. Update daily stats with reset value
+        // 5. Update daily stats with reset value
         updateDailyStats(binType, 0)
     }
 
@@ -429,5 +433,34 @@ object FirebaseManager {
 
     fun removeNotificationSettingsListener(userId: String, listener: ValueEventListener) {
         rootRef?.child("users")?.child(userId)?.child("notification_settings")?.removeEventListener(listener)
+    }
+
+    // ==========================================
+    // Area / Sub-Area - User Assignment
+    // ==========================================
+
+    /**
+     * Data class for area assignment.
+     * Currently hardcoded with defaults; structured for future Firebase migration.
+     * Future: fetched from users/{userId}/assignedArea + areas/{areaId}
+     */
+    data class AreaInfo(
+        val areaName: String = "SDN 1 Banjarmasin",
+        val subAreaName: String = "Halaman Belakang"
+    )
+
+    /**
+     * Get the assigned area for a user.
+     * For now, returns hardcoded defaults.
+     * TODO: Replace with Firebase lookup when area management is implemented.
+     */
+    fun getUserArea(userId: String, callback: (AreaInfo) -> Unit) {
+        // Future implementation:
+        // val ref = rootRef?.child("users")?.child(userId) ?: run {
+        //     callback(AreaInfo())
+        //     return
+        // }
+        // ref.addListenerForSingleValueEvent(...)
+        callback(AreaInfo())
     }
 }

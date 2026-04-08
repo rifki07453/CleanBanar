@@ -30,7 +30,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
 
     override fun observeData() {
         // Listen to Organik bin
-        organikListener = FirebaseManager.listenBinStatus("organik") { percentage, status, lastUpdate ->
+        organikListener = FirebaseManager.listenBinStatus("organik") { percentage, status, lastUpdate, _ ->
             if (!isAdded) return@listenBinStatus
             binding.tvOrganikPercent.text = "$percentage%"
             binding.progressOrganikAdmin.progress = percentage
@@ -41,7 +41,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         }
 
         // Listen to Non-Organik bin
-        nonOrganikListener = FirebaseManager.listenBinStatus("nonOrganik") { percentage, status, lastUpdate ->
+        nonOrganikListener = FirebaseManager.listenBinStatus("nonOrganik") { percentage, status, lastUpdate, _ ->
             if (!isAdded) return@listenBinStatus
             binding.tvNonOrganikPercent.text = "$percentage%"
             binding.progressNonOrganikAdmin.progress = percentage

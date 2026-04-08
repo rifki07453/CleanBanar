@@ -73,12 +73,12 @@ object BinObserver {
             }
         }
 
-        organikListener = FirebaseManager.listenBinStatus("organik") { percentage, _, _ ->
+        organikListener = FirebaseManager.listenBinStatus("organik") { percentage, _, _, _ ->
             handleThreshold("organik", percentage, previousOrganik)
             previousOrganik = percentage
         }
 
-        nonOrganikListener = FirebaseManager.listenBinStatus("nonOrganik") { percentage, _, _ ->
+        nonOrganikListener = FirebaseManager.listenBinStatus("nonOrganik") { percentage, _, _, _ ->
             handleThreshold("nonOrganik", percentage, previousNonOrganik)
             previousNonOrganik = percentage
         }
