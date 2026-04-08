@@ -36,4 +36,23 @@
     <!-- Blue accent -->
     <color name="blue_50">#eff6ff</color>
     <color name="blue_600">#2563eb</color>
+
+    <!-- Extended Emerald palette for gradient -->
+    <color name="emerald_300">#6ee7b7</color>
+    <color name="emerald_400">#34d399</color>
+    <color name="emerald_500">#10b981</color>
+    <color name="emerald_800">#065f46</color>
+
+    <!-- Gradient highlight -->
+    <color name="green_highlight">#4dffb3</color>
+    <color name="green_highlight_transparent">#004dffb3</color>
+
+    <!-- Extended warning/critical -->
+    <color name="amber_500">#f59e0b</color>
+    <color name="red_600">#dc2626</color>
+
+    <!-- Orange for nearly full badge -->
+    <color name="orange_50">#fff7ed</color>
+    <color name="orange_500">#f97316</color>
+    <color name="orange_600">#ea580c</color>
 </resources>
