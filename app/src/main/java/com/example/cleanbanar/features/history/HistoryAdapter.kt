@@ -30,13 +30,18 @@ class HistoryAdapter(private var items: List<Map<String, Any>> = emptyList()) :
         val context = holder.itemView.context
         
         val action = entry["action"] as? String ?: ""
-        val bin = entry["bin"] as? String ?: ""
-        val actor = entry["actor"] as? String ?: ""
+        val areaId = entry["areaId"] as? String ?: ""
+        val fullName = entry["fullName"] as? String ?: ""
+        val userId = entry["userId"] as? String ?: ""
         val timestamp = entry["timestamp"] as? Long ?: 0L
 
         // Bind data
-        val binLabel = if (bin == "organik") "Sampah Organik" else "Sampah Non-Organik"
-        holder.binding.tvTitle.text = binLabel
+        val title = when (action) {
+            "emptied" -> "Pembersihan Area $areaId"
+            "alert" -> "Peringatan Area $areaId"
+            else -> "Aktivitas Sistem"
+        }
+        holder.binding.tvTitle.text = title
         
         // Time & Date
         holder.binding.tvTime.text = formatTime(timestamp)
@@ -49,15 +54,14 @@ class HistoryAdapter(private var items: List<Map<String, Any>> = emptyList()) :
                 holder.binding.tvStatusBadge.setBackgroundResource(R.drawable.badge_outlined_green)
                 holder.binding.tvStatusBadge.setTextColor(context.getColor(R.color.badge_green_text))
                 holder.binding.timelineDot.setBackgroundResource(R.drawable.ic_bg_circle_green)
-                holder.binding.tvDetails.text = "Petugas: $actor\nKapasitas akhir: 0%"
+                holder.binding.tvDetails.text = "Petugas: $fullName (ID: $userId)\nArea: $areaId"
             }
             "alert" -> {
-                val percent = entry["percentage"] as? Int ?: 100
-                holder.binding.tvStatusBadge.text = "PENUH ($percent%)"
+                holder.binding.tvStatusBadge.text = "PENUH (100%)"
                 holder.binding.tvStatusBadge.setBackgroundResource(R.drawable.badge_outlined_red)
                 holder.binding.tvStatusBadge.setTextColor(context.getColor(R.color.badge_red_text))
                 holder.binding.timelineDot.setBackgroundResource(R.drawable.ic_bg_circle_red)
-                holder.binding.tvDetails.text = "Notifikasi dikirim ke petugas kebersihan untuk pengangkutan.\nKapasitas: $percent%"
+                holder.binding.tvDetails.text = "Kapasitas area $areaId telah mencapai batas maksimum. Pengosongan segera diperlukan."
             }
 
             else -> {

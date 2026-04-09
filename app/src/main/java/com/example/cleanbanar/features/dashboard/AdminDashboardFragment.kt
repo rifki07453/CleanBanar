@@ -30,24 +30,24 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
 
     override fun observeData() {
         // Listen to Organik bin
-        organikListener = FirebaseManager.listenBinStatus("organik") { percentage, status, lastUpdate, _ ->
+        organikListener = FirebaseManager.listenBinStatus("organik") { fillPercentage, status, lastUpdate, _ ->
             if (!isAdded) return@listenBinStatus
-            binding.tvOrganikPercent.text = "$percentage%"
-            binding.progressOrganikAdmin.progress = percentage
+            binding.tvOrganikPercent.text = "$fillPercentage%"
+            binding.progressOrganikAdmin.progress = fillPercentage
             binding.tvOrganikUpdate.text = formatLastUpdate(lastUpdate)
-            updateBinBadge(binding.tvOrganikBadge, percentage)
-            updateProgressDrawable(binding.progressOrganikAdmin, percentage)
+            updateBinBadge(binding.tvOrganikBadge, fillPercentage)
+            updateProgressDrawable(binding.progressOrganikAdmin, fillPercentage)
             recalculateSummary()
         }
 
         // Listen to Non-Organik bin
-        nonOrganikListener = FirebaseManager.listenBinStatus("nonOrganik") { percentage, status, lastUpdate, _ ->
+        nonOrganikListener = FirebaseManager.listenBinStatus("nonOrganik") { fillPercentage, status, lastUpdate, _ ->
             if (!isAdded) return@listenBinStatus
-            binding.tvNonOrganikPercent.text = "$percentage%"
-            binding.progressNonOrganikAdmin.progress = percentage
+            binding.tvNonOrganikPercent.text = "$fillPercentage%"
+            binding.progressNonOrganikAdmin.progress = fillPercentage
             binding.tvNonOrganikUpdate.text = formatLastUpdate(lastUpdate)
-            updateBinBadge(binding.tvNonOrganikBadge, percentage)
-            updateProgressDrawable(binding.progressNonOrganikAdmin, percentage)
+            updateBinBadge(binding.tvNonOrganikBadge, fillPercentage)
+            updateProgressDrawable(binding.progressNonOrganikAdmin, fillPercentage)
             recalculateSummary()
         }
 

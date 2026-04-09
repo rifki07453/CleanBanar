@@ -80,5 +80,32 @@
             app:layout_constraintTop_toBottomOf="@id/headerBlock"
             tools:listitem="@layout/item_history_timeline" />
 
+        <!-- Empty State Container -->
+        <LinearLayout
+            android:id="@+id/historyEmptyState"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="32dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/headerBlock">
+            
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@drawable/ic_organik"
+                android:alpha="0.3"
+                app:tint="@color/gray_400" />
+                
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Belum ada riwayat aktivitas"
+                android:textColor="@color/gray_400"
+                android:textSize="14sp"
+                android:layout_marginTop="16dp" />
+        </LinearLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

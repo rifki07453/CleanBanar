@@ -12,6 +12,7 @@ class AuthManager(context: Context) {
         private const val KEY_USER_NAME = "user_name"
         private const val KEY_USER_EMAIL = "user_email"
         private const val KEY_USER_ROLE = "user_role"
+        private const val KEY_ASSIGNED_AREA = "assigned_area_id"
     }
 
     private val prefs: SharedPreferences =
@@ -42,6 +43,7 @@ class AuthManager(context: Context) {
             putString(KEY_USER_NAME, user.name)
             putString(KEY_USER_EMAIL, user.email)
             putString(KEY_USER_ROLE, user.role)
+            putString(KEY_ASSIGNED_AREA, user.assignedAreaId)
             apply()
         }
     }
@@ -79,6 +81,13 @@ class AuthManager(context: Context) {
      */
     fun getUserId(): String {
         return prefs.getInt(KEY_USER_ID, 0).toString()
+    }
+
+    /**
+     * Get the currently logged-in user's assigned area ID.
+     */
+    fun getAssignedAreaId(): String {
+        return prefs.getString(KEY_ASSIGNED_AREA, "") ?: ""
     }
 
     /**

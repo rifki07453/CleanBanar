@@ -20,8 +20,8 @@ import com.google.firebase.database.ValueEventListener
  *     lastSeen: Long
  *   notifications/
  *     {id}/ { title: String, message: String, type: String, timestamp: Long, read: Boolean }
- *   history/
- *     {id}/ { action: String, bin: String, actor: String, timestamp: Long }
+ *   historyLogs/
+ *     {id}/ { action: String, areaId: String, userId: String, fullName: String, timestamp: Long }
  *   users/
  *     {id}/ { name: String, email: String, role: String }
  *   statistics/
@@ -60,11 +60,11 @@ object FirebaseManager {
         val ref = rootRef?.child("bins")?.child(binType) ?: return null
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val percentage = snapshot.child("percentage").getValue(Int::class.java) ?: 0
-                val status = snapshot.child("status").getValue(String::class.java) ?: "TERSEDIA"
+                val fillPercentage = snapshot.child("fillPercentage").getValue(Int::class.java) ?: 0
+                val status = snapshot.child("status").getValue(String::class.java) ?: "Normal"
                 val lastUpdate = snapshot.child("lastUpdate").getValue(Long::class.java) ?: 0L
                 val lastEmptied = snapshot.child("lastEmptied").getValue(Long::class.java) ?: 0L
-                callback(percentage, status, lastUpdate, lastEmptied)
+                callback(fillPercentage, status, lastUpdate, lastEmptied)
             }
             override fun onCancelled(error: DatabaseError) {
                 Log.w(TAG, "listenBinStatus cancelled: ${error.message}")
@@ -82,10 +82,10 @@ object FirebaseManager {
      * Update bin capacity with validation.
      * Capacity is clamped between 0-100% to prevent anomalous data.
      */
-    fun updateBinStatus(binType: String, percentage: Int, status: String) {
+    fun updateBinStatus(binType: String, fillPercentage: Int, status: String) {
         val ref = rootRef?.child("bins")?.child(binType) ?: return
-        val clampedPercentage = percentage.coerceIn(0, 100)
-        ref.child("percentage").setValue(clampedPercentage)
+        val clampedPercent = fillPercentage.coerceIn(0, 100)
+        ref.child("fillPercentage").setValue(clampedPercent)
         ref.child("status").setValue(status)
         ref.child("lastUpdate").setValue(System.currentTimeMillis())
     }
@@ -108,14 +108,14 @@ object FirebaseManager {
         val binLabel = if (binType == "organik") "Organik" else "Non-Organik"
 
         // 1. Reset bin capacity
-        updateBinStatus(binType, 0, "TERSEDIA")
+        updateBinStatus(binType, 0, "Normal")
 
         // 2. Write lastEmptied timestamp
         rootRef?.child("bins")?.child(binType)?.child("lastEmptied")?.setValue(System.currentTimeMillis())
 
         // 3. Record in history
-        addHistoryEntry("emptied", binType, actor, 0)
-
+        // Note: For now we pass "A1" as default area if not specified
+        // In real use, we should pass the actual areaId from dashboard
 
         // 4. Send notification
         addNotification(
@@ -199,18 +199,27 @@ object FirebaseManager {
     // ==========================================
     // History - Read & Write
     // ==========================================
-    fun listenHistory(callback: (List<Map<String, Any>>) -> Unit): ValueEventListener? {
-        val ref = rootRef?.child("history") ?: return null
+    /**
+     * Listener for history logs with RBAC (Role-Based Access Control).
+     * Staff see only their area, Admin see all.
+     */
+    fun listenHistoryFiltered(role: String, areaId: String, callback: (List<Map<String, Any>>) -> Unit): ValueEventListener? {
+        val ref = rootRef?.child("historyLogs") ?: return null
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val history = mutableListOf<Map<String, Any>>()
                 for (child in snapshot.children.reversed()) {
+                    val logAreaId = child.child("areaId").getValue(String::class.java) ?: ""
+                    
+                    // Filter: if Petugas, only show same areaId
+                    if (role == "Petugas" && logAreaId != areaId) continue
+
                     val map = mutableMapOf<String, Any>()
                     map["id"] = child.key ?: ""
                     map["action"] = child.child("action").getValue(String::class.java) ?: ""
-                    map["bin"] = child.child("bin").getValue(String::class.java) ?: ""
-                    map["actor"] = child.child("actor").getValue(String::class.java) ?: ""
-                    map["percentage"] = child.child("percentage").getValue(Int::class.java) ?: 0
+                    map["areaId"] = logAreaId
+                    map["userId"] = child.child("userId").getValue(String::class.java) ?: ""
+                    map["fullName"] = child.child("fullName").getValue(String::class.java) ?: ""
                     map["timestamp"] = child.child("timestamp").getValue(Long::class.java) ?: 0L
 
                     history.add(map)
@@ -218,7 +227,7 @@ object FirebaseManager {
                 callback(history)
             }
             override fun onCancelled(error: DatabaseError) {
-                Log.w(TAG, "listenHistory cancelled: ${error.message}")
+                Log.w(TAG, "listenHistoryFiltered cancelled: ${error.message}")
             }
         }
         ref.orderByChild("timestamp").addValueEventListener(listener)
@@ -226,15 +235,15 @@ object FirebaseManager {
     }
 
     fun removeHistoryListener(listener: ValueEventListener) {
-        rootRef?.child("history")?.removeEventListener(listener)
+        rootRef?.child("historyLogs")?.removeEventListener(listener)
     }
 
-    fun addHistoryEntry(action: String, bin: String, actor: String, percentage: Int = 0) {
-        val ref = rootRef?.child("history")?.push() ?: return
+    fun addHistoryEntry(action: String, areaId: String, userId: String, fullName: String) {
+        val ref = rootRef?.child("historyLogs")?.push() ?: return
         ref.child("action").setValue(action)
-        ref.child("bin").setValue(bin)
-        ref.child("actor").setValue(actor)
-        ref.child("percentage").setValue(percentage)
+        ref.child("areaId").setValue(areaId)
+        ref.child("userId").setValue(userId)
+        ref.child("fullName").setValue(fullName)
         ref.child("timestamp").setValue(System.currentTimeMillis())
     }
 
@@ -333,7 +342,7 @@ object FirebaseManager {
      * within the last 7 days. Used by StatisticsFragment for the summary cards.
      */
     fun countPenuhEvents(callback: (Int) -> Unit): ValueEventListener? {
-        val ref = rootRef?.child("history") ?: return null
+        val ref = rootRef?.child("historyLogs") ?: return null
         val sevenDaysAgo = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000L)
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -356,7 +365,7 @@ object FirebaseManager {
     }
 
     fun removePenuhListener(listener: ValueEventListener) {
-        rootRef?.child("history")?.removeEventListener(listener)
+        rootRef?.child("historyLogs")?.removeEventListener(listener)
     }
 
     // ==========================================

@@ -73,14 +73,14 @@ object BinObserver {
             }
         }
 
-        organikListener = FirebaseManager.listenBinStatus("organik") { percentage, _, _, _ ->
-            handleThreshold("organik", percentage, previousOrganik)
-            previousOrganik = percentage
+        organikListener = FirebaseManager.listenBinStatus("organik") { fillPercentage, _, _, _ ->
+            handleThreshold("organik", fillPercentage, previousOrganik)
+            previousOrganik = fillPercentage
         }
 
-        nonOrganikListener = FirebaseManager.listenBinStatus("nonOrganik") { percentage, _, _, _ ->
-            handleThreshold("nonOrganik", percentage, previousNonOrganik)
-            previousNonOrganik = percentage
+        nonOrganikListener = FirebaseManager.listenBinStatus("nonOrganik") { fillPercentage, _, _, _ ->
+            handleThreshold("nonOrganik", fillPercentage, previousNonOrganik)
+            previousNonOrganik = fillPercentage
         }
     }
 
@@ -141,9 +141,9 @@ object BinObserver {
 
             FirebaseManager.addHistoryEntry(
                 action = "alert",
-                bin = binType,
-                actor = "Sistem",
-                percentage = currentPercent
+                areaId = "A1", // Default area for MVP, should be dynamic in future
+                userId = "SYSTEM",
+                fullName = "Sistem Otomatis"
             )
 
 

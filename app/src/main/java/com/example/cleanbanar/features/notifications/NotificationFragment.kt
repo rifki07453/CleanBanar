@@ -178,23 +178,17 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
         }
 
         val tv = TextView(requireContext()).apply {
-            text = "Semua sudah terkendali"
+            text = "Tidak ada notifikasi saat ini"
             setTextColor(resources.getColor(R.color.gray_400, null))
             textSize = 14f
             gravity = Gravity.CENTER
             setPadding(0, 12.dpToPx(), 0, 4.dpToPx())
         }
 
-        val tvSub = TextView(requireContext()).apply {
-            text = "Tidak ada notifikasi baru."
-            setTextColor(resources.getColor(R.color.gray_400, null))
-            textSize = 11f
-            gravity = Gravity.CENTER
-        }
+        // Removed tvSub secondary text to keep it minimal as per reference
 
         container.addView(icon)
         container.addView(tv)
-        container.addView(tvSub)
         binding.notifListContainer.addView(container)
     }
 

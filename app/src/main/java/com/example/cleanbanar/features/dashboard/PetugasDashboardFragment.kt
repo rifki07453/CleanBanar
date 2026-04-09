@@ -29,8 +29,8 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
     // Track bin data for urgency sorting
     private data class BinData(
         val type: String,
-        var percentage: Int = 0,
-        var status: String = "TERSEDIA",
+        var fillPercentage: Int = 0,
+        var status: String = "Normal",
         var lastUpdate: Long = 0L,
         var lastEmptied: Long = 0L
     )
@@ -62,16 +62,16 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
     // Firebase Real-Time Listeners
     // ==========================================
     override fun observeData() {
-        organikListener = FirebaseManager.listenBinStatus("organik") { percentage, _, lastUpdate, lastEmptied ->
+        organikListener = FirebaseManager.listenBinStatus("organik") { fillPercentage, status, lastUpdate, lastEmptied ->
             if (!isAdded) return@listenBinStatus
-            binDataMap["organik"] = BinData("organik", percentage, "", lastUpdate, lastEmptied)
+            binDataMap["organik"] = BinData("organik", fillPercentage, status, lastUpdate, lastEmptied)
             rebuildCards()
             updateOverallStatus()
         }
 
-        nonOrganikListener = FirebaseManager.listenBinStatus("nonOrganik") { percentage, _, lastUpdate, lastEmptied ->
+        nonOrganikListener = FirebaseManager.listenBinStatus("nonOrganik") { fillPercentage, status, lastUpdate, lastEmptied ->
             if (!isAdded) return@listenBinStatus
-            binDataMap["nonOrganik"] = BinData("nonOrganik", percentage, "", lastUpdate, lastEmptied)
+            binDataMap["nonOrganik"] = BinData("nonOrganik", fillPercentage, status, lastUpdate, lastEmptied)
             rebuildCards()
             updateOverallStatus()
         }
@@ -83,8 +83,8 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
     private fun rebuildCards() {
         binding.cardsContainer.removeAllViews()
 
-        // Sort by percentage descending (highest urgency first)
-        val sortedBins = binDataMap.values.sortedByDescending { it.percentage }
+        // Sort by fillPercentage descending (highest urgency first)
+        val sortedBins = binDataMap.values.sortedByDescending { it.fillPercentage }
 
         for (bin in sortedBins) {
             val card = buildBinCard(bin)
@@ -95,7 +95,7 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
     private fun buildBinCard(bin: BinData): MaterialCardView {
         val isOrganik = bin.type == "organik"
         val label = if (isOrganik) "Organik" else "Non-Organik"
-        val percent = bin.percentage
+        val percent = bin.fillPercentage
 
         // Determine status level
         val (badgeText, badgeDrawable, badgeTextColor, progressDrawableRes) = when {
@@ -330,7 +330,17 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         button.text = "Memuat..."
 
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            // Unified empty action
             FirebaseManager.emptyBin(binType, authManager.getUserName())
+            
+            // Add traceable history entry
+            FirebaseManager.addHistoryEntry(
+                action = "emptied",
+                areaId = authManager.getAssignedAreaId(),
+                userId = authManager.getUserId(),
+                fullName = authManager.getUserName()
+            )
+
             if (isAdded) {
                 button.isEnabled = true
                 button.text = "✓ Dikosongkan"
@@ -353,7 +363,7 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
     // Overall System Status Computation
     // ==========================================
     private fun updateOverallStatus() {
-        val maxPercent = binDataMap.values.maxOfOrNull { it.percentage } ?: 0
+        val maxPercent = binDataMap.values.maxOfOrNull { it.fillPercentage } ?: 0
 
         when {
             maxPercent >= 95 -> {
