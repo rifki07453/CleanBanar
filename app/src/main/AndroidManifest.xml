@@ -5,9 +5,9 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_logo_cleanbanar"
+        android:icon="@mipmap/ic_logo_cleanbanar"
         android:label="@string/app_name"
-        android:roundIcon="@drawable/ic_logo_cleanbanar"
+        android:roundIcon="@mipmap/ic_logo_cleanbanar_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.CleanBanar"
         android:usesCleartextTraffic="true">
