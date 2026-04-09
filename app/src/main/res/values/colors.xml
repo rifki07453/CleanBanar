@@ -55,4 +55,15 @@
     <color name="orange_50">#fff7ed</color>
     <color name="orange_500">#f97316</color>
     <color name="orange_600">#ea580c</color>
+    <!-- Redesign Colors (Timeline & Badges) -->
+    <color name="gray_timeline">#E9ECEF</color>
+    <color name="dot_green">#10B981</color>
+    <color name="dot_red">#EF4444</color>
+    <color name="dot_blue">#3B82F6</color>
+    <color name="badge_green_bg">#D1FAE5</color>
+    <color name="badge_red_bg">#FEE2E2</color>
+    <color name="badge_blue_bg">#DBEAFE</color>
+    <color name="badge_green_text">#065F46</color>
+    <color name="badge_red_text">#991B1B</color>
+    <color name="badge_blue_text">#1E40AF</color>
 </resources>

@@ -67,40 +67,18 @@
             app:layout_constraintStart_toStartOf="@id/tvHistoryTitle"
             app:layout_constraintTop_toBottomOf="@id/tvHistoryTitle" />
 
-        <!-- Content Cards -->
-        <FrameLayout
-            android:id="@+id/contentContainer"
+        <!-- Timeline RecyclerView -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvHistory"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="-30dp"
-            app:layout_constraintTop_toBottomOf="@id/headerBlock">
-
-            <LinearLayout
-                android:id="@+id/historyListContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="16dp"
-                android:paddingBottom="24dp" />
-                
-            <ProgressBar
-                android:id="@+id/progressBar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="50dp"/>
-                
-            <TextView
-                android:id="@+id/tvError"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="50dp"
-                android:text="Gagal memuat data\nPeriksa koneksi Anda"
-                android:gravity="center"
-                android:visibility="gone"
-                android:textColor="@color/gray_500" />
-        </FrameLayout>
+            android:paddingTop="8dp"
+            android:paddingBottom="24dp"
+            android:clipToPadding="false"
+            android:nestedScrollingEnabled="false"
+            app:layout_constraintTop_toBottomOf="@id/headerBlock"
+            tools:listitem="@layout/item_history_timeline" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

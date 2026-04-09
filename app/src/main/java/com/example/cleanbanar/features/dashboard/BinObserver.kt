@@ -139,12 +139,13 @@ object BinObserver {
         if (currentPercent >= 95 && previousPercent < 95) {
             Log.d(TAG, "$binLabel crossed PENUH threshold: $previousPercent% → $currentPercent%")
 
-            // Always write history regardless of notification settings
             FirebaseManager.addHistoryEntry(
                 action = "alert",
                 bin = binType,
-                actor = "Sistem"
+                actor = "Sistem",
+                percentage = currentPercent
             )
+
 
             // Only write notification if user has "penuh" enabled
             if (currentSettings.penuh) {

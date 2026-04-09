@@ -93,7 +93,9 @@
                     android:layout_weight="1"
                     android:layout_marginEnd="6dp"
                     app:cardCornerRadius="16dp"
-                    app:cardElevation="2dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="#F1F3F5"
                     app:cardBackgroundColor="@color/white">
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -126,7 +128,9 @@
                     android:layout_weight="1"
                     android:layout_marginHorizontal="6dp"
                     app:cardCornerRadius="16dp"
-                    app:cardElevation="2dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="#F1F3F5"
                     app:cardBackgroundColor="@color/white">
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -159,7 +163,9 @@
                     android:layout_weight="1"
                     android:layout_marginStart="6dp"
                     app:cardCornerRadius="16dp"
-                    app:cardElevation="2dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="#F1F3F5"
                     app:cardBackgroundColor="@color/white">
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -191,7 +197,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#F1F3F5"
                 android:layout_marginBottom="12dp"
                 app:cardBackgroundColor="@color/white">
                 <LinearLayout
@@ -209,9 +217,8 @@
                             android:id="@+id/icOrganikAdmin"
                             android:layout_width="40dp"
                             android:layout_height="40dp"
-                            android:src="@android:drawable/ic_dialog_map"
-                            android:background="@drawable/leaf_bg"
-                            app:tint="@color/emerald_600"
+                            android:src="@drawable/ic_organik"
+                            android:background="@drawable/ic_bg_circle_green"
                             android:padding="10dp"
                             android:layout_centerVertical="true"
                             android:contentDescription="Organik" />
@@ -243,11 +250,11 @@
                             android:id="@+id/tvOrganikBadge"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="—"
+                            android:text="AKTIF"
                             android:textSize="10sp"
                             android:textStyle="bold"
-                            android:textColor="@color/gray_400"
-                            android:background="@drawable/edit_text_bg"
+                            android:textColor="@color/badge_green_text"
+                            android:background="@drawable/badge_outlined_green"
                             android:paddingHorizontal="10dp"
                             android:paddingVertical="4dp"
                             android:layout_alignParentEnd="true"
@@ -268,7 +275,7 @@
                             android:id="@+id/tvOrganikPercent"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="—"
+                            android:text="0%"
                             android:textStyle="bold"
                             android:textSize="14sp"
                             android:textColor="@color/gray_800"
@@ -290,7 +297,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#F1F3F5"
                 android:layout_marginBottom="16dp"
                 app:cardBackgroundColor="@color/white">
                 <LinearLayout
@@ -308,9 +317,8 @@
                             android:id="@+id/icNonOrganikAdmin"
                             android:layout_width="40dp"
                             android:layout_height="40dp"
-                            android:src="@android:drawable/ic_menu_sort_by_size"
-                            android:background="@drawable/badge_blue_bg"
-                            app:tint="@color/secondary"
+                            android:src="@drawable/ic_non_organik"
+                            android:background="@drawable/ic_bg_circle_blue"
                             android:padding="10dp"
                             android:layout_centerVertical="true"
                             android:contentDescription="Non-Organik" />
@@ -342,11 +350,11 @@
                             android:id="@+id/tvNonOrganikBadge"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="—"
+                            android:text="AKTIF"
                             android:textSize="10sp"
                             android:textStyle="bold"
-                            android:textColor="@color/gray_400"
-                            android:background="@drawable/edit_text_bg"
+                            android:textColor="@color/badge_blue_text"
+                            android:background="@drawable/badge_outlined_blue"
                             android:paddingHorizontal="10dp"
                             android:paddingVertical="4dp"
                             android:layout_alignParentEnd="true"
@@ -367,7 +375,7 @@
                             android:id="@+id/tvNonOrganikPercent"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="—"
+                            android:text="0%"
                             android:textStyle="bold"
                             android:textSize="14sp"
                             android:textColor="@color/gray_800"
@@ -389,7 +397,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#F1F3F5"
                 app:cardBackgroundColor="@color/white">
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -446,7 +456,7 @@
                             android:id="@+id/tvDeviceStatus"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="—"
+                            android:text="OFFLINE"
                             android:textSize="10sp"
                             android:textStyle="bold"
                             android:textColor="@color/gray_400"
@@ -481,5 +491,8 @@
             </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

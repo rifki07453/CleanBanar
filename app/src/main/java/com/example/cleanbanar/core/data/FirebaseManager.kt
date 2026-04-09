@@ -114,7 +114,8 @@ object FirebaseManager {
         rootRef?.child("bins")?.child(binType)?.child("lastEmptied")?.setValue(System.currentTimeMillis())
 
         // 3. Record in history
-        addHistoryEntry("emptied", binType, actor)
+        addHistoryEntry("emptied", binType, actor, 0)
+
 
         // 4. Send notification
         addNotification(
@@ -209,7 +210,9 @@ object FirebaseManager {
                     map["action"] = child.child("action").getValue(String::class.java) ?: ""
                     map["bin"] = child.child("bin").getValue(String::class.java) ?: ""
                     map["actor"] = child.child("actor").getValue(String::class.java) ?: ""
+                    map["percentage"] = child.child("percentage").getValue(Int::class.java) ?: 0
                     map["timestamp"] = child.child("timestamp").getValue(Long::class.java) ?: 0L
+
                     history.add(map)
                 }
                 callback(history)
@@ -226,13 +229,15 @@ object FirebaseManager {
         rootRef?.child("history")?.removeEventListener(listener)
     }
 
-    fun addHistoryEntry(action: String, bin: String, actor: String) {
+    fun addHistoryEntry(action: String, bin: String, actor: String, percentage: Int = 0) {
         val ref = rootRef?.child("history")?.push() ?: return
         ref.child("action").setValue(action)
         ref.child("bin").setValue(bin)
         ref.child("actor").setValue(actor)
+        ref.child("percentage").setValue(percentage)
         ref.child("timestamp").setValue(System.currentTimeMillis())
     }
+
 
     // ==========================================
     // Users / Staff Management

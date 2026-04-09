@@ -118,9 +118,12 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
                 LinearLayout.LayoutParams.WRAP_CONTENT
             ).apply { bottomMargin = 16.dpToPx() }
             radius = 16f.dpToPxF()
-            cardElevation = 2f.dpToPxF()
+            cardElevation = 0f.dpToPxF()
+            strokeWidth = 1.dpToPx()
+            strokeColor = 0xFFF1F3F5.toInt() // light gray stroke
             setCardBackgroundColor(resources.getColor(R.color.white, null))
         }
+
 
         val innerLayout = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL
