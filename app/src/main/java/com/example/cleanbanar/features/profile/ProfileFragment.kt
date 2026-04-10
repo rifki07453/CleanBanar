@@ -1,10 +1,12 @@
 package com.example.cleanbanar.features.profile
 
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -26,6 +28,8 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
     private var debounceRunnable: Runnable? = null
     private var isLoadingSettings = true // Flag to prevent save during initial load
 
+    private var isNotifExpanded = false
+
     override fun inflateBinding(inflater: LayoutInflater, container: ViewGroup?): FragmentProfileBinding {
         return FragmentProfileBinding.inflate(inflater, container, false)
     }
@@ -39,13 +43,22 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         // Display user info from session
         binding.tvProfileName.text = authManager.getUserName()
         binding.tvProfileEmail.text = authManager.getUserEmail()
-        binding.tvProfileRole.text = authManager.getUserRole()
 
-        // Load notification settings from Firebase
-        loadNotificationSettings()
+        // Accordion for Notifikasi
+        binding.btnNavNotifikasi.setOnClickListener {
+            isNotifExpanded = !isNotifExpanded
+            if (isNotifExpanded) {
+                binding.expandableNotifSection.visibility = View.VISIBLE
+                binding.ivExpandNotif.rotation = 180f
+            } else {
+                binding.expandableNotifSection.visibility = View.GONE
+                binding.ivExpandNotif.rotation = 0f
+            }
+        }
 
-        // Setup toggle listeners (with debounce)
-        setupNotificationToggles()
+        binding.btnEditProfil.setOnClickListener {
+            Toast.makeText(requireContext(), "Edit Profil Segera Hadir", Toast.LENGTH_SHORT).show()
+        }
 
         // Change password
         binding.btnChangePassword.setOnClickListener {
@@ -59,16 +72,37 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
         }
+
+        // Fast local load to prevent bounce
+        loadLocalSettingsState()
+        // Load notification settings from Firebase
+        loadNotificationSettings()
+        // Setup toggle listeners (with debounce)
+        setupNotificationToggles()
     }
 
     // ==========================================
-    // Notification Settings - Firebase Sync
+    // Notification Settings - Local & Firebase Sync
     // ==========================================
 
-    /**
-     * Load settings from Firebase and apply to toggle switches.
-     * If data not found, defaults to all ON.
-     */
+    private fun loadLocalSettingsState() {
+        val prefs = requireContext().getSharedPreferences("notif_prefs_${authManager.getUserId()}", Context.MODE_PRIVATE)
+        binding.switchHampirPenuh.isChecked = prefs.getBoolean("hampirPenuh", true)
+        binding.switchPenuh.isChecked = prefs.getBoolean("penuh", true)
+        binding.switchSelesai.isChecked = prefs.getBoolean("selesai", true)
+        binding.switchSistem.isChecked = prefs.getBoolean("sistem", true)
+    }
+
+    private fun saveLocalSettingsState(hampir: Boolean, penuh: Boolean, selesai: Boolean, sistem: Boolean) {
+        val prefs = requireContext().getSharedPreferences("notif_prefs_${authManager.getUserId()}", Context.MODE_PRIVATE)
+        prefs.edit()
+            .putBoolean("hampirPenuh", hampir)
+            .putBoolean("penuh", penuh)
+            .putBoolean("selesai", selesai)
+            .putBoolean("sistem", sistem)
+            .apply()
+    }
+
     private fun loadNotificationSettings() {
         val userId = authManager.getUserId()
         isLoadingSettings = true
@@ -79,14 +113,13 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             binding.switchPenuh.isChecked = settings.penuh
             binding.switchSelesai.isChecked = settings.selesai
             binding.switchSistem.isChecked = settings.sistem
+            
+            // Sync to local
+            saveLocalSettingsState(settings.hampirPenuh, settings.penuh, settings.selesai, settings.sistem)
             isLoadingSettings = false
         }
     }
 
-    /**
-     * Wire up toggle switch listeners with 400ms debounce to prevent
-     * rapid toggle spam from flooding Firebase writes.
-     */
     private fun setupNotificationToggles() {
         val toggleAction = { _: Any, _: Any ->
             if (!isLoadingSettings) {
@@ -100,29 +133,33 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         binding.switchSistem.setOnCheckedChangeListener { _, _ -> toggleAction(Unit, Unit) }
     }
 
-    /**
-     * Debounced save: waits 400ms after the last toggle change before writing
-     * to Firebase. Prevents rapid consecutive writes.
-     */
     private fun scheduleSettingsSave() {
         debounceRunnable?.let { debounceHandler.removeCallbacks(it) }
 
         debounceRunnable = Runnable {
+            val hampir = binding.switchHampirPenuh.isChecked
+            val penuh = binding.switchPenuh.isChecked
+            val selesai = binding.switchSelesai.isChecked
+            val sistem = binding.switchSistem.isChecked
+
             val settings = FirebaseManager.NotificationSettings(
-                hampirPenuh = binding.switchHampirPenuh.isChecked,
-                penuh = binding.switchPenuh.isChecked,
-                selesai = binding.switchSelesai.isChecked,
-                sistem = binding.switchSistem.isChecked
+                hampirPenuh = hampir,
+                penuh = penuh,
+                selesai = selesai,
+                sistem = sistem
             )
 
+            // Save locally immediately to avoid UI state loss on restart
+            saveLocalSettingsState(hampir, penuh, selesai, sistem)
+            // Sync to Firebase
             FirebaseManager.saveNotificationSettings(authManager.getUserId(), settings)
 
             if (isAdded) {
-                Toast.makeText(requireContext(), "Pengaturan notifikasi diperbarui", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Preferensi tersimpan", Toast.LENGTH_SHORT).show()
             }
         }
 
-        debounceHandler.postDelayed(debounceRunnable!!, 400)
+        debounceHandler.postDelayed(debounceRunnable!!, 500)
     }
 
     // ==========================================
@@ -169,9 +206,6 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             .show()
     }
 
-    // ==========================================
-    // Lifecycle - Cleanup
-    // ==========================================
     override fun onDestroyView() {
         debounceRunnable?.let { debounceHandler.removeCallbacks(it) }
         super.onDestroyView()

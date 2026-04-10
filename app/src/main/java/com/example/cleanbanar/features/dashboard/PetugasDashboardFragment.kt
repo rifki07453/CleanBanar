@@ -60,6 +60,9 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
             // Decorative only per user request
             Toast.makeText(requireContext(), "Menyegarkan status...", Toast.LENGTH_SHORT).show()
         }
+
+        // Force initial card render with default 0% values before Firebase responds
+        rebuildCards()
     }
 
     // ==========================================
@@ -152,7 +155,7 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         }
 
         val iconBg = if (isOrganik) R.drawable.ic_bg_circle_green else R.drawable.ic_bg_circle_blue
-        val iconSrc = if (isOrganik) R.drawable.ic_organik else R.drawable.ic_non_organik
+        val iconSrc = if (isOrganik) R.drawable.ic_leaf_green else R.drawable.ic_bottle_blue
 
         val icon = ImageView(requireContext()).apply {
             id = View.generateViewId()

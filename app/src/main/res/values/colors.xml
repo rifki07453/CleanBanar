@@ -40,6 +40,10 @@
     <color name="blue_500">#3b82f6</color>
     <color name="blue_600">#2563eb</color>
 
+    <!-- Purple palette -->
+    <color name="purple_50">#f3e8ff</color>
+    <color name="purple_500">#a855f7</color>
+
     <!-- Extended Emerald palette for gradient -->
     <color name="emerald_300">#6ee7b7</color>
     <color name="emerald_400">#34d399</color>
