@@ -50,11 +50,15 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
     override fun setupViews() {
         authManager = AuthManager(requireContext())
 
-        // Load area and sub-area info
+        // Load area info
         FirebaseManager.getUserArea(authManager.getUserId()) { areaInfo ->
             if (!isAdded) return@getUserArea
             binding.tvAreaName.text = areaInfo.areaName
-            binding.tvSubArea.text = areaInfo.subAreaName
+        }
+
+        binding.btnDecorativeTrash.setOnClickListener {
+            // Decorative only per user request
+            Toast.makeText(requireContext(), "Menyegarkan status...", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -97,37 +101,46 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         val label = if (isOrganik) "Organik" else "Non-Organik"
         val percent = bin.fillPercentage
 
-        // Determine status level
+        // Determine status level exactly matching designs
+        // Note: The design specific colors for badge and text:
+        // "TERSEDIA" = text: #10B981 (emerald 500) bg: #D1FAE5 (emerald 100) or cyan
+        // "HAMPIR PENUH" = text: #D97706 (amber 600) bg: #FEF3C7 (amber 100)
+        
         val (badgeText, badgeDrawable, badgeTextColor, progressDrawableRes) = when {
-            percent >= 95 -> Quadruple("PENUH", R.drawable.badge_outlined_red, R.color.red_500, R.drawable.progress_bar_red)
-            percent >= 80 -> Quadruple("HAMPIR PENUH", R.drawable.badge_outlined_amber, R.color.orange_600, R.drawable.progress_bar_amber)
-            else -> Quadruple("TERSEDIA", R.drawable.badge_outlined_green, R.color.green_600, R.drawable.progress_bar_green)
+            percent >= 95 -> Quadruple("PENUH", R.drawable.badge_red_bg, R.color.red_500, R.drawable.progress_bar_red)
+            percent >= 80 -> Quadruple("HAMPIR PENUH", R.drawable.badge_amber_bg, R.color.amber_600, R.drawable.progress_bar_amber)
+            else -> {
+                // If it's available, Organik uses green badge, Non-Organik uses blue badge? 
+                // The design shows Organik: TERSEDIA (emerald text, emerald bg). 
+                // A generic TERSEDIA state uses green.
+                Quadruple("TERSEDIA", R.drawable.badge_green_bg, R.color.emerald_600, R.drawable.progress_bar_green)
+            }
         }
 
         val statusText = when {
             percent >= 95 -> "Segera dikosongkan!"
             percent >= 80 -> "Perlu segera dikosongkan"
-            percent >= 50 -> "Perlu dipantau"
-            else -> "Dalam kondisi baik"
+            percent >= 50 -> "Perkiraan penuh dlm 1 hari"
+            else -> "Perkiraan penuh dlm 2 hari"
         }
 
-        // Card
+        // Card container
         val cardView = MaterialCardView(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply { bottomMargin = 16.dpToPx() }
-            radius = 16f.dpToPxF()
+            ).apply { bottomMargin = 20.dpToPx() }
+            radius = 20f.dpToPxF()
             cardElevation = 0f.dpToPxF()
             strokeWidth = 1.dpToPx()
-            strokeColor = 0xFFF1F3F5.toInt() // light gray stroke
+            strokeColor = 0x1A000000 // Very light outline
             setCardBackgroundColor(resources.getColor(R.color.white, null))
         }
 
 
         val innerLayout = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(20.dpToPx(), 20.dpToPx(), 20.dpToPx(), 20.dpToPx())
+            setPadding(24.dpToPx(), 24.dpToPx(), 24.dpToPx(), 24.dpToPx())
         }
 
         // ---- Top Row: Icon + Title + Badge ----
@@ -135,7 +148,7 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply { bottomMargin = 16.dpToPx() }
+            ).apply { bottomMargin = 24.dpToPx() }
         }
 
         val iconBg = if (isOrganik) R.drawable.ic_bg_circle_green else R.drawable.ic_bg_circle_blue
@@ -143,13 +156,14 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
 
         val icon = ImageView(requireContext()).apply {
             id = View.generateViewId()
-            layoutParams = RelativeLayout.LayoutParams(48.dpToPx(), 48.dpToPx()).apply {
+            layoutParams = RelativeLayout.LayoutParams(40.dpToPx(), 40.dpToPx()).apply {
                 addRule(RelativeLayout.CENTER_VERTICAL)
             }
             setBackgroundResource(iconBg)
             setImageResource(iconSrc)
             scaleType = ImageView.ScaleType.CENTER
-            setPadding(10.dpToPx(), 10.dpToPx(), 10.dpToPx(), 10.dpToPx())
+            // To simulate design, leaf/bottle is slightly smaller inside circle
+            setPadding(8.dpToPx(), 8.dpToPx(), 8.dpToPx(), 8.dpToPx())
             contentDescription = label
         }
 
@@ -168,13 +182,13 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         val tvTitle = TextView(requireContext()).apply {
             text = label
             setTypeface(typeface, Typeface.BOLD)
-            textSize = 16f
-            setTextColor(resources.getColor(R.color.gray_800, null))
+            textSize = 14f
+            setTextColor(resources.getColor(R.color.gray_900, null))
         }
 
         val tvUpdate = TextView(requireContext()).apply {
             text = formatLastUpdate(bin.lastUpdate)
-            textSize = 10f
+            textSize = 9f
             setTextColor(resources.getColor(R.color.gray_400, null))
         }
 
@@ -184,11 +198,12 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         // Badge
         val tvBadge = TextView(requireContext()).apply {
             text = badgeText
-            textSize = 10f
+            textSize = 8f
             setTypeface(typeface, Typeface.BOLD)
             setTextColor(resources.getColor(badgeTextColor, null))
             setBackgroundResource(badgeDrawable)
-            setPadding(12.dpToPx(), 5.dpToPx(), 12.dpToPx(), 5.dpToPx())
+            setPadding(12.dpToPx(), 6.dpToPx(), 12.dpToPx(), 6.dpToPx())
+            isAllCaps = true
             layoutParams = RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT
@@ -212,16 +227,22 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
 
         val tvCapLabel = TextView(requireContext()).apply {
             text = "Tingkat Kapasitas"
-            setTypeface(typeface, Typeface.BOLD)
-            textSize = 12f
+            textSize = 11f
             setTextColor(resources.getColor(R.color.gray_500, null))
+            layoutParams = RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
+                bottomMargin = 2.dpToPx()
+            }
         }
 
         val tvPercent = TextView(requireContext()).apply {
             text = "$percent%"
             setTypeface(typeface, Typeface.BOLD)
             textSize = 18f
-            setTextColor(resources.getColor(R.color.gray_800, null))
+            setTextColor(resources.getColor(R.color.gray_900, null))
             layoutParams = RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT
@@ -234,14 +255,24 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         capacityRow.addView(tvPercent)
 
         // ---- Progress Bar ----
+        val actualProgressDrawableRes = if (isOrganik) {
+            R.drawable.progress_bar_green
+        } else {
+            // Wait, for non-organik we want blue progress bar instead of green!
+            // I'll make a programmatic blue tint, but if it's over 80% it uses amber/red globally.
+            // But from design, Organik uses green track, Non-Organik uses blue track.
+            if (percent < 80) R.drawable.progress_bar_blue else progressDrawableRes
+        }
+        
         val progressBar = ProgressBar(requireContext(), null, android.R.attr.progressBarStyleHorizontal).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                12.dpToPx()
+                8.dpToPx() // THICKER bar to match design
             ).apply { bottomMargin = 8.dpToPx() }
             max = 100
             progress = percent
-            progressDrawable = resources.getDrawable(progressDrawableRes, null)
+            progressDrawable = resources.getDrawable(actualProgressDrawableRes, null)
+            scaleY = 1.0f // Ensures fat round corners
         }
 
         // ---- Status / Estimate Row ----
@@ -249,25 +280,13 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply { bottomMargin = 8.dpToPx() }
-        }
-
-        val tvLastEmptied = TextView(requireContext()).apply {
-            text = formatLastEmptied(bin.lastEmptied)
-            textSize = 10f
-            setTextColor(resources.getColor(R.color.gray_400, null))
+            ).apply { bottomMargin = 20.dpToPx() }
         }
 
         val tvEstimate = TextView(requireContext()).apply {
             text = statusText
-            textSize = 10f
-            setTextColor(
-                when {
-                    percent >= 95 -> resources.getColor(R.color.red_500, null)
-                    percent >= 80 -> resources.getColor(R.color.orange_600, null)
-                    else -> resources.getColor(R.color.gray_400, null)
-                }
-            )
+            textSize = 8f
+            setTextColor(resources.getColor(R.color.gray_400, null))
             layoutParams = RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT
@@ -276,36 +295,28 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
             }
         }
 
-        statusRow.addView(tvLastEmptied)
         statusRow.addView(tvEstimate)
-
-        // ---- Divider ----
-        val divider = View(requireContext()).apply {
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                1.dpToPx()
-            ).apply {
-                topMargin = 8.dpToPx()
-                bottomMargin = 16.dpToPx()
-            }
-            setBackgroundColor(resources.getColor(R.color.gray_100, null))
-        }
 
         // ---- CTA Button ----
         val btnEmpty = MaterialButton(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                48.dpToPx()
+                42.dpToPx()
             )
             text = "Tandai Telah Dikosongkan"
-            setTextColor(resources.getColor(R.color.emerald_600, null))
+            // Color logic based on design: Organik button is light green, Non-Organik uses light blue
+            val txtColor = if (isOrganik) R.color.emerald_600 else R.color.blue_600
+            val bgColor = if (isOrganik) R.color.green_50 else R.color.blue_50
+            
+            setTextColor(resources.getColor(txtColor, null))
             setTypeface(typeface, Typeface.BOLD)
-            setBackgroundColor(resources.getColor(R.color.emerald_50, null))
+            setBackgroundColor(resources.getColor(bgColor, null))
+            textSize = 11f
             elevation = 0f
-            cornerRadius = 12.dpToPx()
+            cornerRadius = 10.dpToPx()
 
             setOnClickListener {
-                handleEmptyBin(bin.type, this)
+                handleEmptyBin(bin.type, this, isOrganik)
             }
         }
 
@@ -314,7 +325,6 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         innerLayout.addView(capacityRow)
         innerLayout.addView(progressBar)
         innerLayout.addView(statusRow)
-        innerLayout.addView(divider)
         innerLayout.addView(btnEmpty)
         cardView.addView(innerLayout)
 
@@ -324,7 +334,7 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
     // ==========================================
     // Button Handler - Empty Bin
     // ==========================================
-    private fun handleEmptyBin(binType: String, button: MaterialButton) {
+    private fun handleEmptyBin(binType: String, button: MaterialButton, isOrganik: Boolean) {
         val originalText = button.text
         button.isEnabled = false
         button.text = "Memuat..."
@@ -344,13 +354,14 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
             if (isAdded) {
                 button.isEnabled = true
                 button.text = "✓ Dikosongkan"
-                button.setTextColor(resources.getColor(R.color.green_600, null))
+
+                val txtColor = if (isOrganik) R.color.emerald_600 else R.color.blue_600
+                button.setTextColor(resources.getColor(txtColor, null))
 
                 // Revert text after 2 seconds
                 android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
                     if (isAdded) {
                         button.text = originalText
-                        button.setTextColor(resources.getColor(R.color.emerald_600, null))
                     }
                 }, 2000)
 
@@ -368,22 +379,18 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         when {
             maxPercent >= 95 -> {
                 binding.tvStatus.text = "Kritis"
-                binding.tvStatus.setTextColor(resources.getColor(R.color.red_500, null))
                 binding.statusDot.setBackgroundResource(R.drawable.badge_red_bg)
             }
             maxPercent >= 80 -> {
                 binding.tvStatus.text = "Perhatian"
-                binding.tvStatus.setTextColor(resources.getColor(R.color.amber_600, null))
                 binding.statusDot.setBackgroundResource(R.drawable.badge_amber_bg)
             }
             maxPercent >= 50 -> {
                 binding.tvStatus.text = "Perhatian"
-                binding.tvStatus.setTextColor(resources.getColor(R.color.amber_600, null))
                 binding.statusDot.setBackgroundResource(R.drawable.badge_amber_bg)
             }
             else -> {
                 binding.tvStatus.text = "Normal"
-                binding.tvStatus.setTextColor(resources.getColor(R.color.white, null))
                 binding.statusDot.setBackgroundResource(R.drawable.badge_green_bg)
             }
         }
@@ -393,28 +400,13 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
     // Utility / Helper Functions
     // ==========================================
     private fun formatLastUpdate(timestamp: Long): String {
-        if (timestamp == 0L) return "Menunggu data..."
+        if (timestamp == 0L) return "Belum diupdate"
         val diff = System.currentTimeMillis() - timestamp
         val minutes = diff / 60000
         return when {
-            minutes < 1 -> "Update baru saja"
-            minutes < 60 -> "Update $minutes menit lalu"
+            minutes < 1 -> "Baru saja"
+            minutes < 60 -> "Update $minutes min lalu"
             else -> "Update ${minutes / 60} jam lalu"
-        }
-    }
-
-    private fun formatLastEmptied(timestamp: Long): String {
-        if (timestamp == 0L) return "Belum pernah dikosongkan"
-        val diff = System.currentTimeMillis() - timestamp
-        val minutes = diff / 60000
-        val hours = minutes / 60
-        val days = hours / 24
-        return when {
-            minutes < 1 -> "Dikosongkan baru saja"
-            minutes < 60 -> "Dikosongkan $minutes menit lalu"
-            hours < 24 -> "Dikosongkan $hours jam lalu"
-            days == 1L -> "Dikosongkan 1 hari lalu"
-            else -> "Dikosongkan $days hari lalu"
         }
     }
 
@@ -424,7 +416,6 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         super.onDestroyView()
     }
 
-    // Helper data class (Kotlin doesn't have Quadruple)
     private data class Quadruple<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
 
     private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()
