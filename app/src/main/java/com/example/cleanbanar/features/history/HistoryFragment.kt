@@ -1,21 +1,15 @@
 package com.example.cleanbanar.features.history
 
-import android.view.Gravity
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
-import com.example.cleanbanar.R
 import com.example.cleanbanar.core.data.AuthManager
 import com.example.cleanbanar.core.data.FirebaseManager
 import com.example.cleanbanar.core.ui.BaseFragment
 import com.example.cleanbanar.databinding.FragmentHistoryBinding
 import com.google.firebase.database.ValueEventListener
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
 
 class HistoryFragment : BaseFragment<FragmentHistoryBinding>() {
 
@@ -34,6 +28,22 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>() {
             layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
             adapter = historyAdapter
         }
+
+        // Simpangkan UI untuk role user tertentu sesuai instruksi (TopBar Staff lebih clean)
+        val role = authManager.getUserRole()
+        if (role == "petugas" || role == "staff") {
+            binding.ivLogoHistory.visibility = View.GONE
+            binding.tvOverviewTitle.visibility = View.GONE
+            binding.tvSystemStatus.visibility = View.GONE
+        }
+
+        // Pull to refresh layout
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            // Karena data sudah real-time via Firebase, swipe refresh memberikan visual feedback
+            Handler(Looper.getMainLooper()).postDelayed({
+                binding.swipeRefreshLayout.isRefreshing = false
+            }, 1200)
+        }
     }
 
     // ==========================================
@@ -48,11 +58,11 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>() {
             if (!isAdded) return@listenHistoryFiltered
             
             if (historyList.isEmpty()) {
-                binding.rvHistory.visibility = android.view.View.GONE
-                binding.historyEmptyState.visibility = android.view.View.VISIBLE
+                binding.rvHistory.visibility = View.GONE
+                binding.historyEmptyState.visibility = View.VISIBLE
             } else {
-                binding.rvHistory.visibility = android.view.View.VISIBLE
-                binding.historyEmptyState.visibility = android.view.View.GONE
+                binding.rvHistory.visibility = View.VISIBLE
+                binding.historyEmptyState.visibility = View.GONE
                 historyAdapter.updateData(historyList)
             }
         }

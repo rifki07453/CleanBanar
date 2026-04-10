@@ -1,7 +1,6 @@
 package com.example.cleanbanar.features.history
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.cleanbanar.R
@@ -29,52 +28,48 @@ class HistoryAdapter(private var items: List<Map<String, Any>> = emptyList()) :
         val entry = items[position]
         val context = holder.itemView.context
         
-        val action = entry["action"] as? String ?: ""
-        val areaId = entry["areaId"] as? String ?: ""
-        val fullName = entry["fullName"] as? String ?: ""
-        val userId = entry["userId"] as? String ?: ""
+        val type = entry["type"] as? String ?: entry["action"] as? String ?: ""
+        val binTypeRaw = entry["bin_type"] as? String ?: entry["areaId"] as? String ?: ""
+        val capacity = (entry["capacity"] as? Number)?.toInt() ?: 0
+        val petugas = entry["petugas"] as? String ?: entry["fullName"] as? String ?: ""
         val timestamp = entry["timestamp"] as? Long ?: 0L
 
-        // Bind data
-        val title = when (action) {
-            "emptied" -> "Pembersihan Area $areaId"
-            "alert" -> "Peringatan Area $areaId"
-            else -> "Aktivitas Sistem"
-        }
-        holder.binding.tvTitle.text = title
+        // Format binType: organik -> Sampah Organik
+        val titleFormat = "Sampah ${binTypeRaw.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }}"
+        holder.binding.tvTitle.text = titleFormat
         
         // Time & Date
         holder.binding.tvTime.text = formatTime(timestamp)
         holder.binding.tvDate.text = getDayLabel(timestamp)
 
-        // Status & Colors
-        when (action) {
-            "emptied" -> {
+        // Status & Colors based on type
+        when (type) {
+            "dikosongkan", "emptied" -> {
                 holder.binding.tvStatusBadge.text = "DIKOSONGKAN"
                 holder.binding.tvStatusBadge.setBackgroundResource(R.drawable.badge_outlined_green)
                 holder.binding.tvStatusBadge.setTextColor(context.getColor(R.color.badge_green_text))
                 holder.binding.timelineDot.setBackgroundResource(R.drawable.ic_bg_circle_green)
-                holder.binding.tvDetails.text = "Petugas: $fullName (ID: $userId)\nArea: $areaId"
+                
+                holder.binding.tvDetails.text = "Petugas: $petugas\nKapasitas akhir: $capacity%"
             }
-            "alert" -> {
+            "penuh", "alert" -> {
                 holder.binding.tvStatusBadge.text = "PENUH (100%)"
                 holder.binding.tvStatusBadge.setBackgroundResource(R.drawable.badge_outlined_red)
                 holder.binding.tvStatusBadge.setTextColor(context.getColor(R.color.badge_red_text))
                 holder.binding.timelineDot.setBackgroundResource(R.drawable.ic_bg_circle_red)
-                holder.binding.tvDetails.text = "Kapasitas area $areaId telah mencapai batas maksimum. Pengosongan segera diperlukan."
+                
+                holder.binding.tvDetails.text = "Notifikasi dikirim ke petugas kebersihan untuk pengangkutan."
             }
-
             else -> {
-                holder.binding.tvStatusBadge.text = "SINKRON"
+                // For any other status such as hampir penuh
+                holder.binding.tvStatusBadge.text = "HAMPIR PENUH"
                 holder.binding.tvStatusBadge.setBackgroundResource(R.drawable.badge_outlined_blue)
                 holder.binding.tvStatusBadge.setTextColor(context.getColor(R.color.badge_blue_text))
                 holder.binding.timelineDot.setBackgroundResource(R.drawable.ic_bg_circle_blue)
-                holder.binding.tvDetails.text = "Data sensor disinkronkan dengan sistem cloud."
+                
+                holder.binding.tvDetails.text = "Kapasitas saat ini: $capacity%"
             }
         }
-
-        // Hide line for the last item (optional but looks better)
-        // holder.binding.timelineLine.visibility = if (position == itemCount - 1) View.GONE else View.VISIBLE
     }
 
     override fun getItemCount(): Int = items.size

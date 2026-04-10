@@ -52,4 +52,7 @@ dependencies {
     // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.database)
+    
+    // UI
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 }

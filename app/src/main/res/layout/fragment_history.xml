@@ -1,111 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/swipeRefreshLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/gray_50"
     tools:context=".features.history.HistoryFragment">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="24dp">
+        android:layout_height="match_parent"
+        android:background="@color/gray_50">
 
-        <!-- Header Gradient Block -->
-        <FrameLayout
-            android:id="@+id/headerBlock"
-            android:layout_width="match_parent"
-            android:layout_height="180dp"
-            android:background="@drawable/header_gradient_bg"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageView
-            android:id="@+id/ivLogoHistory"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:src="@mipmap/ic_logo_cleanbanar"
-            android:scaleType="fitCenter"
-            android:layout_marginTop="24dp"
-            android:layout_marginEnd="24dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:contentDescription="CleanBanar" />
-
-        <TextView
-            android:id="@+id/tvOverviewTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="LOG AKTIVITAS"
-            android:textColor="@color/emerald_100"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="24dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/tvHistoryTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Riwayat Aktivitas"
-            android:textColor="@color/white"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="@id/tvOverviewTitle"
-            app:layout_constraintTop_toBottomOf="@id/tvOverviewTitle" />
-
-        <TextView
-            android:id="@+id/tvSystemStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Pantau log pembaruan tong sampah"
-            android:textColor="@color/emerald_100"
-            android:textSize="13sp"
-            android:layout_marginTop="4dp"
-            app:layout_constraintStart_toStartOf="@id/tvHistoryTitle"
-            app:layout_constraintTop_toBottomOf="@id/tvHistoryTitle" />
-
-        <!-- Timeline RecyclerView -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvHistory"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="-30dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="24dp"
-            android:clipToPadding="false"
-            android:nestedScrollingEnabled="false"
-            app:layout_constraintTop_toBottomOf="@id/headerBlock"
-            tools:listitem="@layout/item_history_timeline" />
+            android:paddingBottom="24dp">
 
-        <!-- Empty State Container -->
-        <LinearLayout
-            android:id="@+id/historyEmptyState"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:padding="32dp"
-            android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/headerBlock">
-            
+            <!-- Header Gradient Block -->
+            <FrameLayout
+                android:id="@+id/headerBlock"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:background="@drawable/header_gradient_bg"
+                app:layout_constraintTop_toTopOf="parent" />
+
             <ImageView
-                android:layout_width="64dp"
-                android:layout_height="64dp"
-                android:src="@drawable/ic_organik"
-                android:alpha="0.3"
-                app:tint="@color/gray_400" />
-                
+                android:id="@+id/ivLogoHistory"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@mipmap/ic_logo_cleanbanar"
+                android:scaleType="fitCenter"
+                android:layout_marginTop="24dp"
+                android:layout_marginEnd="24dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:contentDescription="CleanBanar" />
+
             <TextView
+                android:id="@+id/tvOverviewTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Belum ada riwayat aktivitas"
-                android:textColor="@color/gray_400"
-                android:textSize="14sp"
-                android:layout_marginTop="16dp" />
-        </LinearLayout>
+                android:text="LOG AKTIVITAS"
+                android:textColor="@color/emerald_100"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="24dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</androidx.core.widget.NestedScrollView>
+            <TextView
+                android:id="@+id/tvHistoryTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Riwayat Aktivitas"
+                android:textColor="@color/white"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="@id/tvOverviewTitle"
+                app:layout_constraintTop_toBottomOf="@id/tvOverviewTitle" />
+
+            <TextView
+                android:id="@+id/tvSystemStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pantau log pembaruan tong sampah"
+                android:textColor="@color/emerald_100"
+                android:textSize="13sp"
+                android:layout_marginTop="4dp"
+                app:layout_constraintStart_toStartOf="@id/tvHistoryTitle"
+                app:layout_constraintTop_toBottomOf="@id/tvHistoryTitle" />
+
+            <!-- Timeline RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvHistory"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-30dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="24dp"
+                android:clipToPadding="false"
+                android:nestedScrollingEnabled="false"
+                app:layout_constraintTop_toBottomOf="@id/headerBlock"
+                tools:listitem="@layout/item_history_timeline" />
+
+            <!-- Empty State Container -->
+            <LinearLayout
+                android:id="@+id/historyEmptyState"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="32dp"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@id/headerBlock">
+                
+                <ImageView
+                    android:layout_width="140dp"
+                    android:layout_height="140dp"
+                    android:src="@drawable/ic_organik"
+                    android:alpha="0.25"
+                    app:tint="@color/emerald_500" />
+                    
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Belum ada aktivitas hari ini.\nTempat sampah masih aman!"
+                    android:textColor="@color/gray_500"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textAlignment="center"
+                    android:lineSpacingExtra="4dp"
+                    android:layout_marginTop="20dp" />
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
