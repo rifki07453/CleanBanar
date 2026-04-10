@@ -15,6 +15,8 @@
     <color name="gray_100">#f3f4f6</color>
     <color name="gray_400">#9ca3af</color>
     <color name="gray_500">#6b7280</color>
+    <color name="gray_600">#4b5563</color>
+    <color name="gray_700">#374151</color>
     <color name="gray_800">#1f2937</color>
     <color name="gray_900">#111827</color>
 
@@ -35,6 +37,7 @@
 
     <!-- Blue accent -->
     <color name="blue_50">#eff6ff</color>
+    <color name="blue_500">#3b82f6</color>
     <color name="blue_600">#2563eb</color>
 
     <!-- Extended Emerald palette for gradient -->

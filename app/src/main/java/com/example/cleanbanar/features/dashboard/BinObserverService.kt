@@ -25,7 +25,11 @@ class BinObserverService : Service() {
         
         // Start foreground with "Monitoring active" notification
         val notification = createForegroundNotification()
-        startForeground(NOTIFICATION_ID, notification)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(NOTIFICATION_ID, notification, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            startForeground(NOTIFICATION_ID, notification)
+        }
 
         // Start the observer logic (re-using the singleton for state tracking)
         BinObserver.start(userId)

@@ -29,17 +29,10 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>() {
             adapter = historyAdapter
         }
 
-        // Simpangkan UI untuk role user tertentu sesuai instruksi (TopBar Staff lebih clean)
-        val role = authManager.getUserRole()
-        if (role == "petugas" || role == "staff") {
-            binding.ivLogoHistory.visibility = View.GONE
-            binding.tvOverviewTitle.visibility = View.GONE
-            binding.tvSystemStatus.visibility = View.GONE
-        }
+        // Header view is now uniform logic based on new design specs
 
         // Pull to refresh layout
         binding.swipeRefreshLayout.setOnRefreshListener {
-            // Karena data sudah real-time via Firebase, swipe refresh memberikan visual feedback
             Handler(Looper.getMainLooper()).postDelayed({
                 binding.swipeRefreshLayout.isRefreshing = false
             }, 1200)

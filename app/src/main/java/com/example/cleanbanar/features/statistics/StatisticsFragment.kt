@@ -61,22 +61,12 @@ class StatisticsFragment : BaseFragment<FragmentStatisticsBinding>() {
         val avgOrganik = stats.map { (it["organik"] as? Int) ?: 0 }.average().toInt()
         val avgNonOrganik = stats.map { (it["nonOrganik"] as? Int) ?: 0 }.average().toInt()
 
-        binding.tvOrganikAvg.text = "$avgOrganik%"
-        binding.tvNonOrganikAvg.text = "$avgNonOrganik%"
-
-        // Animate bar widths proportionally
-        binding.barOrganik.post {
-            val parentWidth = (binding.barOrganik.parent as View).width
-            binding.barOrganik.layoutParams = binding.barOrganik.layoutParams.apply {
-                width = (parentWidth * avgOrganik / 100)
-            }
-        }
-        binding.barNonOrganik.post {
-            val parentWidth = (binding.barNonOrganik.parent as View).width
-            binding.barNonOrganik.layoutParams = binding.barNonOrganik.layoutParams.apply {
-                width = (parentWidth * avgNonOrganik / 100)
-            }
-        }
+        binding.tvOrganikAvg.text = "$avgOrganik"
+        binding.tvNonOrganikAvg.text = "$avgNonOrganik"
+        
+        // Static trend texts based on the design for now, or you could implement difference logic later.
+        binding.tvOrganikTrend.text = "Turun 2%" 
+        binding.tvNonOrganikTrend.text = "Naik 4%"
     }
 
     /**

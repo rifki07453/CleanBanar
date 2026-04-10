@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/gray_50">
+    android:background="@color/white">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -12,221 +12,269 @@
         android:paddingBottom="24dp">
 
         <!-- Header -->
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:padding="24dp">
+            
             <TextView
+                android:id="@+id/tvStatsTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Statistik"
                 android:textStyle="bold"
-                android:textSize="24sp"
-                android:textColor="@color/gray_900" />
-            <TextView
+                android:textSize="20sp"
+                android:textColor="@color/gray_900"
+                android:layout_centerVertical="true" />
+                
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRingkasan"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Tren pengisian tong sampah"
-                android:textSize="13sp"
-                android:textColor="@color/gray_500"
-                android:layout_marginTop="4dp" />
-        </LinearLayout>
+                android:layout_height="40dp"
+                android:text="Ringkasan"
+                android:textColor="@color/gray_800"
+                android:textSize="11sp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                app:cornerRadius="8dp"
+                app:strokeColor="#d1d5db"
+                app:strokeWidth="1dp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true" />
+        </RelativeLayout>
 
-        <!-- Comparison Card: Organik vs Non-Organik Average -->
-        <com.google.android.material.card.MaterialCardView
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#f1f3f5"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Rata-rata Kapasitas Hari Ini -->
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="@color/white">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
+            android:text="RATA-RATA KAPASITAS HARI INI"
+            android:textStyle="bold"
+            android:textSize="11sp"
+            android:textColor="@color/gray_600"
+            android:textAlignment="center"
+            android:layout_marginBottom="16dp" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Rata-rata Kapasitas (7 hari)"
-                    android:textStyle="bold"
-                    android:textSize="14sp"
-                    android:textColor="@color/gray_800"
-                    android:layout_marginBottom="16dp" />
-
-                <!-- Organik Bar -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginBottom="12dp">
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="6dp">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Organik"
-                            android:textSize="12sp"
-                            android:textColor="@color/gray_500" />
-                        <TextView
-                            android:id="@+id/tvOrganikAvg"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0%"
-                            android:textStyle="bold"
-                            android:textSize="12sp"
-                            android:textColor="@color/emerald_600"
-                            android:layout_alignParentEnd="true" />
-                    </RelativeLayout>
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="16dp"
-                        android:background="@drawable/edit_text_bg">
-                        <View
-                            android:id="@+id/barOrganik"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:background="@drawable/progress_bar_green" />
-                    </FrameLayout>
-                </LinearLayout>
-
-                <!-- Non-Organik Bar -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="6dp">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Non-Organik"
-                            android:textSize="12sp"
-                            android:textColor="@color/gray_500" />
-                        <TextView
-                            android:id="@+id/tvNonOrganikAvg"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0%"
-                            android:textStyle="bold"
-                            android:textSize="12sp"
-                            android:textColor="@color/secondary"
-                            android:layout_alignParentEnd="true" />
-                    </RelativeLayout>
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="16dp"
-                        android:background="@drawable/edit_text_bg">
-                        <View
-                            android:id="@+id/barNonOrganik"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:background="@drawable/progress_bar_amber" />
-                    </FrameLayout>
-                </LinearLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Summary Cards: Weekly Average & Total Penuh -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginHorizontal="16dp"
+            android:paddingHorizontal="16dp"
             android:layout_marginBottom="16dp">
 
-            <!-- Weekly Average Card -->
+            <!-- Organik Box -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp"
-                app:cardBackgroundColor="@color/white">
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@color/emerald_500">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="20dp">
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Rata-rata Mingguan"
-                        android:textSize="11sp"
-                        android:textColor="@color/gray_500" />
-                    <TextView
-                        android:id="@+id/tvWeeklyAvg"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0%"
+                        android:text="ORGANIK"
+                        android:textSize="10sp"
                         android:textStyle="bold"
-                        android:textSize="22sp"
-                        android:textColor="@color/gray_800"
-                        android:layout_marginTop="4dp" />
+                        android:textColor="@color/white" />
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="8dp">
+                        <TextView
+                            android:id="@+id/tvOrganikAvg"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="79"
+                            android:textSize="32sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/white" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="%"
+                            android:textSize="14sp"
+                            android:textColor="#B2FCDB"
+                            android:layout_marginStart="4dp" />
+                    </LinearLayout>
+                    <TextView
+                        android:id="@+id/tvOrganikTrend"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Turun 2%"
+                        android:textSize="10sp"
+                        android:textColor="#B2FCDB"
+                        android:layout_marginTop="8dp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Total Penuh Card -->
+            <!-- Non-Organik Box -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp"
-                app:cardBackgroundColor="@color/white">
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@color/blue_500">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="20dp">
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Total Penuh (Minggu Ini)"
-                        android:textSize="11sp"
-                        android:textColor="@color/gray_500" />
+                        android:text="NON-ORG"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/white" />
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginTop="4dp">
+                        android:layout_marginTop="8dp">
                         <TextView
-                            android:id="@+id/tvTotalPenuh"
+                            android:id="@+id/tvNonOrganikAvg"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
+                            android:text="63"
+                            android:textSize="32sp"
                             android:textStyle="bold"
-                            android:textSize="22sp"
-                            android:textColor="@color/red_500" />
+                            android:textColor="@color/white" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text=" kali"
-                            android:textSize="13sp"
-                            android:textColor="@color/gray_500" />
+                            android:text="%"
+                            android:textSize="14sp"
+                            android:textColor="#BFDBFE"
+                            android:layout_marginStart="4dp" />
                     </LinearLayout>
+                    <TextView
+                        android:id="@+id/tvNonOrganikTrend"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Naik 37%"
+                        android:textSize="10sp"
+                        android:textColor="#BFDBFE"
+                        android:layout_marginTop="8dp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
 
-        <!-- Daily Trend Card -->
+        <!-- Container Card 2: RATA RATA MINGGUAN -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+            app:strokeColor="#f1f3f5"
+            app:strokeWidth="1dp"
+            app:cardBackgroundColor="@color/white">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="24dp"
+                android:baselineAligned="false">
+                
+                <!-- RATA-RATA MINGGUAN -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="RATA-RATA\nMINGGUAN"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/gray_600" />
+                    <TextView
+                        android:id="@+id/tvWeeklyAvg"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="39.8%"
+                        android:textStyle="bold"
+                        android:textSize="22sp"
+                        android:textColor="@color/gray_900"
+                        android:layout_marginTop="12dp" />
+                </LinearLayout>
+
+                <!-- Separator Line -->
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="#f1f3f5"
+                    android:layout_marginHorizontal="16dp" />
+
+                <!-- TOTAL PENUH (MINGGU INI) -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="TOTAL PENUH (MINGGU INI)"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/gray_600" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="end|bottom"
+                        android:layout_marginTop="12dp">
+                        <TextView
+                            android:id="@+id/tvTotalPenuh"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="4"
+                            android:textStyle="bold"
+                            android:textSize="24sp"
+                            android:textColor="@color/red_500" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=" kali"
+                            android:textSize="12sp"
+                            android:textColor="@color/gray_500"
+                            android:layout_marginBottom="4dp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Da Grafik Kapasitas (7 Hari) Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+            app:strokeColor="#f1f3f5"
+            app:strokeWidth="1dp"
             app:cardBackgroundColor="@color/white">
             <LinearLayout
                 android:layout_width="match_parent"
@@ -237,43 +285,13 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Tren Harian (7 hari terakhir)"
+                    android:text="Grafik Kapasitas (7 Hari)"
                     android:textStyle="bold"
-                    android:textSize="14sp"
-                    android:textColor="@color/gray_800"
-                    android:layout_marginBottom="4dp" />
+                    android:textSize="12sp"
+                    android:textColor="@color/gray_900"
+                    android:layout_marginBottom="16dp" />
 
-                <!-- Legend -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="16dp">
-                    <View
-                        android:layout_width="12dp"
-                        android:layout_height="12dp"
-                        android:background="@color/emerald_600"
-                        android:layout_gravity="center_vertical" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=" Organik   "
-                        android:textSize="10sp"
-                        android:textColor="@color/gray_500" />
-                    <View
-                        android:layout_width="12dp"
-                        android:layout_height="12dp"
-                        android:background="@color/secondary"
-                        android:layout_gravity="center_vertical" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=" Non-Organik"
-                        android:textSize="10sp"
-                        android:textColor="@color/gray_500" />
-                </LinearLayout>
-
-                <!-- Chart area (vertical bars built programmatically) -->
+                <!-- Chart area placeholder / built programmatically -->
                 <LinearLayout
                     android:id="@+id/chartContainer"
                     android:layout_width="match_parent"
@@ -281,6 +299,37 @@
                     android:orientation="horizontal"
                     android:gravity="bottom"
                     android:baselineAligned="false" />
+
+                <!-- Legend -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:layout_marginTop="16dp">
+                    <View
+                        android:layout_width="8dp"
+                        android:layout_height="8dp"
+                        android:background="@drawable/ic_bg_circle_green"
+                        android:layout_gravity="center_vertical" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=" Organik(%)   "
+                        android:textSize="11sp"
+                        android:textColor="@color/gray_700" />
+                    <View
+                        android:layout_width="8dp"
+                        android:layout_height="8dp"
+                        android:background="@drawable/ic_bg_circle_blue"
+                        android:layout_gravity="center_vertical" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=" Non-Organik(%)"
+                        android:textSize="11sp"
+                        android:textColor="@color/gray_700" />
+                </LinearLayout>
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
