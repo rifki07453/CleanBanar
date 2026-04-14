@@ -285,6 +285,37 @@ object FirebaseManager {
         ref.child("role").setValue(role)
     }
 
+    /**
+     * Seed data awal user ke Realtime Database menggunakan UID dari Firebase Auth.
+     * Dipanggil saat login pertama kali dan data belum ada di DB.
+     * Menyimpan di node: cleanbanar/users/{uid}
+     */
+    fun seedUserData(
+        uid: String,
+        name: String,
+        email: String,
+        role: String,
+        assignedAreaId: String,
+        onComplete: () -> Unit
+    ) {
+        val ref = rootRef?.child("users")?.child(uid) ?: run {
+            onComplete()
+            return
+        }
+        val data = mapOf(
+            "name" to name,
+            "email" to email,
+            "role" to role,
+            "assignedAreaId" to assignedAreaId
+        )
+        ref.setValue(data)
+            .addOnSuccessListener { onComplete() }
+            .addOnFailureListener {
+                Log.w(TAG, "seedUserData failed: ${it.message}")
+                onComplete()
+            }
+    }
+
     fun updateUser(userId: String, name: String, email: String) {
         val ref = rootRef?.child("users")?.child(userId) ?: return
         ref.child("name").setValue(name)
@@ -293,6 +324,30 @@ object FirebaseManager {
 
     fun deleteUser(userId: String) {
         rootRef?.child("users")?.child(userId)?.removeValue()
+    }
+
+    /**
+     * Fetch user data (name, role, assignedAreaId) once from Realtime Database.
+     * Used after Firebase Auth login to retrieve role for role-based navigation.
+     * Calls callback with empty strings if user node not found.
+     */
+    fun getUserData(uid: String, callback: (name: String, role: String, assignedAreaId: String) -> Unit) {
+        val ref = rootRef?.child("users")?.child(uid) ?: run {
+            callback("", "", "")
+            return
+        }
+        ref.addListenerForSingleValueEvent(object : com.google.firebase.database.ValueEventListener {
+            override fun onDataChange(snapshot: com.google.firebase.database.DataSnapshot) {
+                val name = snapshot.child("name").getValue(String::class.java) ?: ""
+                val role = snapshot.child("role").getValue(String::class.java) ?: ""
+                val area = snapshot.child("assignedAreaId").getValue(String::class.java) ?: ""
+                callback(name, role, area)
+            }
+            override fun onCancelled(error: com.google.firebase.database.DatabaseError) {
+                Log.w(TAG, "getUserData cancelled: ${error.message}")
+                callback("", "", "")
+            }
+        })
     }
 
     // ==========================================

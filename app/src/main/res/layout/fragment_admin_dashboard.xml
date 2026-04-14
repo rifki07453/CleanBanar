@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/gray_50"
+    android:background="#F9FAFB"
     tools:context=".features.dashboard.AdminDashboardFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -16,32 +16,20 @@
         <FrameLayout
             android:id="@+id/headerBlock"
             android:layout_width="match_parent"
-            android:layout_height="180dp"
-            android:background="@drawable/header_gradient_bg"
+            android:layout_height="220dp"
+            android:background="@drawable/profile_header_rounded_bg"
             app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageView
-            android:id="@+id/ivLogoAdmin"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:src="@mipmap/ic_logo_cleanbanar"
-            android:scaleType="fitCenter"
-            android:layout_marginTop="24dp"
-            android:layout_marginEnd="24dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:contentDescription="CleanBanar" />
 
         <TextView
             android:id="@+id/tvOverviewTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="OVERVIEW SISTEM"
-            android:textColor="@color/emerald_100"
-            android:textSize="12sp"
+            android:textColor="#A7F3D0" 
+            android:textSize="10sp"
             android:textStyle="bold"
             android:layout_marginStart="24dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="32dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -51,446 +39,364 @@
             android:layout_height="wrap_content"
             android:text="Admin Panel"
             android:textColor="@color/white"
-            android:textSize="22sp"
+            android:textSize="24sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="@id/tvOverviewTitle"
             app:layout_constraintTop_toBottomOf="@id/tvOverviewTitle" />
 
+        <!-- Logo top right transparent -->
+        <FrameLayout
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="24dp"
+            android:background="@drawable/bg_rounded_light_green_glass"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+            <!-- Example using user icon, adjust to leaf if exist -->
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_organik"
+                app:tint="#6EE7B7"
+                android:padding="16dp" />
+        </FrameLayout>
+
+        <!-- Total Petugas -->
         <TextView
-            android:id="@+id/tvSystemStatus"
+            android:id="@+id/tvTotalPetugasLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Semua sistem berjalan normal"
-            android:textColor="@color/emerald_100"
-            android:textSize="13sp"
-            android:layout_marginTop="4dp"
-            app:layout_constraintStart_toStartOf="@id/tvAdminTitle"
+            android:text="Total Petugas Aktif"
+            android:textColor="#D1FAE5"
+            android:textSize="12sp"
+            android:layout_marginTop="24dp"
+            app:layout_constraintStart_toStartOf="@id/tvOverviewTitle"
             app:layout_constraintTop_toBottomOf="@id/tvAdminTitle" />
 
-        <!-- Content Cards -->
         <LinearLayout
-            android:id="@+id/contentContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:baselineAligned="true"
+            app:layout_constraintStart_toStartOf="@id/tvOverviewTitle"
+            app:layout_constraintTop_toBottomOf="@id/tvTotalPetugasLabel">
+
+            <TextView
+                android:id="@+id/tvTotalPetugasCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1"
+                android:textColor="@color/white"
+                android:textSize="36sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" orang"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                android:layout_marginStart="4dp" />
+        </LinearLayout>
+
+        <!-- Overlapping 2 Cards Container -->
+        <LinearLayout
+            android:id="@+id/cardsContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingHorizontal="16dp"
-            android:layout_marginTop="-30dp"
+            android:orientation="horizontal"
+            android:paddingHorizontal="20dp"
+            android:weightSum="2"
+            android:layout_marginTop="-40dp"
             app:layout_constraintTop_toBottomOf="@id/headerBlock">
 
-            <!-- Summary Stats Row (3 columns) -->
+            <!-- Card 1: Manajemen Petugas -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardManajemenPetugas"
+                android:layout_width="0dp"
+                android:layout_height="160dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@color/white"
+                android:clickable="true"
+                android:focusable="true">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="16dp">
+
+                    <FrameLayout
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_rounded_light_blue"
+                        android:layout_marginBottom="12dp">
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:src="@android:drawable/ic_menu_myplaces"
+                            app:tint="#111827"
+                            android:padding="12dp" />
+                    </FrameLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Manajemen\nPetugas"
+                        android:textColor="#111827"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textAlignment="center" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Tambah/hapus akun"
+                        android:textColor="#9CA3AF"
+                        android:textSize="10sp"
+                        android:textAlignment="center"
+                        android:layout_marginTop="4dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Card 2: Status Perangkat -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardStatusPerangkat"
+                android:layout_width="0dp"
+                android:layout_height="160dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@color/white"
+                android:clickable="true"
+                android:focusable="true">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="16dp">
+
+                    <FrameLayout
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:background="#F3F4F6"
+                        android:layout_marginBottom="12dp">
+                        <!-- Custom background can be improved, using greyish blue -->
+                        <View android:layout_width="match_parent" android:layout_height="match_parent" android:background="@drawable/bg_rounded_light_blue"/>
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:src="@android:drawable/ic_menu_sort_by_size"
+                            app:tint="#10B981"
+                            android:padding="12dp" />
+                    </FrameLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Status\nPerangkat"
+                        android:textColor="#111827"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textAlignment="center" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:background="@drawable/bg_badge_green"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="8dp"
+                        android:paddingVertical="4dp"
+                        android:layout_marginTop="6dp">
+                        
+                        <View
+                            android:id="@+id/dotStatus"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginEnd="4dp"
+                            android:background="@drawable/dot_timeline_green" />
+                            
+                        <TextView
+                            android:id="@+id/tvDeviceStatusOverview"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="ONLINE"
+                            android:textColor="#059669"
+                            android:textSize="9sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+
+        <!-- Aktivitas Terbaru Section -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="24dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="1dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="@color/white"
+            app:layout_constraintTop_toBottomOf="@id/cardsContainer">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:baselineAligned="false"
-                android:weightSum="3"
-                android:layout_marginBottom="16dp">
+                android:orientation="vertical"
+                android:padding="20dp">
 
-                <!-- Total Bins -->
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="6dp"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp"
-                    app:strokeWidth="1dp"
-                    app:strokeColor="#F1F3F5"
-                    app:cardBackgroundColor="@color/white">
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="14dp"
-                        android:gravity="center">
-                        <TextView
-                            android:id="@+id/tvTotalBins"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="2"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/gray_800" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Total Bin"
-                            android:textSize="11sp"
-                            android:textColor="@color/gray_500"
-                            android:layout_marginTop="2dp" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- Online -->
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginHorizontal="6dp"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp"
-                    app:strokeWidth="1dp"
-                    app:strokeColor="#F1F3F5"
-                    app:cardBackgroundColor="@color/white">
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="14dp"
-                        android:gravity="center">
-                        <TextView
-                            android:id="@+id/tvOnlineBins"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/green_600" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Online"
-                            android:textSize="11sp"
-                            android:textColor="@color/gray_500"
-                            android:layout_marginTop="2dp" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- Needs Attention -->
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="6dp"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp"
-                    app:strokeWidth="1dp"
-                    app:strokeColor="#F1F3F5"
-                    app:cardBackgroundColor="@color/white">
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="14dp"
-                        android:gravity="center">
-                        <TextView
-                            android:id="@+id/tvAttentionBins"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/amber_600" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Perhatian"
-                            android:textSize="11sp"
-                            android:textColor="@color/gray_500"
-                            android:layout_marginTop="2dp" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-            </LinearLayout>
-
-            <!-- Bin Summary Card: Organik -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="#F1F3F5"
-                android:layout_marginBottom="12dp"
-                app:cardBackgroundColor="@color/white">
-                <LinearLayout
+                <!-- Header List -->
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp">
-
-                        <ImageView
-                            android:id="@+id/icOrganikAdmin"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:src="@drawable/ic_organik"
-                            android:background="@drawable/ic_bg_circle_green"
-                            android:padding="10dp"
-                            android:layout_centerVertical="true"
-                            android:contentDescription="Organik" />
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:layout_toEndOf="@id/icOrganikAdmin"
-                            android:layout_marginStart="12dp"
-                            android:layout_centerVertical="true">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Organik"
-                                android:textStyle="bold"
-                                android:textSize="14sp"
-                                android:textColor="@color/gray_800" />
-                            <TextView
-                                android:id="@+id/tvOrganikUpdate"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Menunggu data..."
-                                android:textSize="10sp"
-                                android:textColor="@color/gray_400" />
-                        </LinearLayout>
-
-                        <TextView
-                            android:id="@+id/tvOrganikBadge"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="AKTIF"
-                            android:textSize="10sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/badge_green_text"
-                            android:background="@drawable/badge_outlined_green"
-                            android:paddingHorizontal="10dp"
-                            android:paddingVertical="4dp"
-                            android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true" />
-                    </RelativeLayout>
-
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="6dp">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Kapasitas"
-                            android:textSize="12sp"
-                            android:textColor="@color/gray_500" />
-                        <TextView
-                            android:id="@+id/tvOrganikPercent"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0%"
-                            android:textStyle="bold"
-                            android:textSize="14sp"
-                            android:textColor="@color/gray_800"
-                            android:layout_alignParentEnd="true" />
-                    </RelativeLayout>
-
-                    <ProgressBar
-                        android:id="@+id/progressOrganikAdmin"
-                        android:layout_width="match_parent"
-                        android:layout_height="10dp"
-                        style="?android:attr/progressBarStyleHorizontal"
-                        android:progress="0"
-                        android:progressDrawable="@drawable/progress_bar_green" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Bin Summary Card: Non-Organik -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="#F1F3F5"
-                android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="@color/white">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp">
-
-                        <ImageView
-                            android:id="@+id/icNonOrganikAdmin"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:src="@drawable/ic_non_organik"
-                            android:background="@drawable/ic_bg_circle_blue"
-                            android:padding="10dp"
-                            android:layout_centerVertical="true"
-                            android:contentDescription="Non-Organik" />
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:layout_toEndOf="@id/icNonOrganikAdmin"
-                            android:layout_marginStart="12dp"
-                            android:layout_centerVertical="true">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Non-Organik"
-                                android:textStyle="bold"
-                                android:textSize="14sp"
-                                android:textColor="@color/gray_800" />
-                            <TextView
-                                android:id="@+id/tvNonOrganikUpdate"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Menunggu data..."
-                                android:textSize="10sp"
-                                android:textColor="@color/gray_400" />
-                        </LinearLayout>
-
-                        <TextView
-                            android:id="@+id/tvNonOrganikBadge"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="AKTIF"
-                            android:textSize="10sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/badge_blue_text"
-                            android:background="@drawable/badge_outlined_blue"
-                            android:paddingHorizontal="10dp"
-                            android:paddingVertical="4dp"
-                            android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true" />
-                    </RelativeLayout>
-
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="6dp">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Kapasitas"
-                            android:textSize="12sp"
-                            android:textColor="@color/gray_500" />
-                        <TextView
-                            android:id="@+id/tvNonOrganikPercent"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0%"
-                            android:textStyle="bold"
-                            android:textSize="14sp"
-                            android:textColor="@color/gray_800"
-                            android:layout_alignParentEnd="true" />
-                    </RelativeLayout>
-
-                    <ProgressBar
-                        android:id="@+id/progressNonOrganikAdmin"
-                        android:layout_width="match_parent"
-                        android:layout_height="10dp"
-                        style="?android:attr/progressBarStyleHorizontal"
-                        android:progress="0"
-                        android:progressDrawable="@drawable/progress_bar_amber" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Device Status Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="#F1F3F5"
-                app:cardBackgroundColor="@color/white">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:layout_marginBottom="16dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Status Perangkat"
-                        android:textStyle="bold"
+                        android:text="Aktivitas Terbaru"
+                        android:textColor="#111827"
                         android:textSize="14sp"
-                        android:textColor="@color/gray_800"
-                        android:layout_marginBottom="12dp" />
+                        android:textStyle="bold"
+                        android:layout_centerVertical="true" />
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:id="@+id/tvLihatSemua"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:background="@drawable/edit_text_bg"
-                        android:padding="12dp"
-                        android:layout_marginBottom="8dp">
+                        android:text="Lihat Semua"
+                        android:textColor="#059669"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:background="@drawable/bg_badge_green"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="4dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true" />
+                </RelativeLayout>
+
+                <!-- List Items (Simulated static for now) -->
+                
+                <!-- Item 1 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="16dp"
+                    android:gravity="top">
+
+                    <FrameLayout
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:background="@drawable/bg_rounded_light_blue">
                         <ImageView
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:src="@android:drawable/ic_menu_manage"
-                            app:tint="@color/gray_500"
-                            android:padding="4dp"
-                            android:contentDescription="ESP32" />
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:layout_marginStart="10dp">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="ESP32 Controller"
-                                android:textStyle="bold"
-                                android:textSize="12sp"
-                                android:textColor="@color/gray_800" />
-                            <TextView
-                                android:id="@+id/tvDeviceLastSeen"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Menunggu koneksi..."
-                                android:textSize="10sp"
-                                android:textColor="@color/gray_400" />
-                        </LinearLayout>
-                        <TextView
-                            android:id="@+id/tvDeviceStatus"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="OFFLINE"
-                            android:textSize="10sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/gray_400"
-                            android:background="@drawable/edit_text_bg"
-                            android:paddingHorizontal="8dp"
-                            android:paddingVertical="4dp" />
-                    </LinearLayout>
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:src="@android:drawable/ic_menu_delete"
+                            app:tint="#2563EB"
+                            android:padding="8dp" />
+                    </FrameLayout>
 
                     <LinearLayout
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/edit_text_bg"
-                        android:orientation="horizontal"
-                        android:padding="12dp"
-                        android:gravity="center_vertical">
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="12dp">
                         <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Terakhir Update"
-                            android:textSize="12sp"
-                            android:textColor="@color/gray_500" />
-                        <TextView
-                            android:id="@+id/tvLastUpdate"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="—"
+                            android:text="Tempat Sampah Area A Penuh"
+                            android:textColor="#111827"
                             android:textStyle="bold"
-                            android:textColor="@color/secondary" />
+                            android:textSize="12sp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Sistem otomatis memberi notifikasi tugasan ke petugas lapangan."
+                            android:textColor="#6B7280"
+                            android:textSize="10sp"
+                            android:layout_marginTop="2dp"
+                            android:lineSpacingExtra="2dp"/>
                     </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
 
-        </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="10 mnt lalu"
+                        android:textColor="#9CA3AF"
+                        android:textSize="9sp"
+                        android:layout_marginStart="8dp" />
+                </LinearLayout>
+
+                <!-- Item 2 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="top">
+
+                    <FrameLayout
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:background="@drawable/bg_badge_green">
+                        <!-- We use badge green as background, but with rounded rect corners 12dp since it exists -->
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:src="@android:drawable/ic_input_add" 
+                            android:rotation="45"
+                            app:tint="#059669"
+                            android:padding="8dp" /> <!-- Actually a checkmark, using input_add rotated for a check hack, or better just use ic_menu_agenda -->
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="12dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Sistem Berjalan Normal"
+                            android:textColor="#111827"
+                            android:textStyle="bold"
+                            android:textSize="12sp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Sinkronisasi status dengan modul IoT terkini berhasil dilakukan."
+                            android:textColor="#6B7280"
+                            android:textSize="10sp"
+                            android:layout_marginTop="2dp"
+                            android:lineSpacingExtra="2dp"/>
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="1 jam lalu"
+                        android:textColor="#9CA3AF"
+                        android:textSize="9sp"
+                        android:layout_marginStart="8dp" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>
-

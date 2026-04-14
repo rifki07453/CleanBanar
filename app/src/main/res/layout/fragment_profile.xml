@@ -4,292 +4,246 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/gray_50">
+    android:background="#F9FAFB"> <!-- Very light gray background -->
 
     <!-- Header Gradient Background -->
     <FrameLayout
         android:id="@+id/headerBlockProfile"
         android:layout_width="match_parent"
-        android:layout_height="220dp"
-        android:background="@drawable/header_gradient_bg"
+        android:layout_height="200dp"
+        android:background="@drawable/profile_header_rounded_bg"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- User Profile Info in Header -->
-    <ImageView
-        android:id="@+id/ivUserAvatar"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="56dp"
-        android:background="@drawable/ic_bg_circle_green_transparent"
-        android:src="@android:drawable/ic_menu_myplaces"
-        app:tint="@color/white"
-        android:padding="16dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
+    <!-- User Profile Info in Header (Centered Vertically and Horizontally in Header) -->
     <LinearLayout
-        android:layout_width="0dp"
+        android:id="@+id/llHeaderContent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="24dp"
-        app:layout_constraintStart_toEndOf="@id/ivUserAvatar"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/ivUserAvatar"
-        app:layout_constraintBottom_toBottomOf="@id/ivUserAvatar">
+        app:layout_constraintTop_toTopOf="@id/headerBlockProfile"
+        app:layout_constraintBottom_toBottomOf="@id/headerBlockProfile"
+        app:layout_constraintVertical_bias="0.4"> <!-- Slightly above center due to rounded corners -->
 
-        <TextView
-            android:id="@+id/tvProfileName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Petugas CleanBanar"
-            android:textColor="@color/white"
-            android:textStyle="bold"
-            android:textSize="20sp" />
+        <!-- Avatar Background: glassmorphism style (white 20% alpha) -->
+        <FrameLayout
+            android:id="@+id/flAvatarContainer"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:background="@drawable/bg_circle_glass"
+            android:padding="2dp">
+            
+            <ImageView
+                android:id="@+id/ivUserAvatar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@android:drawable/ic_menu_myplaces"
+                app:tint="@color/white"
+                android:padding="12dp" />
+        </FrameLayout>
 
-        <TextView
-            android:id="@+id/tvProfileEmail"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="petugas@cleanbanar.com"
-            android:textColor="@color/emerald_100"
-            android:textSize="13sp" />
-        
-        <!-- Role acts as hidden or minimal info now -->
-        <TextView
-            android:id="@+id/tvProfileRole"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="gone" />
+            android:orientation="vertical"
+            android:layout_marginStart="16dp">
+
+            <TextView
+                android:id="@+id/tvProfileName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nama Pengguna"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/tvProfileEmail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="email@contoh.com"
+                android:textColor="#A7F3D0" 
+                android:textSize="14sp" />
+            
+        </LinearLayout>
     </LinearLayout>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="-40dp"
         android:fillViewport="true"
-        app:layout_constraintTop_toBottomOf="@id/ivUserAvatar"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/headerBlockProfile"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="-48dp"
+        android:clipToPadding="false"
+        android:paddingBottom="24dp">
 
-        <!-- The White Menu Card overlapping the header -->
-        <com.google.android.material.card.MaterialCardView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="24dp"
-            android:layout_marginBottom="24dp"
-            app:cardCornerRadius="24dp"
-            app:cardElevation="4dp"
-            app:strokeWidth="0dp"
-            app:cardBackgroundColor="@color/white">
+            android:orientation="vertical"
+            android:clipChildren="false"
+            android:clipToPadding="false">
 
-            <LinearLayout
+            <!-- The White Menu Card overlapping the header -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingVertical="16dp">
+                android:layout_marginHorizontal="24dp"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="8dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@color/white">
 
-                <!-- Menu Item: Edit Profil -->
                 <LinearLayout
-                    android:id="@+id/btnEditProfil"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="20dp"
-                    android:paddingVertical="16dp"
-                    android:gravity="center_vertical"
-                    android:clickable="true"
-                    android:focusable="true">
-
-                    <ImageView
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:background="@drawable/ic_bg_circle_blue"
-                        android:src="@android:drawable/ic_menu_edit"
-                        app:tint="@color/blue_500"
-                        android:padding="8dp" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="16dp"
-                        android:text="Edit Profil"
-                        android:textColor="@color/gray_800"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <!-- Menu Item: Pengaturan Notifikasi -->
-                <LinearLayout
-                    android:id="@+id/btnNavNotifikasi"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="20dp"
-                    android:paddingVertical="16dp"
-                    android:gravity="center_vertical"
-                    android:clickable="true"
-                    android:focusable="true">
-
-                    <ImageView
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:background="@drawable/ic_bg_circle_purple"
-                        android:src="@android:drawable/ic_popup_reminder"
-                        app:tint="@color/purple_500"
-                        android:padding="8dp" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="16dp"
-                        android:text="Pengaturan Notifikasi"
-                        android:textColor="@color/gray_800"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-                        
-                    <ImageView
-                        android:id="@+id/ivExpandNotif"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@android:drawable/arrow_down_float"
-                        app:tint="@color/gray_400" />
-                </LinearLayout>
-
-                <!-- Expandable Toggles Section -->
-                <LinearLayout
-                    android:id="@+id/expandableNotifSection"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingHorizontal="24dp"
-                    android:background="@color/gray_50"
-                    android:visibility="gone">
-                    <!-- Toggle 1 -->
+                    android:paddingVertical="8dp">
+
+                    <!-- Menu Item: Edit Profil -->
                     <LinearLayout
+                        android:id="@+id/btnEditProfil"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
+                        android:paddingHorizontal="16dp"
+                        android:paddingVertical="12dp"
                         android:gravity="center_vertical"
-                        android:paddingVertical="8dp">
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <ImageView
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="@drawable/bg_rounded_light_blue"
+                            android:src="@android:drawable/ic_menu_edit"
+                            app:tint="#3B82F6"
+                            android:padding="8dp" />
+
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Sampah Hampir Penuh"
-                            android:textSize="13sp"
-                            android:textColor="@color/gray_800" />
-                        <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/switchHampirPenuh"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:checked="true"
-                            app:trackTint="@color/emerald_600" />
+                            android:layout_marginStart="16dp"
+                            android:text="Edit Profil"
+                            android:textColor="#374151"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                            
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@android:drawable/arrow_down_float"
+                            app:tint="#9CA3AF"
+                            android:rotation="270" />
                     </LinearLayout>
-                    <!-- Toggle 2 -->
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#F3F4F6"
+                        android:layout_marginHorizontal="64dp" />
+
+                    <!-- Menu Item: Pengaturan Notifikasi -->
                     <LinearLayout
+                        android:id="@+id/btnNavNotifikasi"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
+                        android:paddingHorizontal="16dp"
+                        android:paddingVertical="12dp"
                         android:gravity="center_vertical"
-                        android:paddingVertical="8dp">
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <ImageView
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="@drawable/bg_rounded_light_purple"
+                            android:src="@android:drawable/ic_popup_reminder"
+                            app:tint="#8B5CF6"
+                            android:padding="8dp" />
+
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Sampah Penuh"
-                            android:textSize="13sp"
-                            android:textColor="@color/gray_800" />
-                        <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/switchPenuh"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:checked="true"
-                            app:trackTint="@color/emerald_600" />
+                            android:layout_marginStart="16dp"
+                            android:text="Pengaturan Notifikasi"
+                            android:textColor="#374151"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                            
+                        <ImageView
+                            android:id="@+id/ivExpandNotif"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@android:drawable/arrow_down_float"
+                            app:tint="#9CA3AF"
+                            android:rotation="270" />
                     </LinearLayout>
-                    <!-- Toggle 3 -->
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#F3F4F6"
+                        android:layout_marginHorizontal="64dp" />
+
+                    <!-- Menu Item: Keamanan & Password -->
                     <LinearLayout
+                        android:id="@+id/btnChangePassword"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
+                        android:paddingHorizontal="16dp"
+                        android:paddingVertical="12dp"
                         android:gravity="center_vertical"
-                        android:paddingVertical="8dp">
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <ImageView
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="@drawable/bg_rounded_light_orange"
+                            android:src="@android:drawable/ic_lock_idle_lock"
+                            app:tint="#F97316"
+                            android:padding="8dp" />
+
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Selesai Dikosongkan"
-                            android:textSize="13sp"
-                            android:textColor="@color/gray_800" />
-                        <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/switchSelesai"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:checked="true"
-                            app:trackTint="@color/emerald_600" />
+                            android:layout_marginStart="16dp"
+                            android:text="Keamanan &amp; Password"
+                            android:textColor="#374151"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                            
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@android:drawable/arrow_down_float"
+                            app:tint="#9CA3AF"
+                            android:rotation="270" />
                     </LinearLayout>
-                    <!-- Toggle 4 -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:paddingVertical="8dp">
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Notifikasi Sistem"
-                            android:textSize="13sp"
-                            android:textColor="@color/gray_800" />
-                        <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/switchSistem"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:checked="true"
-                            app:trackTint="@color/emerald_600" />
-                    </LinearLayout>
+
                 </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-                <!-- Menu Item: Keamanan & Password -->
-                <LinearLayout
-                    android:id="@+id/btnChangePassword"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="20dp"
-                    android:paddingVertical="16dp"
-                    android:gravity="center_vertical"
-                    android:clickable="true"
-                    android:focusable="true">
-
-                    <ImageView
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:background="@drawable/ic_bg_circle_orange"
-                        android:src="@android:drawable/ic_lock_idle_lock"
-                        app:tint="@color/orange_600"
-                        android:padding="8dp" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="16dp"
-                        android:text="Keamanan &amp; Password"
-                        android:textColor="@color/gray_800"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/gray_100"
-                    android:layout_marginHorizontal="20dp"
-                    android:layout_marginVertical="8dp" />
+            <!-- CardView Keluar Akun -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@color/white">
 
                 <!-- Menu Item: Keluar Akun -->
                 <LinearLayout
@@ -297,18 +251,18 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingHorizontal="20dp"
-                    android:paddingVertical="16dp"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="12dp"
                     android:gravity="center_vertical"
                     android:clickable="true"
                     android:focusable="true">
 
                     <ImageView
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:background="@drawable/ic_bg_circle_red"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/bg_rounded_light_red"
                         android:src="@android:drawable/ic_lock_power_off"
-                        app:tint="@color/red_500"
+                        app:tint="#EF4444"
                         android:padding="8dp" />
 
                     <TextView
@@ -317,14 +271,14 @@
                         android:layout_weight="1"
                         android:layout_marginStart="16dp"
                         android:text="Keluar Akun"
-                        android:textColor="@color/red_500"
-                        android:textSize="15sp"
+                        android:textColor="#EF4444"
+                        android:textSize="14sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+            </com.google.android.material.card.MaterialCardView>
 
+        </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

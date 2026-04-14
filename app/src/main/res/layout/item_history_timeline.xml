@@ -7,125 +7,148 @@
     android:paddingStart="16dp"
     android:paddingEnd="16dp">
 
-    <!-- Timeline Column -->
+    <!-- Timeline Column (Straight Gray Line) -->
     <View
         android:id="@+id/timelineLine"
         android:layout_width="2dp"
         android:layout_height="0dp"
-        android:background="@color/gray_timeline"
+        android:background="#F3F4F6"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginStart="8dp" />
+        android:layout_marginStart="14dp" />
 
+    <!-- Timeline Dot with White Ring Overlapping the Line -->
     <View
         android:id="@+id/timelineDot"
-        android:layout_width="12dp"
-        android:layout_height="12dp"
-        android:background="@drawable/ic_bg_circle_green"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:background="@drawable/dot_timeline_green"
         app:layout_constraintBottom_toBottomOf="@id/topGuideline"
         app:layout_constraintEnd_toEndOf="@id/timelineLine"
         app:layout_constraintStart_toStartOf="@id/timelineLine"
         app:layout_constraintTop_toTopOf="@id/topGuideline" />
 
+    <!-- Guideline to vertically align the dot and card content top -->
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/topGuideline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_begin="30dp" />
+        app:layout_constraintGuide_begin="32dp" />
 
-    <!-- Card Column -->
+    <!-- Timeline Card (Detail) -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/historyCard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="12dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp"
         app:cardCornerRadius="16dp"
-        app:cardElevation="0dp"
+        app:cardElevation="1dp"
         app:strokeWidth="1dp"
-        app:strokeColor="#F1F3F5"
+        app:strokeColor="#F3F4F6"
         app:cardBackgroundColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/timelineLine"
         app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Status Badge -->
-            <TextView
-                android:id="@+id/tvStatusBadge"
-                android:layout_width="wrap_content"
+            <!-- Row 1: Header Card (Badge & Time) -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/badge_outlined_green"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="4dp"
-                android:text="DIKOSONGKAN"
-                android:textColor="@color/badge_green_text"
-                android:textSize="10sp"
-                android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                
+                <TextView
+                    android:id="@+id/tvStatusBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_badge_green"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="4dp"
+                    android:text="DIKOSONGKAN"
+                    android:textColor="#059669" 
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
 
-            <!-- Time -->
-            <TextView
-                android:id="@+id/tvTime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="10:45 AM"
-                android:textColor="@color/gray_400"
-                android:textSize="11sp"
-                app:layout_constraintBottom_toBottomOf="@id/tvStatusBadge"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@id/tvStatusBadge" />
+                <!-- Flexible space between badge and time -->
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
 
-            <!-- Title -->
+                <TextView
+                    android:id="@+id/tvTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="09:12 AM"
+                    android:textColor="#9CA3AF"
+                    android:textSize="11sp"
+                    android:typeface="monospace" />
+            </LinearLayout>
+
+            <!-- Row 2: Judul -->
             <TextView
                 android:id="@+id/tvTitle"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:text="Sampah Organik"
-                android:textColor="@color/gray_900"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tvStatusBadge" />
+                android:textColor="#111827"
+                android:textSize="14sp"
+                android:textStyle="bold" />
 
-            <!-- Details -->
+            <!-- Row 3: Deskripsi -->
             <TextView
                 android:id="@+id/tvDetails"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:lineSpacingExtra="2dp"
-                android:text="Petugas: Ahmad B.\nKapasitas akhir: 0%"
-                android:textColor="@color/gray_500"
-                android:textSize="13sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tvTitle" />
+                android:text="Notifikasi dikirim ke petugas kebersihan untuk pengangkutan."
+                android:textColor="#6B7280"
+                android:textSize="12sp" />
 
-            <!-- Date -->
-            <TextView
-                android:id="@+id/tvDate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+            <!-- Row 4: Footer Divider & Date -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#F3F4F6"
                 android:layout_marginTop="16dp"
-                android:text="Hari ini, 24 Mart"
-                android:textColor="@color/gray_400"
-                android:textSize="11sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tvDetails" />
+                android:layout_marginBottom="12dp" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:src="@android:drawable/ic_menu_today"
+                    app:tint="#9CA3AF" />
+
+                <TextView
+                    android:id="@+id/tvDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:text="Hari ini, 24 Mart"
+                    android:textColor="#9CA3AF"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+        </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

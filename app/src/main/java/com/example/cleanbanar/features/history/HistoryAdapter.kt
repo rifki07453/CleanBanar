@@ -46,26 +46,26 @@ class HistoryAdapter(private var items: List<Map<String, Any>> = emptyList()) :
         when (type) {
             "dikosongkan", "emptied" -> {
                 holder.binding.tvStatusBadge.text = "DIKOSONGKAN"
-                holder.binding.tvStatusBadge.setBackgroundResource(R.drawable.badge_outlined_green)
-                holder.binding.tvStatusBadge.setTextColor(context.getColor(R.color.badge_green_text))
-                holder.binding.timelineDot.setBackgroundResource(R.drawable.ic_bg_circle_green)
+                holder.binding.tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_green)
+                holder.binding.tvStatusBadge.setTextColor(android.graphics.Color.parseColor("#059669")) // Emerald 600
+                holder.binding.timelineDot.setBackgroundResource(R.drawable.dot_timeline_green)
                 
                 holder.binding.tvDetails.text = "Petugas: $petugas\nKapasitas akhir: $capacity%"
             }
             "penuh", "alert" -> {
                 holder.binding.tvStatusBadge.text = "PENUH (100%)"
-                holder.binding.tvStatusBadge.setBackgroundResource(R.drawable.badge_outlined_red)
-                holder.binding.tvStatusBadge.setTextColor(context.getColor(R.color.badge_red_text))
-                holder.binding.timelineDot.setBackgroundResource(R.drawable.ic_bg_circle_red)
+                holder.binding.tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_red)
+                holder.binding.tvStatusBadge.setTextColor(android.graphics.Color.parseColor("#DC2626")) // Red 600
+                holder.binding.timelineDot.setBackgroundResource(R.drawable.dot_timeline_red)
                 
                 holder.binding.tvDetails.text = "Notifikasi dikirim ke petugas kebersihan untuk pengangkutan."
             }
             else -> {
                 // For any other status such as hampir penuh
                 holder.binding.tvStatusBadge.text = "HAMPIR PENUH"
-                holder.binding.tvStatusBadge.setBackgroundResource(R.drawable.badge_outlined_blue)
-                holder.binding.tvStatusBadge.setTextColor(context.getColor(R.color.badge_blue_text))
-                holder.binding.timelineDot.setBackgroundResource(R.drawable.ic_bg_circle_blue)
+                holder.binding.tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_blue)
+                holder.binding.tvStatusBadge.setTextColor(android.graphics.Color.parseColor("#2563EB")) // Blue 600
+                holder.binding.timelineDot.setBackgroundResource(R.drawable.dot_timeline_blue)
                 
                 holder.binding.tvDetails.text = "Kapasitas saat ini: $capacity%"
             }
