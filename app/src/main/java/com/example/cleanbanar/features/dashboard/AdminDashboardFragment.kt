@@ -11,6 +11,7 @@ import com.google.firebase.database.ValueEventListener
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.example.cleanbanar.features.admin.StaffManagementFragment
 
 class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
 
@@ -26,6 +27,14 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
     override fun setupViews() {
         authManager = AuthManager(requireContext())
         binding.tvAdminTitle.text = "Halo, ${authManager.getUserName()}"
+
+        // Navigate to Staff Management when the card is clicked
+        binding.cardManajemenPetugas.setOnClickListener {
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, StaffManagementFragment())
+                .addToBackStack(null)
+                .commit()
+        }
     }
 
     override fun observeData() {

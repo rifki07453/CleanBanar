@@ -56,10 +56,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                     loadFragment(AdminDashboardFragment())
                     true
                 }
-                R.id.nav_staff -> {
-                    loadFragment(StaffManagementFragment())
-                    true
-                }
                 R.id.nav_statistics -> {
                     loadFragment(StatisticsFragment())
                     true
