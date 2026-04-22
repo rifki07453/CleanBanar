@@ -30,130 +30,191 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
     // ==========================================
 
     override fun observeData() {
-        notifListener = FirebaseManager.listenNotifications { notifications ->
-            if (!isAdded) return@listenNotifications
-            binding.progressBar.visibility = android.view.View.GONE
-            binding.notifListContainer.removeAllViews()
+        binding.progressBar.visibility = android.view.View.GONE
+        binding.notifListContainer.removeAllViews()
+        
+        // Hide the subtitle or update it if needed. The design doesn't show subtitle vividly.
+        binding.tvNotifSubtitle.visibility = android.view.View.GONE
+        
+        val dummyNotifs = listOf(
+            mapOf(
+                "title" to "Organik Penuh!",
+                "message" to "Kapasitas tong sampah organik di\nlingkungan A telah mencapai 100%. Harap\nsegera dikosongkan.",
+                "type" to "danger",
+                "timeText" to "Baru saja",
+                "isUnread" to true
+            ),
+            mapOf(
+                "title" to "Non-Org Hampir Penuh",
+                "message" to "Kapasitas tong sampah non-organik di\nangka 85%. Bersiap untuk persiapan\npengosongan rutin.",
+                "type" to "warning",
+                "timeText" to "15 menit yang lalu",
+                "isUnread" to true
+            ),
+            mapOf(
+                "title" to "Pengosongan Selesai",
+                "message" to "Sampah organik telah berhasil\ndikosongkan secara manual oleh Petugas\nKebersihan Ahmad.",
+                "type" to "success",
+                "timeText" to "Kemarin, 14:30",
+                "isUnread" to false
+            ),
+            mapOf(
+                "title" to "Sistem Online",
+                "message" to "Smart Bin berhasil terkoneksi kembali ke\nserver monitoring utama setelah restart\nnode.",
+                "type" to "info",
+                "timeText" to "2 Hari lalu",
+                "isUnread" to false
+            )
+        )
 
-            if (notifications.isEmpty()) {
-                addEmptyState()
-                return@listenNotifications
-            }
-
-            binding.tvNotifSubtitle.text = "${notifications.size} notifikasi"
-
-            for (notif in notifications) {
-                addNotificationCard(
-                    title = notif["title"] as String,
-                    message = notif["message"] as String,
-                    type = notif["type"] as String,
-                    timestamp = notif["timestamp"] as Long
-                )
-            }
+        for (notif in dummyNotifs) {
+            addNotificationCard(
+                title = notif["title"] as String,
+                message = notif["message"] as String,
+                type = notif["type"] as String,
+                timeText = notif["timeText"] as String,
+                isUnread = notif["isUnread"] as Boolean
+            )
         }
     }
 
     // ==========================================
     // UI Builder - Notification Cards
     // ==========================================
-    private fun addNotificationCard(title: String, message: String, type: String, timestamp: Long) {
+    private fun addNotificationCard(title: String, message: String, type: String, timeText: String, isUnread: Boolean) {
         val cardView = com.google.android.material.card.MaterialCardView(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply { bottomMargin = 10.dpToPx() }
-            radius = 16f.dpToPxF()
-            cardElevation = 1f.dpToPxF()
+            ).apply { bottomMargin = 16.dpToPx() }
+            radius = 24f.dpToPxF()
+            cardElevation = 0f.dpToPxF()
             setCardBackgroundColor(resources.getColor(R.color.white, null))
+            
+            val strokeCol = when (type) {
+                "danger" -> android.graphics.Color.parseColor("#FCA5A5") // red 300
+                "warning" -> android.graphics.Color.parseColor("#FDE047") // yellow 300
+                "success" -> android.graphics.Color.parseColor("#60A5FA") // blue 400
+                else -> android.graphics.Color.parseColor("#FEF08A") // faint yellow/white outline
+            }
+            // For info we can just use light gray
+            if (type == "info") {
+                 setStrokeColor(android.graphics.Color.parseColor("#F3F4F6"))
+            } else {
+                 setStrokeColor(strokeCol)
+            }
+            strokeWidth = 1.dpToPx()
         }
 
         val row = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.HORIZONTAL
-            setPadding(14.dpToPx(), 14.dpToPx(), 14.dpToPx(), 14.dpToPx())
-            gravity = Gravity.CENTER_VERTICAL
+            setPadding(16.dpToPx(), 16.dpToPx(), 16.dpToPx(), 16.dpToPx())
         }
 
-        // Type-specific icon & color
-        val (iconRes, bgRes, tintColor) = when (type) {
-            "danger", "full" -> Triple(
+        val (iconRes, iconBgColor, iconTintColor) = when (type) {
+            "danger" -> Triple(
                 android.R.drawable.ic_dialog_alert,
-                R.drawable.badge_red_bg,
-                R.color.red_500
+                "#FEF2F2", // red 50
+                resources.getColor(R.color.red_500, null)
             )
             "warning" -> Triple(
-                android.R.drawable.ic_dialog_alert,
-                R.drawable.badge_amber_bg,
-                R.color.amber_600
+                android.R.drawable.ic_popup_reminder, // generic bell
+                "#FEFCE8", // yellow 50
+                resources.getColor(R.color.amber_600, null)
+            )
+            "success" -> Triple(
+                android.R.drawable.ic_input_add, // will be rotated to look like checkmark
+                "#F9FAFB", // gray 50
+                android.graphics.Color.parseColor("#111827")
             )
             else -> Triple(
-                android.R.drawable.ic_dialog_info,
-                R.drawable.badge_green_bg,
-                R.color.green_600
+                android.R.drawable.ic_dialog_dialer, // wifi substitute
+                "#EFF6FF", // blue 50
+                android.graphics.Color.parseColor("#1E3A8A")
             )
+        }
+
+        val iconFrame = android.widget.FrameLayout(requireContext()).apply {
+            layoutParams = LinearLayout.LayoutParams(48.dpToPx(), 48.dpToPx()).apply {
+                marginEnd = 16.dpToPx()
+            }
+            background = getCircleDrawable(android.graphics.Color.parseColor(iconBgColor))
         }
 
         val icon = ImageView(requireContext()).apply {
-            layoutParams = LinearLayout.LayoutParams(36.dpToPx(), 36.dpToPx())
+            layoutParams = android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT
+            )
             setImageResource(iconRes)
-            setBackgroundResource(bgRes)
-            setColorFilter(resources.getColor(tintColor, null))
-            setPadding(8.dpToPx(), 8.dpToPx(), 8.dpToPx(), 8.dpToPx())
+            if (iconRes == android.R.drawable.ic_input_add) rotation = 45f
+            setColorFilter(iconTintColor)
+            setPadding(12.dpToPx(), 12.dpToPx(), 12.dpToPx(), 12.dpToPx())
         }
+        iconFrame.addView(icon)
 
         val info = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-            setPadding(12.dpToPx(), 0, 0, 0)
-        }
-
-        // Status badge text
-        val statusLabel = when (type) {
-            "danger", "full" -> "Penuh"
-            "warning" -> "Hampir Penuh"
-            else -> "Info"
         }
 
         val tvTitle = TextView(requireContext()).apply {
             text = title
             setTextColor(resources.getColor(R.color.gray_800, null))
-            textSize = 13f
+            textSize = 14f
             setTypeface(typeface, android.graphics.Typeface.BOLD)
         }
         val tvMessage = TextView(requireContext()).apply {
             text = message
-            setTextColor(resources.getColor(R.color.gray_400, null))
-            textSize = 11f
+            setTextColor(resources.getColor(R.color.gray_500, null))
+            textSize = 12f
+            setPadding(0, 8.dpToPx(), 0, 16.dpToPx())
+            setLineSpacing(2f.dpToPxF(), 1f)
+        }
+        val timeColor = when (type) {
+            "danger" -> android.graphics.Color.parseColor("#EF4444")
+            "warning" -> android.graphics.Color.parseColor("#EAB308")
+            else -> resources.getColor(R.color.gray_400, null)
+        }
+        val tvTime = TextView(requireContext()).apply {
+            text = timeText
+            setTextColor(timeColor)
+            textSize = 10f
         }
         info.addView(tvTitle)
         info.addView(tvMessage)
+        info.addView(tvTime)
 
-        // Right side: time + status
         val rightCol = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.END
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+            )
         }
-        val tvTime = TextView(requireContext()).apply {
-            text = formatTime(timestamp)
-            setTextColor(resources.getColor(R.color.gray_400, null))
-            textSize = 10f
-            gravity = Gravity.END
+        if (isUnread) {
+            val dot = View(requireContext()).apply {
+                layoutParams = LinearLayout.LayoutParams(8.dpToPx(), 8.dpToPx()).apply {
+                    topMargin = 4.dpToPx()
+                }
+                background = getCircleDrawable(iconTintColor)
+            }
+            rightCol.addView(dot)
         }
-        val tvStatus = TextView(requireContext()).apply {
-            text = statusLabel
-            setTextColor(resources.getColor(tintColor, null))
-            textSize = 9f
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
-            gravity = Gravity.END
-            setPadding(0, 4.dpToPx(), 0, 0)
-        }
-        rightCol.addView(tvTime)
-        rightCol.addView(tvStatus)
 
-        row.addView(icon)
+        row.addView(iconFrame)
         row.addView(info)
         row.addView(rightCol)
         cardView.addView(row)
         binding.notifListContainer.addView(cardView)
+    }
+
+    private fun getCircleDrawable(color: Int): android.graphics.drawable.GradientDrawable {
+        return android.graphics.drawable.GradientDrawable().apply {
+            shape = android.graphics.drawable.GradientDrawable.OVAL
+            setColor(color)
+        }
     }
 
     // ==========================================
