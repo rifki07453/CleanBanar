@@ -52,6 +52,14 @@ class HistoryAdapter(private var items: List<Map<String, Any>> = emptyList()) :
                 
                 holder.binding.tvDetails.text = "Petugas: $petugas\nKapasitas akhir: $capacity%"
             }
+            "dikosongkan_blue" -> {
+                holder.binding.tvStatusBadge.text = "DIKOSONGKAN"
+                holder.binding.tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_blue)
+                holder.binding.tvStatusBadge.setTextColor(android.graphics.Color.parseColor("#2563EB")) // Blue 600
+                holder.binding.timelineDot.setBackgroundResource(R.drawable.dot_timeline_blue)
+                
+                holder.binding.tvDetails.text = "Petugas: $petugas\nKapasitas akhir: $capacity%"
+            }
             "penuh", "alert" -> {
                 holder.binding.tvStatusBadge.text = "PENUH (100%)"
                 holder.binding.tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_red)

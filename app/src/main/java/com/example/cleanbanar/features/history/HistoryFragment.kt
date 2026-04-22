@@ -44,21 +44,49 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>() {
     // ==========================================
 
     override fun observeData() {
-        val role = authManager.getUserRole()
-        val areaId = authManager.getAssignedAreaId()
+        val cal = java.util.Calendar.getInstance()
+        
+        // Item 1: Hari ini, 10:45 AM
+        cal.set(java.util.Calendar.HOUR_OF_DAY, 10)
+        cal.set(java.util.Calendar.MINUTE, 45)
+        val time1 = cal.timeInMillis
 
-        historyListener = FirebaseManager.listenHistoryFiltered(role, areaId) { historyList ->
-            if (!isAdded) return@listenHistoryFiltered
-            
-            if (historyList.isEmpty()) {
-                binding.rvHistory.visibility = View.GONE
-                binding.historyEmptyState.visibility = View.VISIBLE
-            } else {
-                binding.rvHistory.visibility = View.VISIBLE
-                binding.historyEmptyState.visibility = View.GONE
-                historyAdapter.updateData(historyList)
-            }
-        }
+        // Item 2: Hari ini, 09:12 AM
+        cal.set(java.util.Calendar.HOUR_OF_DAY, 9)
+        cal.set(java.util.Calendar.MINUTE, 12)
+        val time2 = cal.timeInMillis
+
+        // Item 3: Kemarin, 15:30 PM
+        cal.add(java.util.Calendar.DAY_OF_YEAR, -1)
+        cal.set(java.util.Calendar.HOUR_OF_DAY, 15)
+        cal.set(java.util.Calendar.MINUTE, 30)
+        val time3 = cal.timeInMillis
+
+        val dummyHistory = listOf(
+            mapOf(
+                "type" to "dikosongkan",
+                "bin_type" to "Organik",
+                "petugas" to "Ahmad B.",
+                "capacity" to 0,
+                "timestamp" to time1
+            ),
+            mapOf(
+                "type" to "penuh",
+                "bin_type" to "Organik",
+                "timestamp" to time2
+            ),
+            mapOf(
+                "type" to "dikosongkan_blue",
+                "bin_type" to "Non-Organik",
+                "petugas" to "Sutejo",
+                "capacity" to 0,
+                "timestamp" to time3
+            )
+        )
+
+        binding.rvHistory.visibility = android.view.View.VISIBLE
+        binding.historyEmptyState.visibility = android.view.View.GONE
+        historyAdapter.updateData(dummyHistory)
     }
 
     override fun onDestroyView() {
