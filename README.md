@@ -5,10 +5,11 @@
 ## Features
 
 - **Monitoring Real-Time**: Live tracking of Organik & Non-Organik bin capacity via IoT sensors
-- **Notifikasi Otomatis**: Automatic alerts when bins reach ≥80% (Hampir Penuh) and ≥95% (Penuh)
+- **Notifikasi Otomatis**: Automatic alerts when bins reach ≥80% (Hampir Penuh) and ≥95% (Penuh), with beautifully styled UI cards.
 - **Statistik**: Visual bar charts showing 7-day capacity trends, weekly averages, and total penuh events
-- **Manajemen Petugas**: Admin-only staff management panel (add, edit, remove petugas)
-- **Riwayat Aktivitas**: Full activity log of bin alerts and emptying events
+- **Manajemen Petugas**: Centralized admin panel (accessible directly from the Admin Dashboard) to add, view, and remove staff.
+- **Riwayat Aktivitas**: Universal activity timeline (available to both Admin and Staff) logging bin alerts, statuses, and emptying events.
+- **Keamanan Akun**: Secure authentication login interfaces featuring modern UX (e.g., password visibility toggles).
 
 ## Tech Stack
 
@@ -80,18 +81,20 @@ When a Petugas marks a bin as emptied, `FirebaseManager.emptyBin()` atomically:
    git clone https://github.com/rifki07453/CleanBanar.git
    ```
 2. Open the project in **Android Studio**.
-3. Sync the Gradle files to download dependencies.
+3. Sync the Gradle files to download dependencies (Project is configured for JDK 21).
 4. Setup Firebase:
    - Place your `google-services.json` in the `app/` directory.
    - Ensure Firebase Realtime Database rules allow read/write.
 5. Build and run on an Android emulator or physical device.
 
-## Bottom Navigation
+## Navigation Layouts
 
-| Admin                  | Petugas (Staff)       |
+| Admin Role             | Petugas (Staff) Role  |
 |------------------------|-----------------------|
 | Dashboard              | Home                  |
-| Manajemen Petugas      | Statistik             |
-| Statistik              | History               |
-| Notifikasi             | Notifikasi            |
-| Profil                 | Profil                |
+| Statistics             | Statistik             |
+| History                | History               |
+| Notifications          | Notifikasi            |
+| Profile                | Profil                |
+
+*Note: Staff Management functionalities for Admins are seamlessly integrated into the main Dashboard as quick-access cards to streamline the App's bottom navigation.*
