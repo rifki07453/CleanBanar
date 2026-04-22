@@ -164,16 +164,8 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
         info.addView(tvName)
         info.addView(tvEmail)
 
-        // Light gray empty button rectangle
-        val btnDelPlaceholder = android.view.View(requireContext()).apply {
-            layoutParams = LinearLayout.LayoutParams(32.dp, 32.dp)
-            background = getRoundedRectDrawable(android.graphics.Color.parseColor("#EFF6FF"), 8f.dpF)
-            // Removed click listener and icon to match empty placeholder look from the mock
-        }
-
         row.addView(avatarBg)
         row.addView(info)
-        row.addView(btnDelPlaceholder)
         cardView.addView(row)
         binding.staffListContainer.addView(cardView)
     }
