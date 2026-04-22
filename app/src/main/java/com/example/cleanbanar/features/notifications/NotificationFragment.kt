@@ -194,7 +194,7 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
             )
         }
         if (isUnread) {
-            val dot = View(requireContext()).apply {
+            val dot = android.view.View(requireContext()).apply {
                 layoutParams = LinearLayout.LayoutParams(8.dpToPx(), 8.dpToPx()).apply {
                     topMargin = 4.dpToPx()
                 }
