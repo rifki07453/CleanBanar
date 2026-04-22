@@ -60,6 +60,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                     loadFragment(StatisticsFragment())
                     true
                 }
+                R.id.nav_history -> {
+                    loadFragment(HistoryFragment())
+                    true
+                }
                 R.id.nav_notification -> {
                     loadFragment(NotificationFragment())
                     true

@@ -35,6 +35,12 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
                 .addToBackStack(null)
                 .commit()
         }
+
+        // Navigate to History when 'Lihat Semua' is clicked
+        binding.tvLihatSemua.setOnClickListener {
+            val bottomNav = requireActivity().findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNavigation)
+            bottomNav.selectedItemId = R.id.nav_history
+        }
     }
 
     override fun observeData() {
