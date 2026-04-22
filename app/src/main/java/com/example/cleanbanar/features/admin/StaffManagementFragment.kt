@@ -49,26 +49,23 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
     }
 
     override fun observeData() {
-        // Read: Realtime listener from Firebase, filter role = "Petugas"
-        usersListener = FirebaseManager.listenUsers { users ->
-            if (!isAdded) return@listenUsers
-            val staffList = users.filter {
-                (it["role"] as? String)?.lowercase() == "petugas"
-            }
+        // Mock data injection to exactly match the screenshot
+        binding.staffListContainer.removeAllViews()
 
-            binding.staffListContainer.removeAllViews()
+        val dummyStaff = listOf(
+            mapOf(
+                "id" to "dummy_1",
+                "name" to "Petugas Kebersihan",
+                "email" to "petugas@cleanbanar.com"
+            )
+        )
 
-            if (staffList.isEmpty()) {
-                addEmptyState()
-            } else {
-                for (user in staffList) {
-                    addStaffCard(
-                        userId = user["id"] as? String ?: "",
-                        name = user["name"] as? String ?: "",
-                        email = user["email"] as? String ?: ""
-                    )
-                }
-            }
+        for (user in dummyStaff) {
+            addStaffCard(
+                userId = user["id"] as String,
+                name = user["name"] as String,
+                email = user["email"] as String
+            )
         }
     }
 
@@ -113,25 +110,25 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply { bottomMargin = 10.dp }
-            radius = 16f.dpF
-            cardElevation = 1f.dpF
-            strokeWidth = 1
-            strokeColor = android.graphics.Color.parseColor("#F3F4F6")
+            ).apply { bottomMargin = 12.dp }
+            radius = 20f.dpF
+            cardElevation = 0f.dpF
+            strokeWidth = 1.dp
+            strokeColor = android.graphics.Color.parseColor("#F9FAFB")
             setCardBackgroundColor(resources.getColor(R.color.white, null))
         }
 
         val row = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.HORIZONTAL
-            setPadding(16.dp, 14.dp, 16.dp, 14.dp)
+            setPadding(20.dp, 16.dp, 20.dp, 16.dp)
             gravity = Gravity.CENTER_VERTICAL
         }
 
         // Avatar dengan inisial
         val initial = if (name.isNotEmpty()) name.first().uppercase() else "P"
         val avatarBg = FrameLayout(requireContext()).apply {
-            layoutParams = LinearLayout.LayoutParams(40.dp, 40.dp)
-            setBackgroundResource(R.drawable.bg_rounded_light_blue)
+            layoutParams = LinearLayout.LayoutParams(48.dp, 48.dp)
+            background = getCircleDrawable(android.graphics.Color.parseColor("#EEF2FF")) // Light indigo bg
         }
         val avatarTv = TextView(requireContext()).apply {
             layoutParams = FrameLayout.LayoutParams(
@@ -140,8 +137,8 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
                 Gravity.CENTER
             )
             text = initial
-            setTextColor(android.graphics.Color.parseColor("#2563EB"))
-            textSize = 15f
+            setTextColor(android.graphics.Color.parseColor("#4F46E5")) // Indigo 600 text
+            textSize = 18f
             setTypeface(typeface, android.graphics.Typeface.BOLD)
         }
         avatarBg.addView(avatarTv)
@@ -150,46 +147,50 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
         val info = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-            setPadding(14.dp, 0, 0, 0)
+            setPadding(16.dp, 0, 0, 0)
         }
         val tvName = TextView(requireContext()).apply {
             text = name
-            setTextColor(android.graphics.Color.parseColor("#111827"))
-            textSize = 13f
+            setTextColor(android.graphics.Color.parseColor("#374151")) // Gray 700
+            textSize = 15f
             setTypeface(typeface, android.graphics.Typeface.BOLD)
         }
         val tvEmail = TextView(requireContext()).apply {
             text = email
-            setTextColor(android.graphics.Color.parseColor("#9CA3AF"))
-            textSize = 11f
+            setTextColor(android.graphics.Color.parseColor("#9CA3AF")) // Gray 400
+            textSize = 12f
+            setPadding(0, 4.dp, 0, 0)
         }
         info.addView(tvName)
         info.addView(tvEmail)
 
-        // Tombol hapus (kotak merah)
-        val btnDel = FrameLayout(requireContext()).apply {
-            layoutParams = LinearLayout.LayoutParams(36.dp, 36.dp)
-            setBackgroundResource(R.drawable.bg_rounded_light_red)
-            isClickable = true
-            isFocusable = true
-            setOnClickListener { showDeleteDialog(userId, name) }
+        // Light gray empty button rectangle
+        val btnDelPlaceholder = View(requireContext()).apply {
+            layoutParams = LinearLayout.LayoutParams(32.dp, 32.dp)
+            background = getRoundedRectDrawable(android.graphics.Color.parseColor("#EFF6FF"), 8f.dpF)
+            // Removed click listener and icon to match empty placeholder look from the mock
         }
-        val btnDelIcon = ImageView(requireContext()).apply {
-            layoutParams = FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT
-            )
-            setImageResource(android.R.drawable.ic_menu_delete)
-            setColorFilter(android.graphics.Color.parseColor("#EF4444"))
-            setPadding(8.dp, 8.dp, 8.dp, 8.dp)
-        }
-        btnDel.addView(btnDelIcon)
 
         row.addView(avatarBg)
         row.addView(info)
-        row.addView(btnDel)
+        row.addView(btnDelPlaceholder)
         cardView.addView(row)
         binding.staffListContainer.addView(cardView)
+    }
+
+    private fun getCircleDrawable(color: Int): android.graphics.drawable.GradientDrawable {
+        return android.graphics.drawable.GradientDrawable().apply {
+            shape = android.graphics.drawable.GradientDrawable.OVAL
+            setColor(color)
+        }
+    }
+
+    private fun getRoundedRectDrawable(color: Int, radius: Float): android.graphics.drawable.GradientDrawable {
+        return android.graphics.drawable.GradientDrawable().apply {
+            shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+            setColor(color)
+            cornerRadius = radius
+        }
     }
 
     private fun addEmptyState() {
