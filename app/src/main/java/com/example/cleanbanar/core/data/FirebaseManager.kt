@@ -7,6 +7,16 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 
+// =========================================================================
+// TODO (PBL GROUP) - PANDUAN SETUP FIREBASE UNTUK MASING-MASING ANGGOTA:
+// =========================================================================
+// 1. Download file `google-services.json` dari project Firebase kamu sendiri.
+// 2. Masukkan/timpa file tersebut ke dalam folder `app/` di Android Studio.
+// 3. Pastikan di Firebase Console kamu sudah mengaktifkan:
+//    - Authentication (Sign-in provider: Email/Password)
+//    - Realtime Database (Set Rules .read = true, .write = true)
+// =========================================================================
+
 /**
  * Firebase Realtime Database manager for CleanBanar.
  *
@@ -38,6 +48,10 @@ object FirebaseManager {
 
     private val database: FirebaseDatabase? by lazy {
         try {
+            // TODO (PBL GROUP) - SETUP REALTIME DATABASE URL:
+            // Jika kalian pakai server region Singapore (asia-southeast1), terkadang getInstance() kosong bisa error.
+            // Jika error, masukkan URL database kalian ke dalam kurung di bawah ini.
+            // Contoh: FirebaseDatabase.getInstance("https://cleanbanar-3ea64-default-rtdb.asia-southeast1.firebasedatabase.app/")
             FirebaseDatabase.getInstance()
         } catch (e: Exception) {
             Log.w(TAG, "Firebase not configured: ${e.message}")
