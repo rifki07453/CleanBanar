@@ -36,6 +36,11 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
                 .commit()
         }
 
+        // Show Device Status Bottom Sheet
+        binding.cardStatusPerangkat.setOnClickListener {
+            showDeviceStatusBottomSheet()
+        }
+
         // Navigate to History when 'Lihat Semua' is clicked
         binding.tvLihatSemua.setOnClickListener {
             val bottomNav = requireActivity().findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNavigation)
@@ -43,11 +48,17 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         }
     }
 
+    private var currentConnectionStatus: String = "OFFLINE"
+    private var lastSeenTimestamp: Long = 0L
+
     override fun observeData() {
         // Listen to device status for the Status Perangkat card
         deviceListener = FirebaseManager.listenDeviceStatus { connectionStatus, lastSeen ->
             if (!isAdded) return@listenDeviceStatus
-            val isOnline = connectionStatus == "ONLINE"
+            
+            currentConnectionStatus = connectionStatus ?: "OFFLINE"
+            lastSeenTimestamp = lastSeen
+            val isOnline = currentConnectionStatus == "ONLINE"
             
             // Only update the minimal status badge in the new UI
             if (isOnline) {
@@ -70,6 +81,87 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
                 }
             }
         }
+    }
+
+    private fun showDeviceStatusBottomSheet() {
+        val bottomSheetDialog = com.google.android.material.bottomsheet.BottomSheetDialog(requireContext())
+        val view = layoutInflater.inflate(R.layout.bottom_sheet_device_status, null)
+        bottomSheetDialog.setContentView(view)
+
+        val tvConnectionStatus = view.findViewById<android.widget.TextView>(R.id.tvConnectionStatus)
+        val tvNetworkMode = view.findViewById<android.widget.TextView>(R.id.tvNetworkMode)
+        val tvLastSync = view.findViewById<android.widget.TextView>(R.id.tvLastSync)
+        val ivConnectionIcon = view.findViewById<android.widget.ImageView>(R.id.ivConnectionIcon)
+        val flConnectionIconBg = view.findViewById<android.widget.FrameLayout>(R.id.flConnectionIconBg)
+        
+        val btnModeWifi = view.findViewById<com.google.android.material.card.MaterialCardView>(R.id.btnModeWifi)
+        val btnModeBluetooth = view.findViewById<com.google.android.material.card.MaterialCardView>(R.id.btnModeBluetooth)
+
+        // Initial update based on current Firebase status
+        val isOnline = currentConnectionStatus == "ONLINE"
+        
+        fun updateUIMode(mode: String) {
+            tvLastSync.text = formatLastUpdate(lastSeenTimestamp)
+            
+            if (mode == "WIFI") {
+                // Style for WiFi Mode
+                btnModeWifi.strokeWidth = 2
+                btnModeWifi.strokeColor = android.graphics.Color.parseColor("#10B981")
+                btnModeWifi.setCardBackgroundColor(android.graphics.Color.parseColor("#ECFDF5"))
+                
+                btnModeBluetooth.strokeWidth = 1
+                btnModeBluetooth.strokeColor = android.graphics.Color.parseColor("#E5E7EB")
+                btnModeBluetooth.setCardBackgroundColor(android.graphics.Color.WHITE)
+
+                tvNetworkMode.text = "Terhubung via WiFi"
+                ivConnectionIcon.setImageResource(R.drawable.ic_wifi_status)
+                
+                if (isOnline) {
+                    tvConnectionStatus.text = "ONLINE (WiFi)"
+                    tvConnectionStatus.setTextColor(android.graphics.Color.parseColor("#059669"))
+                    flConnectionIconBg.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#D1FAE5"))
+                    ivConnectionIcon.setColorFilter(android.graphics.Color.parseColor("#059669"))
+                } else {
+                    tvConnectionStatus.text = "OFFLINE"
+                    tvConnectionStatus.setTextColor(android.graphics.Color.parseColor("#DC2626"))
+                    flConnectionIconBg.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FEE2E2"))
+                    ivConnectionIcon.setColorFilter(android.graphics.Color.parseColor("#DC2626"))
+                }
+            } else {
+                // Style for Bluetooth Mode
+                btnModeBluetooth.strokeWidth = 2
+                btnModeBluetooth.strokeColor = android.graphics.Color.parseColor("#3B82F6")
+                btnModeBluetooth.setCardBackgroundColor(android.graphics.Color.parseColor("#EFF6FF"))
+                
+                btnModeWifi.strokeWidth = 1
+                btnModeWifi.strokeColor = android.graphics.Color.parseColor("#E5E7EB")
+                btnModeWifi.setCardBackgroundColor(android.graphics.Color.WHITE)
+
+                tvNetworkMode.text = "Terhubung via Bluetooth"
+                ivConnectionIcon.setImageResource(R.drawable.ic_bluetooth_status)
+                
+                // Assuming Bluetooth is directly connected when selected (Simulation)
+                tvConnectionStatus.text = "TERHUBUNG (Bluetooth)"
+                tvConnectionStatus.setTextColor(android.graphics.Color.parseColor("#2563EB"))
+                flConnectionIconBg.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#DBEAFE"))
+                ivConnectionIcon.setColorFilter(android.graphics.Color.parseColor("#2563EB"))
+            }
+        }
+
+        // Initialize with WiFi mode
+        updateUIMode("WIFI")
+
+        btnModeWifi.setOnClickListener {
+            updateUIMode("WIFI")
+            android.widget.Toast.makeText(context, "Beralih ke mode WiFi", android.widget.Toast.LENGTH_SHORT).show()
+        }
+
+        btnModeBluetooth.setOnClickListener {
+            updateUIMode("BLUETOOTH")
+            android.widget.Toast.makeText(context, "Mencari perangkat Bluetooth...", android.widget.Toast.LENGTH_SHORT).show()
+        }
+
+        bottomSheetDialog.show()
     }
 
     private fun formatLastUpdate(timestamp: Long): String {

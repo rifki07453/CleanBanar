@@ -141,8 +141,7 @@
                         <ImageView
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:src="@android:drawable/ic_menu_myplaces"
-                            app:tint="#111827"
+                            android:src="@drawable/ic_users_group_modern"
                             android:padding="12dp" />
                     </FrameLayout>
 
@@ -178,7 +177,8 @@
                 app:strokeWidth="0dp"
                 app:cardBackgroundColor="@color/white"
                 android:clickable="true"
-                android:focusable="true">
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -190,15 +190,13 @@
                     <FrameLayout
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:background="#F3F4F6"
+                        android:background="#ECFDF5"
                         android:layout_marginBottom="12dp">
-                        <!-- Custom background can be improved, using greyish blue -->
-                        <View android:layout_width="match_parent" android:layout_height="match_parent" android:background="@drawable/bg_rounded_light_blue"/>
+                        <View android:layout_width="match_parent" android:layout_height="match_parent" android:background="@drawable/bg_rounded_light_blue" android:backgroundTint="#ECFDF5"/>
                         <ImageView
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:src="@android:drawable/ic_menu_sort_by_size"
-                            app:tint="#10B981"
+                            android:src="@drawable/ic_iot_device_modern"
                             android:padding="12dp" />
                     </FrameLayout>
 
