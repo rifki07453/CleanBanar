@@ -33,10 +33,11 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
             val password = binding.etPassword.text.toString().trim()
 
             if (email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Email dan password tidak boleh kosong", Toast.LENGTH_SHORT).show()
+                showError("Email dan password tidak boleh kosong")
                 return@setOnClickListener
             }
 
+            hideError()
             setLoading(true)
 
             // Login via Firebase Authentication
@@ -97,7 +98,9 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                 .addOnFailureListener { e ->
                     val msg = when {
                         e.message?.contains("no user record") == true ||
-                        e.message?.contains("user-not-found") == true -> {
+                        e.message?.contains("user-not-found") == true ||
+                        e.message?.contains("credential is incorrect") == true ||
+                        e.message?.contains("INVALID_LOGIN_CREDENTIALS") == true -> {
                             // User not found in Auth. Cek apakah Admin sudah mendaftarkan email ini di Realtime DB.
                             checkAndRegisterStaff(email, password)
                             return@addOnFailureListener
@@ -110,7 +113,7 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                         else -> "Login gagal: ${e.message}"
                     }
                     setLoading(false)
-                    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                    showError(msg)
                 }
         }
     }
@@ -138,13 +141,26 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                     }
                     .addOnFailureListener { e ->
                         setLoading(false)
-                        Toast.makeText(this, "Gagal mengaktifkan akun: ${e.message}", Toast.LENGTH_LONG).show()
+                        if (e.message?.contains("already in use") == true || e.message?.contains("email-already-in-use") == true) {
+                            showError("Password salah")
+                        } else {
+                            showError("Gagal mengaktifkan akun: ${e.message}")
+                        }
                     }
             } else {
                 setLoading(false)
-                Toast.makeText(this, "Email tidak terdaftar. Silakan hubungi Administrator.", Toast.LENGTH_LONG).show()
+                showError("Email tidak terdaftar. Silakan hubungi Administrator.")
             }
         }
+    }
+
+    private fun showError(message: String) {
+        binding.errorContainer.visibility = android.view.View.VISIBLE
+        binding.tvErrorMessage.text = message
+    }
+    
+    private fun hideError() {
+        binding.errorContainer.visibility = android.view.View.GONE
     }
 
     /**

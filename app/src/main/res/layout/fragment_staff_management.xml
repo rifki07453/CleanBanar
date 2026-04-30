@@ -95,17 +95,26 @@
                         android:textColorHint="#9CA3AF"
                         android:layout_marginBottom="12dp" />
 
-                    <EditText
-                        android:id="@+id/etNewPassword"
+                    <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:background="@drawable/edit_text_bg"
-                        android:hint="Password Sistem"
-                        android:inputType="textPassword"
-                        android:paddingHorizontal="16dp"
-                        android:textSize="14sp"
-                        android:textColorHint="#9CA3AF"
-                        android:layout_marginBottom="16dp" />
+                        android:layout_height="wrap_content"
+                        app:hintEnabled="false"
+                        app:endIconMode="password_toggle"
+                        app:endIconTint="#9CA3AF"
+                        app:boxBackgroundMode="none"
+                        android:layout_marginBottom="16dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etNewPassword"
+                            android:layout_width="match_parent"
+                            android:layout_height="50dp"
+                            android:background="@drawable/edit_text_bg"
+                            android:hint="Password Sistem"
+                            android:inputType="textPassword"
+                            android:paddingHorizontal="16dp"
+                            android:textSize="14sp"
+                            android:textColorHint="#9CA3AF" />
+                    </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Using #059669 for Green instead of Indigo to match Admin preview style -->
                     <com.google.android.material.button.MaterialButton
