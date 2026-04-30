@@ -85,7 +85,7 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
         // Clear form
         binding.etNewName.text.clear()
         binding.etNewEmail.text.clear()
-        binding.etNewPassword.text.clear()
+        binding.etNewPassword.text?.clear()
 
         binding.btnCreateAccount.isEnabled = true
         binding.btnCreateAccount.text = "Buat Akun Petugas"
