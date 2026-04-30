@@ -49,23 +49,24 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
     }
 
     override fun observeData() {
-        // Mock data injection to exactly match the screenshot
-        binding.staffListContainer.removeAllViews()
-
-        val dummyStaff = listOf(
-            mapOf(
-                "id" to "dummy_1",
-                "name" to "Petugas Kebersihan",
-                "email" to "petugas@cleanbanar.com"
-            )
-        )
-
-        for (user in dummyStaff) {
-            addStaffCard(
-                userId = user["id"] as String,
-                name = user["name"] as String,
-                email = user["email"] as String
-            )
+        usersListener = FirebaseManager.listenUsers { users ->
+            binding.staffListContainer.removeAllViews()
+            
+            if (users.isEmpty()) {
+                addEmptyState()
+            } else {
+                for (user in users) {
+                    val role = user["role"] as? String ?: ""
+                    // Jika ingin memfilter agar Admin tidak bisa dihapus dari list ini:
+                    // if (role == "Admin") continue
+                    
+                    addStaffCard(
+                        userId = user["id"] as? String ?: "",
+                        name = user["name"] as? String ?: "",
+                        email = user["email"] as? String ?: ""
+                    )
+                }
+            }
         }
     }
 
@@ -164,8 +165,27 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
         info.addView(tvName)
         info.addView(tvEmail)
 
+        // Tambahkan tombol hapus (icon bin) di sebelah kanan
+        val deleteIcon = ImageView(requireContext()).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = Gravity.CENTER_VERTICAL
+            }
+            setImageResource(android.R.drawable.ic_menu_delete) // Menggunakan icon bawaan Android
+            imageTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#EF4444")) // Red 500
+            setPadding(8.dp, 8.dp, 8.dp, 8.dp)
+            background = getRoundedRectDrawable(android.graphics.Color.TRANSPARENT, 8f.dpF)
+            
+            setOnClickListener {
+                showDeleteDialog(userId, name)
+            }
+        }
+
         row.addView(avatarBg)
         row.addView(info)
+        row.addView(deleteIcon)
         cardView.addView(row)
         binding.staffListContainer.addView(cardView)
     }

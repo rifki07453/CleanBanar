@@ -300,6 +300,32 @@ object FirebaseManager {
     }
 
     /**
+     * Cek apakah email sudah didaftarkan oleh Admin di Realtime DB (tanpa akun Auth).
+     */
+    fun checkIfUserPreRegistered(email: String, callback: (Boolean, String, String, String) -> Unit) {
+        val ref = rootRef?.child("users") ?: run {
+            callback(false, "", "", "")
+            return
+        }
+        ref.orderByChild("email").equalTo(email).addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    val child = snapshot.children.first()
+                    val id = child.key ?: ""
+                    val name = child.child("name").getValue(String::class.java) ?: ""
+                    val role = child.child("role").getValue(String::class.java) ?: ""
+                    callback(true, id, name, role)
+                } else {
+                    callback(false, "", "", "")
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {
+                callback(false, "", "", "")
+            }
+        })
+    }
+
+    /**
      * Seed data awal user ke Realtime Database menggunakan UID dari Firebase Auth.
      * Dipanggil saat login pertama kali dan data belum ada di DB.
      * Menyimpan di node: cleanbanar/users/{uid}

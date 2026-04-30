@@ -95,11 +95,13 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                     }
                 }
                 .addOnFailureListener { e ->
-                    setLoading(false)
                     val msg = when {
                         e.message?.contains("no user record") == true ||
-                        e.message?.contains("user-not-found") == true ->
-                            "Email tidak terdaftar"
+                        e.message?.contains("user-not-found") == true -> {
+                            // User not found in Auth. Cek apakah Admin sudah mendaftarkan email ini di Realtime DB.
+                            checkAndRegisterStaff(email, password)
+                            return@addOnFailureListener
+                        }
                         e.message?.contains("password is invalid") == true ||
                         e.message?.contains("wrong-password") == true ->
                             "Password salah"
@@ -107,8 +109,41 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                             "Tidak ada koneksi internet"
                         else -> "Login gagal: ${e.message}"
                     }
+                    setLoading(false)
                     Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
                 }
+        }
+    }
+
+    private fun checkAndRegisterStaff(email: String, password: String) {
+        FirebaseManager.checkIfUserPreRegistered(email) { exists, oldId, name, role ->
+            if (exists) {
+                // Email sudah didaftarkan Admin. Buatkan akun Auth sekarang.
+                firebaseAuth.createUserWithEmailAndPassword(email, password)
+                    .addOnSuccessListener { authResult ->
+                        val uid = authResult.user?.uid ?: return@addOnSuccessListener
+                        
+                        // Pindahkan data dari ID lama (random push ID) ke ID Auth (uid)
+                        // Assign area default "A1" (sementara hardcoded)
+                        FirebaseManager.seedUserData(uid, name, email, role, "A1") {
+                            // Hapus data lama
+                            FirebaseManager.deleteUser(oldId)
+                            
+                            // Simpan sesi dan arahkan ke dashboard
+                            setLoading(false)
+                            authManager.saveSession(uid, name, email, role, "A1")
+                            Toast.makeText(this, "Akun berhasil diaktifkan! Selamat datang, $name", Toast.LENGTH_LONG).show()
+                            navigateToDashboard(role)
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        setLoading(false)
+                        Toast.makeText(this, "Gagal mengaktifkan akun: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
+            } else {
+                setLoading(false)
+                Toast.makeText(this, "Email tidak terdaftar. Silakan hubungi Administrator.", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
