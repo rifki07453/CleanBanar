@@ -80,17 +80,27 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
         binding.btnCreateAccount.isEnabled = false
         binding.btnCreateAccount.text = "Memproses..."
 
-        FirebaseManager.addUser(name, email, "Petugas")
+        FirebaseManager.addUser(
+            name = name,
+            email = email,
+            role = "Petugas",
+            onSuccess = {
+                // Clear form
+                binding.etNewName.text.clear()
+                binding.etNewEmail.text.clear()
+                binding.etNewPassword.text?.clear()
 
-        // Clear form
-        binding.etNewName.text.clear()
-        binding.etNewEmail.text.clear()
-        binding.etNewPassword.text?.clear()
+                binding.btnCreateAccount.isEnabled = true
+                binding.btnCreateAccount.text = "Buat Akun Petugas"
 
-        binding.btnCreateAccount.isEnabled = true
-        binding.btnCreateAccount.text = "Buat Akun Petugas"
-
-        toast("Akun petugas $name berhasil dibuat")
+                toast("✓ Akun petugas $name berhasil ditambahkan")
+            },
+            onFailure = { errorMsg ->
+                binding.btnCreateAccount.isEnabled = true
+                binding.btnCreateAccount.text = "Buat Akun Petugas"
+                toast("Gagal: $errorMsg")
+            }
+        )
     }
 
     // Delete: Remove from Firebase Realtime Database

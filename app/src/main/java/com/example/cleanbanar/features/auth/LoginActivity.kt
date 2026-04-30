@@ -96,24 +96,24 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                     }
                 }
                 .addOnFailureListener { e ->
-                    val msg = when {
-                        e.message?.contains("no user record") == true ||
-                        e.message?.contains("user-not-found") == true ||
-                        e.message?.contains("credential is incorrect") == true ||
-                        e.message?.contains("INVALID_LOGIN_CREDENTIALS") == true -> {
-                            // User not found in Auth. Cek apakah Admin sudah mendaftarkan email ini di Realtime DB.
-                            checkAndRegisterStaff(email, password)
-                            return@addOnFailureListener
+                    val errMsg = e.message ?: ""
+                    android.util.Log.d("LoginActivity", "Auth error: $errMsg")
+
+                    when {
+                        // Jelas salah password (akun ada, tapi password salah)
+                        errMsg.contains("password is invalid") ||
+                        errMsg.contains("wrong-password") -> {
+                            setLoading(false)
+                            showError("Password salah")
                         }
-                        e.message?.contains("password is invalid") == true ||
-                        e.message?.contains("wrong-password") == true ->
-                            "Password salah"
-                        e.message?.contains("network") == true ->
-                            "Tidak ada koneksi internet"
-                        else -> "Login gagal: ${e.message}"
+                        // Tidak ada koneksi
+                        errMsg.contains("network") -> {
+                            setLoading(false)
+                            showError("Tidak ada koneksi internet")
+                        }
+                        // Semua error lain → cek apakah email sudah didaftarkan Admin di DB
+                        else -> checkAndRegisterStaff(email, password)
                     }
-                    setLoading(false)
-                    showError(msg)
                 }
         }
     }

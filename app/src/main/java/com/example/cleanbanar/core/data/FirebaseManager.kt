@@ -48,11 +48,9 @@ object FirebaseManager {
 
     private val database: FirebaseDatabase? by lazy {
         try {
-            // TODO (PBL GROUP) - SETUP REALTIME DATABASE URL:
-            // Jika kalian pakai server region Singapore (asia-southeast1), terkadang getInstance() kosong bisa error.
-            // Jika error, masukkan URL database kalian ke dalam kurung di bawah ini.
-            // Contoh: FirebaseDatabase.getInstance("https://cleanbanar-3ea64-default-rtdb.asia-southeast1.firebasedatabase.app/")
-            FirebaseDatabase.getInstance()
+            // URL Realtime Database region asia-southeast1 (Singapore) wajib di-hardcode
+            // karena FirebaseDatabase.getInstance() tanpa URL bisa gagal di region ini.
+            FirebaseDatabase.getInstance("https://cleanbanar-default-rtdb.asia-southeast1.firebasedatabase.app")
         } catch (e: Exception) {
             Log.w(TAG, "Firebase not configured: ${e.message}")
             null
@@ -292,34 +290,62 @@ object FirebaseManager {
         rootRef?.child("users")?.removeEventListener(listener)
     }
 
-    fun addUser(name: String, email: String, role: String) {
-        val ref = rootRef?.child("users")?.push() ?: return
-        ref.child("name").setValue(name)
-        ref.child("email").setValue(email)
-        ref.child("role").setValue(role)
+    fun addUser(
+        name: String,
+        email: String,
+        role: String,
+        onSuccess: () -> Unit = {},
+        onFailure: (String) -> Unit = {}
+    ) {
+        val ref = rootRef?.child("users")?.push() ?: run {
+            Log.w(TAG, "addUser: rootRef is null, Firebase tidak terhubung")
+            onFailure("Firebase tidak terhubung. Periksa koneksi internet.")
+            return
+        }
+        val data = mapOf(
+            "name" to name,
+            "email" to email,
+            "role" to role
+        )
+        ref.setValue(data)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { e ->
+                Log.w(TAG, "addUser failed: ${e.message}")
+                onFailure(e.message ?: "Gagal menyimpan data")
+            }
     }
 
     /**
      * Cek apakah email sudah didaftarkan oleh Admin di Realtime DB (tanpa akun Auth).
+     * Menggunakan full-scan client-side (bukan orderByChild) untuk menghindari
+     * kebutuhan Firebase index di Realtime Database Rules.
      */
     fun checkIfUserPreRegistered(email: String, callback: (Boolean, String, String, String) -> Unit) {
         val ref = rootRef?.child("users") ?: run {
+            Log.w(TAG, "checkIfUserPreRegistered: rootRef null, Firebase tidak terhubung")
             callback(false, "", "", "")
             return
         }
-        ref.orderByChild("email").equalTo(email).addListenerForSingleValueEvent(object : ValueEventListener {
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.exists()) {
-                    val child = snapshot.children.first()
-                    val id = child.key ?: ""
-                    val name = child.child("name").getValue(String::class.java) ?: ""
-                    val role = child.child("role").getValue(String::class.java) ?: ""
-                    callback(true, id, name, role)
-                } else {
-                    callback(false, "", "", "")
+                Log.d(TAG, "checkIfUserPreRegistered: total users di DB = ${snapshot.childrenCount}")
+                for (child in snapshot.children) {
+                    val dbEmail = child.child("email").getValue(String::class.java) ?: ""
+                    Log.d(TAG, "  checking: dbEmail='$dbEmail' vs input='${email.trim()}'")
+                    if (dbEmail.trim().equals(email.trim(), ignoreCase = true)) {
+                        val id = child.key ?: ""
+                        val name = child.child("name").getValue(String::class.java) ?: ""
+                        val role = child.child("role").getValue(String::class.java) ?: ""
+                        Log.d(TAG, "  FOUND: id=$id, name=$name, role=$role")
+                        callback(true, id, name, role)
+                        return
+                    }
                 }
+                Log.w(TAG, "checkIfUserPreRegistered: email '$email' tidak ditemukan di DB")
+                callback(false, "", "", "")
             }
             override fun onCancelled(error: DatabaseError) {
+                Log.w(TAG, "checkIfUserPreRegistered cancelled: ${error.message}")
                 callback(false, "", "", "")
             }
         })
