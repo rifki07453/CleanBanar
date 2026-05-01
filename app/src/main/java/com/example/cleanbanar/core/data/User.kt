@@ -5,6 +5,5 @@ data class User(
     val name: String,
     val email: String,
     val password: String,
-    val role: String, // "Admin" or "Petugas"
-    val assignedAreaId: String = ""
+    val role: String // "Admin" or "Petugas"
 )

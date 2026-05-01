@@ -1,7 +1,6 @@
 package com.example.cleanbanar.features.admin
 
 import android.app.AlertDialog
-import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -16,6 +15,10 @@ import com.example.cleanbanar.core.ui.BaseFragment
 import com.example.cleanbanar.databinding.FragmentStaffManagementBinding
 import com.google.firebase.database.ValueEventListener
 
+/**
+ * Fragment untuk manajemen petugas lapangan oleh Admin.
+ * Memungkinkan penambahan dan penghapusan akses petugas.
+ */
 class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
 
     private var usersListener: ValueEventListener? = null
@@ -28,12 +31,10 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
     }
 
     override fun setupViews() {
-        // Back button
         binding.btnBack.setOnClickListener {
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
 
-        // Create account button
         binding.btnCreateAccount.setOnClickListener {
             val name = binding.etNewName.text.toString().trim()
             val email = binding.etNewEmail.text.toString().trim()
@@ -49,6 +50,7 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
     }
 
     override fun observeData() {
+        // Mendengarkan daftar pengguna dari Firebase secara real-time
         usersListener = FirebaseManager.listenUsers { users ->
             binding.staffListContainer.removeAllViews()
             
@@ -56,10 +58,6 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
                 addEmptyState()
             } else {
                 for (user in users) {
-                    val role = user["role"] as? String ?: ""
-                    // Jika ingin memfilter agar Admin tidak bisa dihapus dari list ini:
-                    // if (role == "Admin") continue
-                    
                     addStaffCard(
                         userId = user["id"] as? String ?: "",
                         name = user["name"] as? String ?: "",
@@ -70,12 +68,9 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
         }
     }
 
-    // Create: Write to Firebase Realtime Database
-    // Note: Ini menyimpan data akun petugas ke Realtime DB path "users".
-    // Firebase Auth tidak digunakan karena project ini menggunakan
-    // SharedPreferences + UserSeeder untuk autentikasi lokal.
-    // Jika ingin mengintegrasikan Firebase Auth di masa depan,
-    // gunakan secondary FirebaseApp instance untuk menghindari logout sesi Admin.
+    /**
+     * Membuat akun petugas baru di database.
+     */
     private fun createStaffAccount(name: String, email: String, password: String) {
         binding.btnCreateAccount.isEnabled = false
         binding.btnCreateAccount.text = "Memproses..."
@@ -85,7 +80,6 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
             email = email,
             role = "Petugas",
             onSuccess = {
-                // Clear form
                 binding.etNewName.text.clear()
                 binding.etNewEmail.text.clear()
                 binding.etNewPassword.text?.clear()
@@ -103,11 +97,13 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
         )
     }
 
-    // Delete: Remove from Firebase Realtime Database
+    /**
+     * Menampilkan dialog konfirmasi penghapusan petugas.
+     */
     private fun showDeleteDialog(userId: String, name: String) {
         AlertDialog.Builder(requireContext())
             .setTitle("Hapus Petugas")
-            .setMessage("Yakin ingin menghapus akses \"$name\"?\n\nCatatan: Data dihapus dari database. Untuk mencabut akses Firebase Auth secara penuh, diperlukan Cloud Functions.")
+            .setMessage("Yakin ingin menghapus akses \"$name\"?\n\nCatatan: Data akan dihapus secara permanen dari database.")
             .setPositiveButton("Hapus") { _, _ ->
                 FirebaseManager.deleteUser(userId)
                 toast("$name berhasil dihapus")
@@ -116,6 +112,9 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
             .show()
     }
 
+    /**
+     * Membangun kartu informasi petugas secara dinamis.
+     */
     private fun addStaffCard(userId: String, name: String, email: String) {
         val cardView = com.google.android.material.card.MaterialCardView(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(
@@ -135,11 +134,10 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
             gravity = Gravity.CENTER_VERTICAL
         }
 
-        // Avatar dengan inisial
         val initial = if (name.isNotEmpty()) name.first().uppercase() else "P"
         val avatarBg = FrameLayout(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(48.dp, 48.dp)
-            background = getCircleDrawable(android.graphics.Color.parseColor("#EEF2FF")) // Light indigo bg
+            background = getCircleDrawable(android.graphics.Color.parseColor("#EEF2FF"))
         }
         val avatarTv = TextView(requireContext()).apply {
             layoutParams = FrameLayout.LayoutParams(
@@ -148,13 +146,12 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
                 Gravity.CENTER
             )
             text = initial
-            setTextColor(android.graphics.Color.parseColor("#4F46E5")) // Indigo 600 text
+            setTextColor(android.graphics.Color.parseColor("#4F46E5"))
             textSize = 18f
             setTypeface(typeface, android.graphics.Typeface.BOLD)
         }
         avatarBg.addView(avatarTv)
 
-        // Info teks
         val info = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
@@ -162,29 +159,26 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
         }
         val tvName = TextView(requireContext()).apply {
             text = name
-            setTextColor(android.graphics.Color.parseColor("#374151")) // Gray 700
+            setTextColor(android.graphics.Color.parseColor("#374151"))
             textSize = 15f
             setTypeface(typeface, android.graphics.Typeface.BOLD)
         }
         val tvEmail = TextView(requireContext()).apply {
             text = email
-            setTextColor(android.graphics.Color.parseColor("#9CA3AF")) // Gray 400
+            setTextColor(android.graphics.Color.parseColor("#9CA3AF"))
             textSize = 12f
             setPadding(0, 4.dp, 0, 0)
         }
         info.addView(tvName)
         info.addView(tvEmail)
 
-        // Tambahkan tombol hapus (icon bin) di sebelah kanan
         val deleteIcon = ImageView(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                gravity = Gravity.CENTER_VERTICAL
-            }
-            setImageResource(android.R.drawable.ic_menu_delete) // Menggunakan icon bawaan Android
-            imageTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#EF4444")) // Red 500
+            ).apply { gravity = Gravity.CENTER_VERTICAL }
+            setImageResource(android.R.drawable.ic_menu_delete)
+            imageTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#EF4444"))
             setPadding(8.dp, 8.dp, 8.dp, 8.dp)
             background = getRoundedRectDrawable(android.graphics.Color.TRANSPARENT, 8f.dpF)
             
@@ -235,8 +229,7 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
         super.onDestroyView()
     }
 
-    private fun toast(msg: String) =
-        Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
+    private fun toast(msg: String) = Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
 
     private val Int.dp: Int get() = (this * resources.displayMetrics.density).toInt()
     private val Float.dpF: Float get() = this * resources.displayMetrics.density

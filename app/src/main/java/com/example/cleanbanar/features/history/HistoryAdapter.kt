@@ -10,6 +10,9 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
+/**
+ * Adapter untuk menampilkan daftar riwayat aktivitas dalam bentuk timeline.
+ */
 class HistoryAdapter(private var items: List<Map<String, Any>> = emptyList()) :
     RecyclerView.Adapter<HistoryAdapter.ViewHolder>() {
 
@@ -26,28 +29,26 @@ class HistoryAdapter(private var items: List<Map<String, Any>> = emptyList()) :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val entry = items[position]
-        val context = holder.itemView.context
         
         val type = entry["type"] as? String ?: entry["action"] as? String ?: ""
-        val binTypeRaw = entry["bin_type"] as? String ?: entry["areaId"] as? String ?: ""
+        val binTypeRaw = entry["binType"] as? String ?: entry["bin_type"] as? String ?: ""
         val capacity = (entry["capacity"] as? Number)?.toInt() ?: 0
         val petugas = entry["petugas"] as? String ?: entry["fullName"] as? String ?: ""
         val timestamp = entry["timestamp"] as? Long ?: 0L
 
-        // Format binType: organik -> Sampah Organik
+        // Format judul (contoh: Sampah Organik)
         val titleFormat = "Sampah ${binTypeRaw.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }}"
         holder.binding.tvTitle.text = titleFormat
         
-        // Time & Date
         holder.binding.tvTime.text = formatTime(timestamp)
         holder.binding.tvDate.text = getDayLabel(timestamp)
 
-        // Status & Colors based on type
+        // Penyesuaian status dan warna berdasarkan tipe kejadian
         when (type) {
             "dikosongkan", "emptied" -> {
                 holder.binding.tvStatusBadge.text = "DIKOSONGKAN"
                 holder.binding.tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_green)
-                holder.binding.tvStatusBadge.setTextColor(android.graphics.Color.parseColor("#059669")) // Emerald 600
+                holder.binding.tvStatusBadge.setTextColor(android.graphics.Color.parseColor("#059669"))
                 holder.binding.timelineDot.setBackgroundResource(R.drawable.dot_timeline_green)
                 
                 holder.binding.tvDetails.text = "Petugas: $petugas\nKapasitas akhir: $capacity%"
@@ -55,7 +56,7 @@ class HistoryAdapter(private var items: List<Map<String, Any>> = emptyList()) :
             "dikosongkan_blue" -> {
                 holder.binding.tvStatusBadge.text = "DIKOSONGKAN"
                 holder.binding.tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_blue)
-                holder.binding.tvStatusBadge.setTextColor(android.graphics.Color.parseColor("#2563EB")) // Blue 600
+                holder.binding.tvStatusBadge.setTextColor(android.graphics.Color.parseColor("#2563EB"))
                 holder.binding.timelineDot.setBackgroundResource(R.drawable.dot_timeline_blue)
                 
                 holder.binding.tvDetails.text = "Petugas: $petugas\nKapasitas akhir: $capacity%"
@@ -63,16 +64,15 @@ class HistoryAdapter(private var items: List<Map<String, Any>> = emptyList()) :
             "penuh", "alert" -> {
                 holder.binding.tvStatusBadge.text = "PENUH (100%)"
                 holder.binding.tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_red)
-                holder.binding.tvStatusBadge.setTextColor(android.graphics.Color.parseColor("#DC2626")) // Red 600
+                holder.binding.tvStatusBadge.setTextColor(android.graphics.Color.parseColor("#DC2626"))
                 holder.binding.timelineDot.setBackgroundResource(R.drawable.dot_timeline_red)
                 
-                holder.binding.tvDetails.text = "Notifikasi dikirim ke petugas kebersihan untuk pengangkutan."
+                holder.binding.tvDetails.text = "Notifikasi terkirim otomatis untuk pengangkutan segera."
             }
             else -> {
-                // For any other status such as hampir penuh
                 holder.binding.tvStatusBadge.text = "HAMPIR PENUH"
                 holder.binding.tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_blue)
-                holder.binding.tvStatusBadge.setTextColor(android.graphics.Color.parseColor("#2563EB")) // Blue 600
+                holder.binding.tvStatusBadge.setTextColor(android.graphics.Color.parseColor("#2563EB"))
                 holder.binding.timelineDot.setBackgroundResource(R.drawable.dot_timeline_blue)
                 
                 holder.binding.tvDetails.text = "Kapasitas saat ini: $capacity%"
@@ -109,7 +109,7 @@ class HistoryAdapter(private var items: List<Map<String, Any>> = emptyList()) :
 
     private fun formatTime(timestamp: Long): String {
         if (timestamp == 0L) return ""
-        val sdf = SimpleDateFormat("HH:mm a", Locale.getDefault())
+        val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
         return sdf.format(Date(timestamp))
     }
 }

@@ -11,7 +11,7 @@
         android:id="@+id/headerBlockProfile"
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:background="@drawable/profile_header_rounded_bg"
+        android:background="@drawable/header_gradient_bg"
         app:layout_constraintTop_toTopOf="parent" />
 
     <!-- User Profile Info in Header (Centered Vertically and Horizontally in Header) -->
@@ -22,7 +22,7 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="32dp"
         app:layout_constraintTop_toTopOf="@id/headerBlockProfile"
         app:layout_constraintBottom_toBottomOf="@id/headerBlockProfile"
         app:layout_constraintVertical_bias="0.4"> <!-- Slightly above center due to rounded corners -->
@@ -39,7 +39,7 @@
                 android:id="@+id/ivUserAvatar"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:src="@android:drawable/ic_menu_myplaces"
+                android:src="@drawable/ic_profile"
                 app:tint="@color/white"
                 android:padding="12dp" />
         </FrameLayout>
@@ -133,19 +133,12 @@
                             android:textSize="14sp"
                             android:textStyle="bold" />
                             
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@android:drawable/arrow_down_float"
-                            app:tint="#9CA3AF"
-                            android:rotation="270" />
                     </LinearLayout>
 
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#F3F4F6"
-                        android:layout_marginHorizontal="64dp" />
+                        android:background="#F3F4F6" />
 
                     <!-- Menu Item: Pengaturan Notifikasi -->
                     <LinearLayout
@@ -177,20 +170,12 @@
                             android:textSize="14sp"
                             android:textStyle="bold" />
                             
-                        <ImageView
-                            android:id="@+id/ivExpandNotif"
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@android:drawable/arrow_down_float"
-                            app:tint="#9CA3AF"
-                            android:rotation="270" />
                     </LinearLayout>
 
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#F3F4F6"
-                        android:layout_marginHorizontal="64dp" />
+                        android:background="#F3F4F6" />
 
                     <!-- Menu Item: Keamanan & Password -->
                     <LinearLayout
@@ -222,12 +207,6 @@
                             android:textSize="14sp"
                             android:textStyle="bold" />
                             
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@android:drawable/arrow_down_float"
-                            app:tint="#9CA3AF"
-                            android:rotation="270" />
                     </LinearLayout>
 
                 </LinearLayout>
@@ -261,7 +240,7 @@
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:background="@drawable/bg_rounded_light_red"
-                        android:src="@android:drawable/ic_lock_power_off"
+                        android:src="@drawable/ic_logout"
                         app:tint="#EF4444"
                         android:padding="8dp" />
 

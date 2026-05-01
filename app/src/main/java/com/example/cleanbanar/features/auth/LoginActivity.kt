@@ -46,7 +46,7 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                     val uid = authResult.user?.uid ?: return@addOnSuccessListener
 
                     // Ambil role dari Realtime Database (node "cleanbanar/users/{uid}")
-                    FirebaseManager.getUserData(uid) { name, role, assignedAreaId ->
+                    FirebaseManager.getUserData(uid) { name, role ->
                         if (role.isEmpty()) {
                             // Data belum ada di DB → seed otomatis berdasarkan email
                             val seedData = getSeedDataForEmail(email)
@@ -66,16 +66,14 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                                 uid = uid,
                                 name = seedData.first,
                                 email = email,
-                                role = seedData.second,
-                                assignedAreaId = seedData.third
+                                role = seedData.second
                             ) {
                                 setLoading(false)
                                 authManager.saveSession(
                                     uid = uid,
                                     name = seedData.first,
                                     email = email,
-                                    role = seedData.second,
-                                    assignedAreaId = seedData.third
+                                    role = seedData.second
                                 )
                                 Toast.makeText(this, "Selamat datang, ${seedData.first}!", Toast.LENGTH_SHORT).show()
                                 navigateToDashboard(seedData.second)
@@ -87,8 +85,7 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                                 uid = uid,
                                 name = name,
                                 email = email,
-                                role = role,
-                                assignedAreaId = assignedAreaId
+                                role = role
                             )
                             Toast.makeText(this, "Selamat datang, $name!", Toast.LENGTH_SHORT).show()
                             navigateToDashboard(role)
@@ -127,14 +124,13 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                         val uid = authResult.user?.uid ?: return@addOnSuccessListener
                         
                         // Pindahkan data dari ID lama (random push ID) ke ID Auth (uid)
-                        // Assign area default "A1" (sementara hardcoded)
-                        FirebaseManager.seedUserData(uid, name, email, role, "A1") {
+                        FirebaseManager.seedUserData(uid, name, email, role) {
                             // Hapus data lama
                             FirebaseManager.deleteUser(oldId)
                             
                             // Simpan sesi dan arahkan ke dashboard
                             setLoading(false)
-                            authManager.saveSession(uid, name, email, role, "A1")
+                            authManager.saveSession(uid, name, email, role)
                             Toast.makeText(this, "Akun berhasil diaktifkan! Selamat datang, $name", Toast.LENGTH_LONG).show()
                             navigateToDashboard(role)
                         }
@@ -164,14 +160,14 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
     }
 
     /**
-     * Menentukan data awal (name, role, assignedAreaId) berdasarkan email.
+     * Menentukan data awal (name, role) berdasarkan email.
      * Hanya berlaku untuk akun default sistem.
      * Return null jika email tidak dikenali sebagai akun sistem.
      */
-    private fun getSeedDataForEmail(email: String): Triple<String, String, String>? {
+    private fun getSeedDataForEmail(email: String): Pair<String, String>? {
         return when (email.lowercase()) {
-            "admin@cleanbanar.com"   -> Triple("Administrator",    "Admin",   "")
-            "petugas@cleanbanar.com" -> Triple("Petugas Lapangan", "Petugas", "A1")
+            "admin@cleanbanar.com"   -> Pair("Administrator",    "Admin")
+            "petugas@cleanbanar.com" -> Pair("Petugas Lapangan", "Petugas")
             else -> null
         }
     }

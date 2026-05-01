@@ -4,6 +4,9 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.google.firebase.auth.FirebaseAuth
 
+/**
+ * Pengelola autentikasi dan sesi pengguna menggunakan FirebaseAuth dan SharedPreferences.
+ */
 class AuthManager(context: Context) {
 
     companion object {
@@ -12,7 +15,6 @@ class AuthManager(context: Context) {
         private const val KEY_USER_NAME = "user_name"
         private const val KEY_USER_EMAIL = "user_email"
         private const val KEY_USER_ROLE = "user_role"
-        private const val KEY_ASSIGNED_AREA = "assigned_area_id"
     }
 
     private val prefs: SharedPreferences =
@@ -21,55 +23,48 @@ class AuthManager(context: Context) {
     private val firebaseAuth = FirebaseAuth.getInstance()
 
     /**
-     * Check if user is currently logged in via FirebaseAuth.
-     * SharedPrefs digunakan sebagai cache role lokal supaya tidak perlu query DB tiap buka app.
+     * Memeriksa apakah pengguna sudah masuk (login).
+     * Menggunakan SharedPreferences sebagai cache role lokal.
      */
     fun isLoggedIn(): Boolean {
         return firebaseAuth.currentUser != null && getUserRole().isNotEmpty()
     }
 
     /**
-     * Save user session data (name, email, role, area) to SharedPreferences.
-     * Dipanggil setelah Firebase Auth berhasil & role berhasil diambil dari DB.
+     * Menyimpan data sesi pengguna ke SharedPreferences.
      */
-    fun saveSession(uid: String, name: String, email: String, role: String, assignedAreaId: String = "") {
+    fun saveSession(uid: String, name: String, email: String, role: String) {
         prefs.edit().apply {
             putString(KEY_USER_ID, uid)
             putString(KEY_USER_NAME, name)
             putString(KEY_USER_EMAIL, email)
             putString(KEY_USER_ROLE, role)
-            putString(KEY_ASSIGNED_AREA, assignedAreaId)
             apply()
         }
     }
 
     /**
-     * Get the currently logged-in user's name.
+     * Mendapatkan nama pengguna yang sedang masuk.
      */
     fun getUserName(): String = prefs.getString(KEY_USER_NAME, "") ?: ""
 
     /**
-     * Get the currently logged-in user's email.
+     * Mendapatkan email pengguna yang sedang masuk.
      */
     fun getUserEmail(): String = prefs.getString(KEY_USER_EMAIL, "") ?: ""
 
     /**
-     * Get the currently logged-in user's role ("Admin" or "Petugas").
+     * Mendapatkan peran pengguna yang sedang masuk (Admin/Petugas).
      */
     fun getUserRole(): String = prefs.getString(KEY_USER_ROLE, "") ?: ""
 
     /**
-     * Get the currently logged-in user's UID.
+     * Mendapatkan UID pengguna yang sedang masuk.
      */
     fun getUserId(): String = prefs.getString(KEY_USER_ID, "") ?: ""
 
     /**
-     * Get the currently logged-in user's assigned area ID.
-     */
-    fun getAssignedAreaId(): String = prefs.getString(KEY_ASSIGNED_AREA, "") ?: ""
-
-    /**
-     * Logout: sign out dari Firebase, clear SharedPreferences cache.
+     * Meluar (Logout): keluar dari Firebase dan hapus cache sesi lokal.
      */
     fun logout() {
         firebaseAuth.signOut()

@@ -16,8 +16,7 @@ object UserSeeder {
                 name = "Petugas Lapangan",
                 email = "petugas@cleanbanar.com",
                 password = "petugas123",
-                role = "Petugas",
-                assignedAreaId = "A1"
+                role = "Petugas"
             )
         )
     }

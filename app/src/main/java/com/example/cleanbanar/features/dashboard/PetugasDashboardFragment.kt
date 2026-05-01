@@ -1,7 +1,6 @@
 package com.example.cleanbanar.features.dashboard
 
 import android.graphics.Typeface
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,13 +19,17 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.google.firebase.database.ValueEventListener
 
+/**
+ * Fragment untuk Dashboard Petugas Lapangan.
+ * Menampilkan status tempat sampah secara real-time dan aksi pengosongan.
+ */
 class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>() {
 
     private lateinit var authManager: AuthManager
     private var organikListener: ValueEventListener? = null
     private var nonOrganikListener: ValueEventListener? = null
 
-    // Track bin data for urgency sorting
+    // Data class untuk melacak status tempat sampah
     private data class BinData(
         val type: String,
         var fillPercentage: Int = 0,
@@ -44,31 +47,20 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         return FragmentPetugasDashboardBinding.inflate(inflater, container, false)
     }
 
-    // ==========================================
-    // View Setup & Area Info Loading
-    // ==========================================
     override fun setupViews() {
         authManager = AuthManager(requireContext())
-
-        // Load area info
-        FirebaseManager.getUserArea(authManager.getUserId()) { areaInfo ->
-            if (!isAdded) return@getUserArea
-            binding.tvAreaName.text = areaInfo.areaName
-        }
+        binding.tvSystemName.text = "Sistem Terpusat"
 
         binding.btnDecorativeTrash.setOnClickListener {
-            // Decorative only per user request
             Toast.makeText(requireContext(), "Menyegarkan status...", Toast.LENGTH_SHORT).show()
         }
 
-        // Force initial card render with default 0% values before Firebase responds
+        // Tampilkan kartu awal dengan nilai 0%
         rebuildCards()
     }
 
-    // ==========================================
-    // Firebase Real-Time Listeners
-    // ==========================================
     override fun observeData() {
+        // Pantau status tempat sampah organik
         organikListener = FirebaseManager.listenBinStatus("organik") { fillPercentage, status, lastUpdate, lastEmptied ->
             if (!isAdded) return@listenBinStatus
             binDataMap["organik"] = BinData("organik", fillPercentage, status, lastUpdate, lastEmptied)
@@ -76,6 +68,7 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
             updateOverallStatus()
         }
 
+        // Pantau status tempat sampah non-organik
         nonOrganikListener = FirebaseManager.listenBinStatus("nonOrganik") { fillPercentage, status, lastUpdate, lastEmptied ->
             if (!isAdded) return@listenBinStatus
             binDataMap["nonOrganik"] = BinData("nonOrganik", fillPercentage, status, lastUpdate, lastEmptied)
@@ -84,13 +77,11 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         }
     }
 
-    // ==========================================
-    // Dynamic Card Building (Urgency Sorted)
-    // ==========================================
+    /**
+     * Membangun ulang kartu tempat sampah dan mengurutkannya berdasarkan urgensi (kapasitas tertinggi).
+     */
     private fun rebuildCards() {
         binding.cardsContainer.removeAllViews()
-
-        // Sort by fillPercentage descending (highest urgency first)
         val sortedBins = binDataMap.values.sortedByDescending { it.fillPercentage }
 
         for (bin in sortedBins) {
@@ -99,25 +90,19 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         }
     }
 
+    /**
+     * Membangun kartu (CardView) tempat sampah secara dinamis.
+     */
     private fun buildBinCard(bin: BinData): MaterialCardView {
         val isOrganik = bin.type == "organik"
         val label = if (isOrganik) "Organik" else "Non-Organik"
         val percent = bin.fillPercentage
 
-        // Determine status level exactly matching designs
-        // Note: The design specific colors for badge and text:
-        // "TERSEDIA" = text: #10B981 (emerald 500) bg: #D1FAE5 (emerald 100) or cyan
-        // "HAMPIR PENUH" = text: #D97706 (amber 600) bg: #FEF3C7 (amber 100)
-        
+        // Tentukan status berdasarkan kapasitas
         val (badgeText, badgeDrawable, badgeTextColor, progressDrawableRes) = when {
             percent >= 95 -> Quadruple("PENUH", R.drawable.badge_red_bg, R.color.red_500, R.drawable.progress_bar_red)
             percent >= 80 -> Quadruple("HAMPIR PENUH", R.drawable.badge_amber_bg, R.color.amber_600, R.drawable.progress_bar_amber)
-            else -> {
-                // If it's available, Organik uses green badge, Non-Organik uses blue badge? 
-                // The design shows Organik: TERSEDIA (emerald text, emerald bg). 
-                // A generic TERSEDIA state uses green.
-                Quadruple("TERSEDIA", R.drawable.badge_green_bg, R.color.emerald_600, R.drawable.progress_bar_green)
-            }
+            else -> Quadruple("TERSEDIA", R.drawable.badge_green_bg, R.color.emerald_600, R.drawable.progress_bar_green)
         }
 
         val statusText = when {
@@ -127,7 +112,7 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
             else -> "Perkiraan penuh dlm 2 hari"
         }
 
-        // Card container
+        // Wadah Kartu
         val cardView = MaterialCardView(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -136,17 +121,16 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
             radius = 20f.dpToPxF()
             cardElevation = 0f.dpToPxF()
             strokeWidth = 1.dpToPx()
-            strokeColor = 0x1A000000 // Very light outline
+            strokeColor = 0x1A000000 
             setCardBackgroundColor(resources.getColor(R.color.white, null))
         }
-
 
         val innerLayout = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(24.dpToPx(), 24.dpToPx(), 24.dpToPx(), 24.dpToPx())
         }
 
-        // ---- Top Row: Icon + Title + Badge ----
+        // Baris Atas: Ikon + Judul + Badge
         val topRow = RelativeLayout(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -165,9 +149,7 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
             setBackgroundResource(iconBg)
             setImageResource(iconSrc)
             scaleType = ImageView.ScaleType.CENTER
-            // To simulate design, leaf/bottle is slightly smaller inside circle
             setPadding(8.dpToPx(), 8.dpToPx(), 8.dpToPx(), 8.dpToPx())
-            contentDescription = label
         }
 
         val titleCol = LinearLayout(requireContext()).apply {
@@ -198,7 +180,6 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         titleCol.addView(tvTitle)
         titleCol.addView(tvUpdate)
 
-        // Badge
         val tvBadge = TextView(requireContext()).apply {
             text = badgeText
             textSize = 8f
@@ -220,7 +201,7 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         topRow.addView(titleCol)
         topRow.addView(tvBadge)
 
-        // ---- Capacity Row ----
+        // Baris Kapasitas
         val capacityRow = RelativeLayout(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -257,28 +238,25 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         capacityRow.addView(tvCapLabel)
         capacityRow.addView(tvPercent)
 
-        // ---- Progress Bar ----
+        // Progress Bar
         val actualProgressDrawableRes = if (isOrganik) {
             R.drawable.progress_bar_green
         } else {
-            // Wait, for non-organik we want blue progress bar instead of green!
-            // I'll make a programmatic blue tint, but if it's over 80% it uses amber/red globally.
-            // But from design, Organik uses green track, Non-Organik uses blue track.
             if (percent < 80) R.drawable.progress_bar_blue else progressDrawableRes
         }
         
         val progressBar = ProgressBar(requireContext(), null, android.R.attr.progressBarStyleHorizontal).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                8.dpToPx() // THICKER bar to match design
+                8.dpToPx()
             ).apply { bottomMargin = 8.dpToPx() }
             max = 100
             progress = percent
             progressDrawable = resources.getDrawable(actualProgressDrawableRes, null)
-            scaleY = 1.0f // Ensures fat round corners
+            scaleY = 1.0f 
         }
 
-        // ---- Status / Estimate Row ----
+        // Baris Status
         val statusRow = RelativeLayout(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -300,14 +278,13 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
 
         statusRow.addView(tvEstimate)
 
-        // ---- CTA Button ----
+        // Tombol Pengosongan
         val btnEmpty = MaterialButton(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 42.dpToPx()
             )
             text = "Tandai Telah Dikosongkan"
-            // Color logic based on design: Organik button is light green, Non-Organik uses light blue
             val txtColor = if (isOrganik) R.color.emerald_600 else R.color.blue_600
             val bgColor = if (isOrganik) R.color.green_50 else R.color.blue_50
             
@@ -323,7 +300,6 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
             }
         }
 
-        // Assemble card
         innerLayout.addView(topRow)
         innerLayout.addView(capacityRow)
         innerLayout.addView(progressBar)
@@ -334,22 +310,22 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         return cardView
     }
 
-    // ==========================================
-    // Button Handler - Empty Bin
-    // ==========================================
+    /**
+     * Menangani proses pengosongan tempat sampah.
+     */
     private fun handleEmptyBin(binType: String, button: MaterialButton, isOrganik: Boolean) {
         val originalText = button.text
         button.isEnabled = false
         button.text = "Memuat..."
 
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-            // Unified empty action
+            // Update status di Firebase
             FirebaseManager.emptyBin(binType, authManager.getUserName())
             
-            // Add traceable history entry
+            // Catat di riwayat
             FirebaseManager.addHistoryEntry(
                 action = "emptied",
-                areaId = authManager.getAssignedAreaId(),
+                binType = binType,
                 userId = authManager.getUserId(),
                 fullName = authManager.getUserName()
             )
@@ -361,7 +337,7 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
                 val txtColor = if (isOrganik) R.color.emerald_600 else R.color.blue_600
                 button.setTextColor(resources.getColor(txtColor, null))
 
-                // Revert text after 2 seconds
+                // Kembalikan teks tombol setelah 2 detik
                 android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
                     if (isAdded) {
                         button.text = originalText
@@ -373,9 +349,9 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         }, 800)
     }
 
-    // ==========================================
-    // Overall System Status Computation
-    // ==========================================
+    /**
+     * Memperbarui status sistem secara keseluruhan.
+     */
     private fun updateOverallStatus() {
         val maxPercent = binDataMap.values.maxOfOrNull { it.fillPercentage } ?: 0
 
@@ -388,10 +364,6 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
                 binding.tvStatus.text = "Perhatian"
                 binding.statusDot.setBackgroundResource(R.drawable.badge_amber_bg)
             }
-            maxPercent >= 50 -> {
-                binding.tvStatus.text = "Perhatian"
-                binding.statusDot.setBackgroundResource(R.drawable.badge_amber_bg)
-            }
             else -> {
                 binding.tvStatus.text = "Normal"
                 binding.statusDot.setBackgroundResource(R.drawable.badge_green_bg)
@@ -399,9 +371,9 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         }
     }
 
-    // ==========================================
-    // Utility / Helper Functions
-    // ==========================================
+    /**
+     * Memformat waktu update terakhir ke format yang mudah dibaca.
+     */
     private fun formatLastUpdate(timestamp: Long): String {
         if (timestamp == 0L) return "Belum diupdate"
         val diff = System.currentTimeMillis() - timestamp

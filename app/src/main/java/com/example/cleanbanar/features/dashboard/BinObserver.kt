@@ -5,71 +5,40 @@ import com.example.cleanbanar.core.data.FirebaseManager
 import com.google.firebase.database.ValueEventListener
 
 /**
- * BinObserver — Threshold-based notification trigger.
+ * BinObserver — Pemicu notifikasi berdasarkan ambang batas (threshold).
  *
- * This singleton listens to real-time bin capacity changes from Firebase
- * and automatically generates notifications and history entries when
- * thresholds are crossed.
- *
- * Responsibilities:
- *   - Track previous capacity state for each bin
- *   - Trigger "Hampir Penuh" notification at ≥80%
- *   - Trigger "Penuh" notification + history at ≥95%
- *   - Prevent duplicate notifications via last-state comparison
- *   - Respect user notification preferences before writing
- *
- * Architecture note:
- *   This runs on the frontend as a hybrid workaround. Ideally,
- *   threshold logic would live in Firebase Cloud Functions or
- *   on the ESP32 device itself.
+ * Mendengarkan perubahan kapasitas tempat sampah secara real-time dan
+ * membuat notifikasi serta entri riwayat secara otomatis.
  */
 object BinObserver {
 
     private const val TAG = "BinObserver"
 
-    // ==========================================
-    // State Tracking
-    // ==========================================
-
-    /** Previous known capacity for each bin type (to detect threshold crossings) */
+    // Kapasitas sebelumnya untuk mendeteksi kenaikan ambang batas
     private var previousOrganik: Int = -1
     private var previousNonOrganik: Int = -1
 
-    /** Firebase listeners (to remove on stop) */
+    // Listener Firebase
     private var organikListener: ValueEventListener? = null
     private var nonOrganikListener: ValueEventListener? = null
     private var settingsListener: ValueEventListener? = null
 
-    /** Flag to prevent starting multiple times */
     private var isRunning = false
-
-    /** Current user's notification preferences (loaded from Firebase) */
     private var currentSettings = FirebaseManager.NotificationSettings()
     private var currentUserId: String = ""
 
-    // ==========================================
-    // Lifecycle - Start / Stop
-    // ==========================================
-
     /**
-     * Start observing bin status changes.
-     * Safe to call multiple times — will no-op if already running.
-     * @param userId The current logged-in user ID for notification preferences.
+     * Mulai mengamati perubahan status tempat sampah.
      */
     fun start(userId: String = "") {
-        if (isRunning) {
-            Log.d(TAG, "BinObserver already running, skipping start.")
-            return
-        }
+        if (isRunning) return
         isRunning = true
         currentUserId = userId
-        Log.d(TAG, "BinObserver started for user: $userId")
 
-        // Listen to user's notification preferences in real-time
+        // Ambil preferensi notifikasi pengguna secara real-time
         if (userId.isNotEmpty()) {
             settingsListener = FirebaseManager.listenNotificationSettings(userId) { settings ->
                 currentSettings = settings
-                Log.d(TAG, "Notification settings updated: $settings")
             }
         }
 
@@ -85,7 +54,7 @@ object BinObserver {
     }
 
     /**
-     * Stop observing bin status changes and clean up listeners.
+     * Berhenti mengamati dan bersihkan semua listener.
      */
     fun stop() {
         organikListener?.let { FirebaseManager.removeBinListener("organik", it) }
@@ -101,53 +70,36 @@ object BinObserver {
         previousOrganik = -1
         previousNonOrganik = -1
         isRunning = false
-        Log.d(TAG, "BinObserver stopped.")
     }
 
-    // ==========================================
-    // Threshold Logic
-    // ==========================================
-
     /**
-     * Evaluate whether a bin's capacity has crossed a critical threshold.
-     *
-     * Rules:
-     *   - Ignore the very first reading (previousPercent == -1) to prevent
-     *     false alerts on app startup.
-     *   - Only trigger when crossing UP through a threshold, not when
-     *     the value stays above the threshold on subsequent updates.
-     *   - ≥95%: "Penuh" → danger notification + history alert entry
-     *   - ≥80%: "Hampir Penuh" → warning notification only
-     *   - Check user notification settings before writing notifications
+     * Evaluasi apakah kapasitas tempat sampah telah melewati ambang batas kritis.
+     * 
+     * Aturan:
+     * - >= 95%: Penuh -> Notifikasi bahaya + entri riwayat
+     * - >= 80%: Hampir Penuh -> Notifikasi peringatan
      */
     private fun handleThreshold(binType: String, currentPercent: Int, previousPercent: Int) {
-        // Skip the first reading after app start (no previous baseline)
+        // Lewati pembacaan pertama setelah aplikasi dimulai
         if (previousPercent == -1) return
 
-        // Skip if capacity decreased (e.g., bin was emptied) or didn't change
+        // Abaikan jika kapasitas turun (dikongsongkan) atau tidak berubah
         if (currentPercent <= previousPercent) return
 
-        // Validate: ignore anomalous sensor data
-        if (currentPercent < 0 || currentPercent > 100) {
-            Log.w(TAG, "Anomalous reading for $binType: $currentPercent%, ignoring.")
-            return
-        }
+        // Abaikan data sensor yang tidak valid (anomali)
+        if (currentPercent < 0 || currentPercent > 100) return
 
         val binLabel = if (binType == "organik") "Organik" else "Non-Organik"
 
-        // Threshold: PENUH (≥95%, crossed from below 95%)
+        // Ambang batas: PENUH (>= 95%)
         if (currentPercent >= 95 && previousPercent < 95) {
-            Log.d(TAG, "$binLabel crossed PENUH threshold: $previousPercent% → $currentPercent%")
-
             FirebaseManager.addHistoryEntry(
                 action = "alert",
-                areaId = "A1", // Default area for MVP, should be dynamic in future
+                binType = binType,
                 userId = "SYSTEM",
                 fullName = "Sistem Otomatis"
             )
 
-
-            // Only write notification if user has "penuh" enabled
             if (currentSettings.penuh) {
                 FirebaseManager.addNotification(
                     title = "$binLabel Penuh!",
@@ -156,16 +108,12 @@ object BinObserver {
                 )
             }
 
-            // Update daily stats with the peak value
             FirebaseManager.updateDailyStats(binType, currentPercent)
             return
         }
 
-        // Threshold: HAMPIR PENUH (≥80%, crossed from below 80%)
+        // Ambang batas: HAMPIR PENUH (>= 80%)
         if (currentPercent >= 80 && previousPercent < 80) {
-            Log.d(TAG, "$binLabel crossed HAMPIR PENUH threshold: $previousPercent% → $currentPercent%")
-
-            // Only write notification if user has "hampir_penuh" enabled
             if (currentSettings.hampirPenuh) {
                 FirebaseManager.addNotification(
                     title = "$binLabel Hampir Penuh",
@@ -174,7 +122,6 @@ object BinObserver {
                 )
             }
 
-            // Update daily stats
             FirebaseManager.updateDailyStats(binType, currentPercent)
         }
     }

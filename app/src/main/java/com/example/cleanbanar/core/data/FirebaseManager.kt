@@ -7,20 +7,10 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 
-// =========================================================================
-// TODO (PBL GROUP) - PANDUAN SETUP FIREBASE UNTUK MASING-MASING ANGGOTA:
-// =========================================================================
-// 1. Download file `google-services.json` dari project Firebase kamu sendiri.
-// 2. Masukkan/timpa file tersebut ke dalam folder `app/` di Android Studio.
-// 3. Pastikan di Firebase Console kamu sudah mengaktifkan:
-//    - Authentication (Sign-in provider: Email/Password)
-//    - Realtime Database (Set Rules .read = true, .write = true)
-// =========================================================================
-
 /**
- * Firebase Realtime Database manager for CleanBanar.
+ * Pengelola Firebase Realtime Database untuk CleanBanar.
  *
- * Database structure:
+ * Struktur Database:
  * cleanbanar/
  *   bins/
  *     organik/   { percentage: Int, status: String, lastUpdate: Long }
@@ -31,7 +21,7 @@ import com.google.firebase.database.ValueEventListener
  *   notifications/
  *     {id}/ { title: String, message: String, type: String, timestamp: Long, read: Boolean }
  *   historyLogs/
- *     {id}/ { action: String, areaId: String, userId: String, fullName: String, timestamp: Long }
+ *     {id}/ { action: String, binType: String, userId: String, fullName: String, timestamp: Long }
  *   users/
  *     {id}/ { name: String, email: String, role: String }
  *   statistics/
@@ -40,19 +30,14 @@ import com.google.firebase.database.ValueEventListener
  */
 object FirebaseManager {
 
-    // ==========================================
-    // Constants & Firebase References
-    // ==========================================
-
     private const val TAG = "FirebaseManager"
 
     private val database: FirebaseDatabase? by lazy {
         try {
-            // URL Realtime Database region asia-southeast1 (Singapore) wajib di-hardcode
-            // karena FirebaseDatabase.getInstance() tanpa URL bisa gagal di region ini.
+            // Menggunakan URL database region asia-southeast1 (Singapore)
             FirebaseDatabase.getInstance("https://cleanbanar-default-rtdb.asia-southeast1.firebasedatabase.app")
         } catch (e: Exception) {
-            Log.w(TAG, "Firebase not configured: ${e.message}")
+            Log.w(TAG, "Firebase belum dikonfigurasi: ${e.message}")
             null
         }
     }
@@ -66,7 +51,7 @@ object FirebaseManager {
     }
 
     // ==========================================
-    // Bin Status - Read & Write
+    // Status Tempat Sampah - Baca & Tulis
     // ==========================================
     fun listenBinStatus(binType: String, callback: (percentage: Int, status: String, lastUpdate: Long, lastEmptied: Long) -> Unit): ValueEventListener? {
         val ref = rootRef?.child("bins")?.child(binType) ?: return null
@@ -79,7 +64,7 @@ object FirebaseManager {
                 callback(fillPercentage, status, lastUpdate, lastEmptied)
             }
             override fun onCancelled(error: DatabaseError) {
-                Log.w(TAG, "listenBinStatus cancelled: ${error.message}")
+                Log.w(TAG, "listenBinStatus dibatalkan: ${error.message}")
             }
         }
         ref.addValueEventListener(listener)
@@ -91,8 +76,8 @@ object FirebaseManager {
     }
 
     /**
-     * Update bin capacity with validation.
-     * Capacity is clamped between 0-100% to prevent anomalous data.
+     * Memperbarui status kapasitas tempat sampah.
+     * Kapasitas dibatasi antara 0-100% untuk menghindari data anomali.
      */
     fun updateBinStatus(binType: String, fillPercentage: Int, status: String) {
         val ref = rootRef?.child("bins")?.child(binType) ?: return
@@ -103,56 +88,63 @@ object FirebaseManager {
     }
 
     // ==========================================
-    // Unified Actions - Data Consistency
+    // Aksi Terpadu - Konsistensi Data
     // ==========================================
 
     /**
-     * Unified "empty bin" action. Ensures data consistency by:
-     * 1. Resetting capacity to 0% and status to "TERSEDIA"
-     * 2. Writing a history entry ("emptied")
-     * 3. Sending a "selesai" notification
-     * 4. Updating daily statistics
-     *
-     * This is the ONLY method that should be called when a petugas
-     * marks a bin as emptied, to avoid fragmented writes.
+     * Aksi terpadu untuk pengosongan sampah. Menjamin konsistensi data dengan:
+     * 1. Meriset kapasitas ke 0% dan status ke "Normal"
+     * 2. Mencatat waktu pengosongan terakhir
+     * 3. Menambahkan entri riwayat (history)
+     * 4. Mengirim notifikasi keberhasilan
+     * 5. Memperbarui statistik harian
      */
     fun emptyBin(binType: String, actor: String) {
         val binLabel = if (binType == "organik") "Organik" else "Non-Organik"
 
-        // 1. Reset bin capacity
+        // 1. Riset kapasitas tempat sampah
         updateBinStatus(binType, 0, "Normal")
 
-        // 2. Write lastEmptied timestamp
+        // 2. Simpan waktu pengosongan terakhir
         rootRef?.child("bins")?.child(binType)?.child("lastEmptied")?.setValue(System.currentTimeMillis())
 
-        // 3. Record in history
-        // Note: For now we pass "A1" as default area if not specified
-        // In real use, we should pass the actual areaId from dashboard
+        // 3. Catat di riwayat
+        addHistoryEntry(
+            action = "emptied",
+            binType = binType,
+            userId = "SYSTEM",
+            fullName = actor
+        )
 
-        // 4. Send notification
+        // 4. Tambahkan notifikasi
         addNotification(
             title = "$binLabel Dikosongkan",
             message = "Sampah $binLabel telah dikosongkan oleh $actor.",
             type = "success"
         )
 
-        // 5. Update daily stats with reset value
+        // 5. Perbarui statistik harian dengan nilai riset
         updateDailyStats(binType, 0)
     }
 
     // ==========================================
-    // Device Status - Online/Offline
+    // Status Perangkat - Online/Offline & Tipe Jaringan
     // ==========================================
-    fun listenDeviceStatus(callback: (connectionStatus: String, lastSeen: Long) -> Unit): ValueEventListener? {
+    /**
+     * Mendengarkan status koneksi alat IoT secara real-time.
+     * Mengembalikan status (ONLINE/OFFLINE), waktu terakhir terlihat, dan tipe jaringan (WIFI/BT).
+     */
+    fun listenDeviceStatus(callback: (connectionStatus: String, lastSeen: Long, networkType: String) -> Unit): ValueEventListener? {
         val ref = rootRef?.child("device") ?: return null
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val status = snapshot.child("connectionStatus").getValue(String::class.java) ?: "OFFLINE"
                 val lastSeen = snapshot.child("lastSeen").getValue(Long::class.java) ?: 0L
-                callback(status, lastSeen)
+                val networkType = snapshot.child("networkType").getValue(String::class.java) ?: "WIFI"
+                callback(status, lastSeen, networkType)
             }
             override fun onCancelled(error: DatabaseError) {
-                Log.w(TAG, "listenDeviceStatus cancelled: ${error.message}")
+                Log.w(TAG, "listenDeviceStatus dibatalkan: ${error.message}")
             }
         }
         ref.addValueEventListener(listener)
@@ -163,8 +155,15 @@ object FirebaseManager {
         rootRef?.child("device")?.removeEventListener(listener)
     }
 
+    /**
+     * Memperbarui tipe jaringan aktif pada database (WiFi atau Bluetooth).
+     */
+    fun updateDeviceNetworkType(networkType: String) {
+        rootRef?.child("device")?.child("networkType")?.setValue(networkType)
+    }
+
     // ==========================================
-    // Notifications - Read & Write
+    // Notifikasi - Baca & Tulis
     // ==========================================
     fun listenNotifications(callback: (List<Map<String, Any>>) -> Unit): ValueEventListener? {
         val ref = rootRef?.child("notifications") ?: return null
@@ -184,7 +183,7 @@ object FirebaseManager {
                 callback(notifications)
             }
             override fun onCancelled(error: DatabaseError) {
-                Log.w(TAG, "listenNotifications cancelled: ${error.message}")
+                Log.w(TAG, "listenNotifications dibatalkan: ${error.message}")
             }
         }
         ref.orderByChild("timestamp").addValueEventListener(listener)
@@ -196,8 +195,8 @@ object FirebaseManager {
     }
 
     /**
-     * Write a new notification to Firebase.
-     * Used by both manual actions (emptyBin) and automatic triggers (BinObserver).
+     * Menambahkan notifikasi baru ke Firebase.
+     * Digunakan oleh aksi manual (pengosongan) maupun otomatis (BinObserver).
      */
     fun addNotification(title: String, message: String, type: String) {
         val ref = rootRef?.child("notifications")?.push() ?: return
@@ -209,27 +208,18 @@ object FirebaseManager {
     }
 
     // ==========================================
-    // History - Read & Write
+    // Riwayat (History) - Baca & Tulis
     // ==========================================
-    /**
-     * Listener for history logs with RBAC (Role-Based Access Control).
-     * Staff see only their area, Admin see all.
-     */
-    fun listenHistoryFiltered(role: String, areaId: String, callback: (List<Map<String, Any>>) -> Unit): ValueEventListener? {
+    fun listenHistory(callback: (List<Map<String, Any>>) -> Unit): ValueEventListener? {
         val ref = rootRef?.child("historyLogs") ?: return null
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val history = mutableListOf<Map<String, Any>>()
                 for (child in snapshot.children.reversed()) {
-                    val logAreaId = child.child("areaId").getValue(String::class.java) ?: ""
-                    
-                    // Filter: if Petugas, only show same areaId
-                    if (role == "Petugas" && logAreaId != areaId) continue
-
                     val map = mutableMapOf<String, Any>()
                     map["id"] = child.key ?: ""
                     map["action"] = child.child("action").getValue(String::class.java) ?: ""
-                    map["areaId"] = logAreaId
+                    map["binType"] = child.child("binType").getValue(String::class.java) ?: ""
                     map["userId"] = child.child("userId").getValue(String::class.java) ?: ""
                     map["fullName"] = child.child("fullName").getValue(String::class.java) ?: ""
                     map["timestamp"] = child.child("timestamp").getValue(Long::class.java) ?: 0L
@@ -239,7 +229,7 @@ object FirebaseManager {
                 callback(history)
             }
             override fun onCancelled(error: DatabaseError) {
-                Log.w(TAG, "listenHistoryFiltered cancelled: ${error.message}")
+                Log.w(TAG, "listenHistory dibatalkan: ${error.message}")
             }
         }
         ref.orderByChild("timestamp").addValueEventListener(listener)
@@ -250,10 +240,10 @@ object FirebaseManager {
         rootRef?.child("historyLogs")?.removeEventListener(listener)
     }
 
-    fun addHistoryEntry(action: String, areaId: String, userId: String, fullName: String) {
+    fun addHistoryEntry(action: String, binType: String, userId: String, fullName: String) {
         val ref = rootRef?.child("historyLogs")?.push() ?: return
         ref.child("action").setValue(action)
-        ref.child("areaId").setValue(areaId)
+        ref.child("binType").setValue(binType)
         ref.child("userId").setValue(userId)
         ref.child("fullName").setValue(fullName)
         ref.child("timestamp").setValue(System.currentTimeMillis())
@@ -261,7 +251,7 @@ object FirebaseManager {
 
 
     // ==========================================
-    // Users / Staff Management
+    // Pengelolaan Pengguna / Petugas
     // ==========================================
     fun listenUsers(callback: (List<Map<String, Any>>) -> Unit): ValueEventListener? {
         val ref = rootRef?.child("users") ?: return null
@@ -279,7 +269,7 @@ object FirebaseManager {
                 callback(users)
             }
             override fun onCancelled(error: DatabaseError) {
-                Log.w(TAG, "listenUsers cancelled: ${error.message}")
+                Log.w(TAG, "listenUsers dibatalkan: ${error.message}")
             }
         }
         ref.addValueEventListener(listener)
@@ -298,7 +288,7 @@ object FirebaseManager {
         onFailure: (String) -> Unit = {}
     ) {
         val ref = rootRef?.child("users")?.push() ?: run {
-            Log.w(TAG, "addUser: rootRef is null, Firebase tidak terhubung")
+            Log.w(TAG, "addUser: rootRef null, Firebase tidak terhubung")
             onFailure("Firebase tidak terhubung. Periksa koneksi internet.")
             return
         }
@@ -310,58 +300,48 @@ object FirebaseManager {
         ref.setValue(data)
             .addOnSuccessListener { onSuccess() }
             .addOnFailureListener { e ->
-                Log.w(TAG, "addUser failed: ${e.message}")
+                Log.w(TAG, "addUser gagal: ${e.message}")
                 onFailure(e.message ?: "Gagal menyimpan data")
             }
     }
 
     /**
-     * Cek apakah email sudah didaftarkan oleh Admin di Realtime DB (tanpa akun Auth).
-     * Menggunakan full-scan client-side (bukan orderByChild) untuk menghindari
-     * kebutuhan Firebase index di Realtime Database Rules.
+     * Memeriksa apakah email sudah didaftarkan oleh Admin di database.
      */
     fun checkIfUserPreRegistered(email: String, callback: (Boolean, String, String, String) -> Unit) {
         val ref = rootRef?.child("users") ?: run {
-            Log.w(TAG, "checkIfUserPreRegistered: rootRef null, Firebase tidak terhubung")
             callback(false, "", "", "")
             return
         }
         ref.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                Log.d(TAG, "checkIfUserPreRegistered: total users di DB = ${snapshot.childrenCount}")
                 for (child in snapshot.children) {
                     val dbEmail = child.child("email").getValue(String::class.java) ?: ""
-                    Log.d(TAG, "  checking: dbEmail='$dbEmail' vs input='${email.trim()}'")
                     if (dbEmail.trim().equals(email.trim(), ignoreCase = true)) {
                         val id = child.key ?: ""
                         val name = child.child("name").getValue(String::class.java) ?: ""
                         val role = child.child("role").getValue(String::class.java) ?: ""
-                        Log.d(TAG, "  FOUND: id=$id, name=$name, role=$role")
                         callback(true, id, name, role)
                         return
                     }
                 }
-                Log.w(TAG, "checkIfUserPreRegistered: email '$email' tidak ditemukan di DB")
                 callback(false, "", "", "")
             }
             override fun onCancelled(error: DatabaseError) {
-                Log.w(TAG, "checkIfUserPreRegistered cancelled: ${error.message}")
+                Log.w(TAG, "checkIfUserPreRegistered dibatalkan: ${error.message}")
                 callback(false, "", "", "")
             }
         })
     }
 
     /**
-     * Seed data awal user ke Realtime Database menggunakan UID dari Firebase Auth.
-     * Dipanggil saat login pertama kali dan data belum ada di DB.
-     * Menyimpan di node: cleanbanar/users/{uid}
+     * Menyimpan data awal pengguna saat pendaftaran pertama kali.
      */
     fun seedUserData(
         uid: String,
         name: String,
         email: String,
         role: String,
-        assignedAreaId: String,
         onComplete: () -> Unit
     ) {
         val ref = rootRef?.child("users")?.child(uid) ?: run {
@@ -371,13 +351,12 @@ object FirebaseManager {
         val data = mapOf(
             "name" to name,
             "email" to email,
-            "role" to role,
-            "assignedAreaId" to assignedAreaId
+            "role" to role
         )
         ref.setValue(data)
             .addOnSuccessListener { onComplete() }
             .addOnFailureListener {
-                Log.w(TAG, "seedUserData failed: ${it.message}")
+                Log.w(TAG, "seedUserData gagal: ${it.message}")
                 onComplete()
             }
     }
@@ -393,31 +372,28 @@ object FirebaseManager {
     }
 
     /**
-     * Fetch user data (name, role, assignedAreaId) once from Realtime Database.
-     * Used after Firebase Auth login to retrieve role for role-based navigation.
-     * Calls callback with empty strings if user node not found.
+     * Mengambil data pengguna (nama, role) satu kali berdasarkan UID.
      */
-    fun getUserData(uid: String, callback: (name: String, role: String, assignedAreaId: String) -> Unit) {
+    fun getUserData(uid: String, callback: (name: String, role: String) -> Unit) {
         val ref = rootRef?.child("users")?.child(uid) ?: run {
-            callback("", "", "")
+            callback("", "")
             return
         }
         ref.addListenerForSingleValueEvent(object : com.google.firebase.database.ValueEventListener {
             override fun onDataChange(snapshot: com.google.firebase.database.DataSnapshot) {
                 val name = snapshot.child("name").getValue(String::class.java) ?: ""
                 val role = snapshot.child("role").getValue(String::class.java) ?: ""
-                val area = snapshot.child("assignedAreaId").getValue(String::class.java) ?: ""
-                callback(name, role, area)
+                callback(name, role)
             }
             override fun onCancelled(error: com.google.firebase.database.DatabaseError) {
-                Log.w(TAG, "getUserData cancelled: ${error.message}")
-                callback("", "", "")
+                Log.w(TAG, "getUserData dibatalkan: ${error.message}")
+                callback("", "")
             }
         })
     }
 
     // ==========================================
-    // Statistics - Daily Summaries & Aggregation
+    // Statistik - Ringkasan Harian
     // ==========================================
     fun listenDailyStats(callback: (List<Map<String, Any>>) -> Unit): ValueEventListener? {
         val ref = rootRef?.child("statistics")?.child("daily") ?: return null
@@ -434,7 +410,7 @@ object FirebaseManager {
                 callback(stats)
             }
             override fun onCancelled(error: DatabaseError) {
-                Log.w(TAG, "listenDailyStats cancelled: ${error.message}")
+                Log.w(TAG, "listenDailyStats dibatalkan: ${error.message}")
             }
         }
         ref.orderByKey().limitToLast(7).addValueEventListener(listener)
@@ -446,9 +422,7 @@ object FirebaseManager {
     }
 
     /**
-     * Update the daily statistics summary for a given bin type.
-     * Stores the latest capacity value under today's date key.
-     * This is lightweight aggregation — no heavy computation.
+     * Memperbarui ringkasan statistik harian berdasarkan tipe sampah.
      */
     fun updateDailyStats(binType: String, percentage: Int) {
         val dateKey = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
@@ -459,8 +433,7 @@ object FirebaseManager {
     }
 
     /**
-     * Count the number of "penuh" (alert) events from the history node
-     * within the last 7 days. Used by StatisticsFragment for the summary cards.
+     * Menghitung jumlah kejadian "Penuh" (alert) dalam 7 hari terakhir.
      */
     fun countPenuhEvents(callback: (Int) -> Unit): ValueEventListener? {
         val ref = rootRef?.child("historyLogs") ?: return null
@@ -478,7 +451,7 @@ object FirebaseManager {
                 callback(count)
             }
             override fun onCancelled(error: DatabaseError) {
-                Log.w(TAG, "countPenuhEvents cancelled: ${error.message}")
+                Log.w(TAG, "countPenuhEvents dibatalkan: ${error.message}")
             }
         }
         ref.addValueEventListener(listener)
@@ -490,13 +463,9 @@ object FirebaseManager {
     }
 
     // ==========================================
-    // Notification Settings - Per User Preferences
+    // Pengaturan Notifikasi Pengguna
     // ==========================================
 
-    /**
-     * Data class representing user notification preferences.
-     * Default values are all true (all notifications ON).
-     */
     data class NotificationSettings(
         val hampirPenuh: Boolean = true,
         val penuh: Boolean = true,
@@ -505,8 +474,7 @@ object FirebaseManager {
     )
 
     /**
-     * Save notification settings for a specific user.
-     * Stored at: users/{userId}/notification_settings/
+     * Menyimpan pengaturan notifikasi untuk pengguna tertentu.
      */
     fun saveNotificationSettings(userId: String, settings: NotificationSettings) {
         val ref = rootRef?.child("users")?.child(userId)?.child("notification_settings") ?: return
@@ -517,8 +485,7 @@ object FirebaseManager {
     }
 
     /**
-     * Load notification settings for a user (one-time read).
-     * If data not found, returns defaults (all ON).
+     * Memuat pengaturan notifikasi pengguna (satu kali baca).
      */
     fun loadNotificationSettings(userId: String, callback: (NotificationSettings) -> Unit) {
         val ref = rootRef?.child("users")?.child(userId)?.child("notification_settings") ?: run {
@@ -536,15 +503,14 @@ object FirebaseManager {
                 callback(settings)
             }
             override fun onCancelled(error: DatabaseError) {
-                Log.w(TAG, "loadNotificationSettings cancelled: ${error.message}")
+                Log.w(TAG, "loadNotificationSettings dibatalkan: ${error.message}")
                 callback(NotificationSettings())
             }
         })
     }
 
     /**
-     * Listen to notification settings changes in real-time.
-     * Returns the listener so it can be removed on cleanup.
+     * Mendengarkan perubahan pengaturan notifikasi secara real-time.
      */
     fun listenNotificationSettings(userId: String, callback: (NotificationSettings) -> Unit): ValueEventListener? {
         val ref = rootRef?.child("users")?.child(userId)?.child("notification_settings") ?: return null
@@ -559,7 +525,7 @@ object FirebaseManager {
                 callback(settings)
             }
             override fun onCancelled(error: DatabaseError) {
-                Log.w(TAG, "listenNotificationSettings cancelled: ${error.message}")
+                Log.w(TAG, "listenNotificationSettings dibatalkan: ${error.message}")
             }
         }
         ref.addValueEventListener(listener)
@@ -568,34 +534,5 @@ object FirebaseManager {
 
     fun removeNotificationSettingsListener(userId: String, listener: ValueEventListener) {
         rootRef?.child("users")?.child(userId)?.child("notification_settings")?.removeEventListener(listener)
-    }
-
-    // ==========================================
-    // Area / Sub-Area - User Assignment
-    // ==========================================
-
-    /**
-     * Data class for area assignment.
-     * Currently hardcoded with defaults; structured for future Firebase migration.
-     * Future: fetched from users/{userId}/assignedArea + areas/{areaId}
-     */
-    data class AreaInfo(
-        val areaName: String = "SDN 1 Banjarmasin",
-        val subAreaName: String = "Halaman Belakang"
-    )
-
-    /**
-     * Get the assigned area for a user.
-     * For now, returns hardcoded defaults.
-     * TODO: Replace with Firebase lookup when area management is implemented.
-     */
-    fun getUserArea(userId: String, callback: (AreaInfo) -> Unit) {
-        // Future implementation:
-        // val ref = rootRef?.child("users")?.child(userId) ?: run {
-        //     callback(AreaInfo())
-        //     return
-        // }
-        // ref.addListenerForSingleValueEvent(...)
-        callback(AreaInfo())
     }
 }
