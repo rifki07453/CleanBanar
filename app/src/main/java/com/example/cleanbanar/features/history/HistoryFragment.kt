@@ -51,16 +51,16 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>() {
                     
                     // Konversi data Firebase ke format yang dikenali adapter
                     val formattedHistory = historyData.map { item ->
-                        val action = item["action"] as String
-                        val binType = item["binType"] as String
-                        val binLabel = if (binType == "organik") "Organik" else "Non-Organik"
+                        val aksi = item["aksi"] as String
+                        val tipeSampah = item["tipeSampah"] as String
+                        val binLabel = if (tipeSampah == "organik") "Organik" else "Non-Organik"
                         
                         mapOf(
-                            "type" to if (action == "emptied") (if (binType == "organik") "dikosongkan" else "dikosongkan_blue") else "penuh",
+                            "type" to if (aksi == "pengosongan") (if (tipeSampah == "organik") "dikosongkan" else "dikosongkan_blue") else "penuh",
                             "bin_type" to binLabel,
-                            "petugas" to (item["fullName"] ?: ""),
+                            "petugas" to (item["namaLengkap"] ?: ""),
                             "capacity" to 0,
-                            "timestamp" to (item["timestamp"] ?: 0L)
+                            "timestamp" to (item["waktu"] ?: 0L)
                         )
                     }
                     historyAdapter.updateData(formattedHistory)

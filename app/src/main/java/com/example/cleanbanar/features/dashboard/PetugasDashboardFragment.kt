@@ -324,10 +324,10 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
             
             // Catat di riwayat
             FirebaseManager.addHistoryEntry(
-                action = "emptied",
-                binType = binType,
-                userId = authManager.getUserId(),
-                fullName = authManager.getUserName()
+                aksi = "pengosongan",
+                tipeSampah = binType,
+                idPengguna = authManager.getUserId(),
+                namaLengkap = authManager.getUserName()
             )
 
             if (isAdded) {

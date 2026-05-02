@@ -40,13 +40,13 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
                     addEmptyState()
                 } else {
                     for (notif in notifData) {
-                        val timestamp = notif["timestamp"] as Long
+                        val waktu = notif["waktu"] as Long
                         addNotificationCard(
-                            title = notif["title"] as String,
-                            message = notif["message"] as String,
-                            type = notif["type"] as String,
-                            timeText = formatTimestamp(timestamp),
-                            isUnread = !(notif["read"] as Boolean)
+                            title = notif["judul"] as String,
+                            message = notif["pesan"] as String,
+                            type = notif["tipe"] as String,
+                            timeText = formatTimestamp(waktu),
+                            isUnread = !(notif["sudahDibaca"] as Boolean)
                         )
                     }
                 }
@@ -162,9 +162,6 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
         }
     }
 
-    /**
-     * Tampilan saat tidak ada notifikasi.
-     */
     private fun addEmptyState() {
         val container = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL
@@ -193,9 +190,6 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
         binding.notifListContainer.addView(container)
     }
 
-    /**
-     * Memformat timestamp ke format waktu yang mudah dibaca.
-     */
     private fun formatTimestamp(timestamp: Long): String {
         if (timestamp == 0L) return ""
         val diff = System.currentTimeMillis() - timestamp

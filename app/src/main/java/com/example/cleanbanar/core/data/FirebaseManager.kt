@@ -9,24 +9,7 @@ import com.google.firebase.database.ValueEventListener
 
 /**
  * Pengelola Firebase Realtime Database untuk CleanBanar.
- *
- * Struktur Database:
- * cleanbanar/
- *   bins/
- *     organik/   { percentage: Int, status: String, lastUpdate: Long }
- *     nonOrganik/{ percentage: Int, status: String, lastUpdate: Long }
- *   device/
- *     connectionStatus: String ("ONLINE" / "OFFLINE")
- *     lastSeen: Long
- *   notifications/
- *     {id}/ { title: String, message: String, type: String, timestamp: Long, read: Boolean }
- *   historyLogs/
- *     {id}/ { action: String, binType: String, userId: String, fullName: String, timestamp: Long }
- *   users/
- *     {id}/ { name: String, email: String, role: String }
- *   statistics/
- *     daily/
- *       {date}/ { organik: Int, nonOrganik: Int }
+ * Seluruh field database dan kunci data menggunakan Bahasa Indonesia untuk konsistensi.
  */
 object FirebaseManager {
 
@@ -34,7 +17,6 @@ object FirebaseManager {
 
     private val database: FirebaseDatabase? by lazy {
         try {
-            // Menggunakan URL database region asia-southeast1 (Singapore)
             FirebaseDatabase.getInstance("https://cleanbanar-default-rtdb.asia-southeast1.firebasedatabase.app")
         } catch (e: Exception) {
             Log.w(TAG, "Firebase belum dikonfigurasi: ${e.message}")
@@ -46,212 +28,136 @@ object FirebaseManager {
         database?.getReference("cleanbanar")
     }
 
-    private fun isAvailable(): Boolean {
-        return rootRef != null
-    }
-
     // ==========================================
-    // Status Tempat Sampah - Baca & Tulis
+    // Status Tempat Sampah
     // ==========================================
-    fun listenBinStatus(binType: String, callback: (percentage: Int, status: String, lastUpdate: Long, lastEmptied: Long) -> Unit): ValueEventListener? {
+    fun listenBinStatus(binType: String, callback: (persentase: Int, status: String, terakhirUpdate: Long, terakhirDikosongkan: Long) -> Unit): ValueEventListener? {
         val ref = rootRef?.child("bins")?.child(binType) ?: return null
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val fillPercentage = snapshot.child("fillPercentage").getValue(Int::class.java) ?: 0
+                val persentase = snapshot.child("persentaseIsi").getValue(Int::class.java) ?: 0
                 val status = snapshot.child("status").getValue(String::class.java) ?: "Normal"
-                val lastUpdate = snapshot.child("lastUpdate").getValue(Long::class.java) ?: 0L
-                val lastEmptied = snapshot.child("lastEmptied").getValue(Long::class.java) ?: 0L
-                callback(fillPercentage, status, lastUpdate, lastEmptied)
+                val terakhirUpdate = snapshot.child("terakhirUpdate").getValue(Long::class.java) ?: 0L
+                val terakhirDikosongkan = snapshot.child("terakhirDikosongkan").getValue(Long::class.java) ?: 0L
+                callback(persentase, status, terakhirUpdate, terakhirDikosongkan)
             }
-            override fun onCancelled(error: DatabaseError) {
-                Log.w(TAG, "listenBinStatus dibatalkan: ${error.message}")
-            }
+            override fun onCancelled(error: DatabaseError) {}
         }
         ref.addValueEventListener(listener)
         return listener
     }
 
-    fun removeBinListener(binType: String, listener: ValueEventListener) {
-        rootRef?.child("bins")?.child(binType)?.removeEventListener(listener)
-    }
-
-    /**
-     * Memperbarui status kapasitas tempat sampah.
-     * Kapasitas dibatasi antara 0-100% untuk menghindari data anomali.
-     */
-    fun updateBinStatus(binType: String, fillPercentage: Int, status: String) {
+    fun updateBinStatus(binType: String, persentase: Int, status: String) {
         val ref = rootRef?.child("bins")?.child(binType) ?: return
-        val clampedPercent = fillPercentage.coerceIn(0, 100)
-        ref.child("fillPercentage").setValue(clampedPercent)
+        ref.child("persentaseIsi").setValue(persentase.coerceIn(0, 100))
         ref.child("status").setValue(status)
-        ref.child("lastUpdate").setValue(System.currentTimeMillis())
+        ref.child("terakhirUpdate").setValue(System.currentTimeMillis())
     }
 
-    // ==========================================
-    // Aksi Terpadu - Konsistensi Data
-    // ==========================================
-
-    /**
-     * Aksi terpadu untuk pengosongan sampah. Menjamin konsistensi data dengan:
-     * 1. Meriset kapasitas ke 0% dan status ke "Normal"
-     * 2. Mencatat waktu pengosongan terakhir
-     * 3. Menambahkan entri riwayat (history)
-     * 4. Mengirim notifikasi keberhasilan
-     * 5. Memperbarui statistik harian
-     */
-    fun emptyBin(binType: String, actor: String) {
+    fun emptyBin(binType: String, aktor: String) {
         val binLabel = if (binType == "organik") "Organik" else "Non-Organik"
-
-        // 1. Riset kapasitas tempat sampah
         updateBinStatus(binType, 0, "Normal")
+        rootRef?.child("bins")?.child(binType)?.child("terakhirDikosongkan")?.setValue(System.currentTimeMillis())
 
-        // 2. Simpan waktu pengosongan terakhir
-        rootRef?.child("bins")?.child(binType)?.child("lastEmptied")?.setValue(System.currentTimeMillis())
-
-        // 3. Catat di riwayat
-        addHistoryEntry(
-            action = "emptied",
-            binType = binType,
-            userId = "SYSTEM",
-            fullName = actor
-        )
-
-        // 4. Tambahkan notifikasi
-        addNotification(
-            title = "$binLabel Dikosongkan",
-            message = "Sampah $binLabel telah dikosongkan oleh $actor.",
-            type = "success"
-        )
-
-        // 5. Perbarui statistik harian dengan nilai riset
+        addHistoryEntry("pengosongan", binType, "SYSTEM", aktor)
+        addNotification("$binLabel Dikosongkan", "Sampah $binLabel telah dikosongkan oleh $aktor.", "success")
         updateDailyStats(binType, 0)
     }
 
     // ==========================================
-    // Status Perangkat - Online/Offline & Tipe Jaringan
+    // Status Perangkat
     // ==========================================
-    /**
-     * Mendengarkan status koneksi alat IoT secara real-time.
-     * Mengembalikan status (ONLINE/OFFLINE), waktu terakhir terlihat, dan tipe jaringan (WIFI/BT).
-     */
-    fun listenDeviceStatus(callback: (connectionStatus: String, lastSeen: Long, networkType: String) -> Unit): ValueEventListener? {
+    fun listenDeviceStatus(callback: (statusKoneksi: String, terakhirTerlihat: Long, tipeJaringan: String) -> Unit): ValueEventListener? {
         val ref = rootRef?.child("device") ?: return null
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val status = snapshot.child("connectionStatus").getValue(String::class.java) ?: "OFFLINE"
-                val lastSeen = snapshot.child("lastSeen").getValue(Long::class.java) ?: 0L
-                val networkType = snapshot.child("networkType").getValue(String::class.java) ?: "WIFI"
-                callback(status, lastSeen, networkType)
+                val status = snapshot.child("statusKoneksi").getValue(String::class.java) ?: "OFFLINE"
+                val terakhir = snapshot.child("terakhirTerlihat").getValue(Long::class.java) ?: 0L
+                val tipe = snapshot.child("tipeJaringan").getValue(String::class.java) ?: "WIFI"
+                callback(status, terakhir, tipe)
             }
-            override fun onCancelled(error: DatabaseError) {
-                Log.w(TAG, "listenDeviceStatus dibatalkan: ${error.message}")
-            }
+            override fun onCancelled(error: DatabaseError) {}
         }
         ref.addValueEventListener(listener)
         return listener
     }
 
-    fun removeDeviceListener(listener: ValueEventListener) {
-        rootRef?.child("device")?.removeEventListener(listener)
-    }
-
-    /**
-     * Memperbarui tipe jaringan aktif pada database (WiFi atau Bluetooth).
-     */
-    fun updateDeviceNetworkType(networkType: String) {
-        rootRef?.child("device")?.child("networkType")?.setValue(networkType)
+    fun updateDeviceNetworkType(tipe: String) {
+        rootRef?.child("device")?.child("tipeJaringan")?.setValue(tipe)
     }
 
     // ==========================================
-    // Notifikasi - Baca & Tulis
+    // Notifikasi
     // ==========================================
     fun listenNotifications(callback: (List<Map<String, Any>>) -> Unit): ValueEventListener? {
         val ref = rootRef?.child("notifications") ?: return null
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val notifications = mutableListOf<Map<String, Any>>()
+                val daftar = mutableListOf<Map<String, Any>>()
                 for (child in snapshot.children.reversed()) {
-                    val map = mutableMapOf<String, Any>()
-                    map["id"] = child.key ?: ""
-                    map["title"] = child.child("title").getValue(String::class.java) ?: ""
-                    map["message"] = child.child("message").getValue(String::class.java) ?: ""
-                    map["type"] = child.child("type").getValue(String::class.java) ?: "info"
-                    map["timestamp"] = child.child("timestamp").getValue(Long::class.java) ?: 0L
-                    map["read"] = child.child("read").getValue(Boolean::class.java) ?: false
-                    notifications.add(map)
+                    daftar.add(mapOf(
+                        "id" to (child.key ?: ""),
+                        "judul" to (child.child("judul").getValue(String::class.java) ?: ""),
+                        "pesan" to (child.child("pesan").getValue(String::class.java) ?: ""),
+                        "tipe" to (child.child("tipe").getValue(String::class.java) ?: "info"),
+                        "waktu" to (child.child("waktu").getValue(Long::class.java) ?: 0L),
+                        "sudahDibaca" to (child.child("sudahDibaca").getValue(Boolean::class.java) ?: false)
+                    ))
                 }
-                callback(notifications)
+                callback(daftar)
             }
-            override fun onCancelled(error: DatabaseError) {
-                Log.w(TAG, "listenNotifications dibatalkan: ${error.message}")
-            }
+            override fun onCancelled(error: DatabaseError) {}
         }
-        ref.orderByChild("timestamp").addValueEventListener(listener)
+        ref.orderByChild("waktu").addValueEventListener(listener)
         return listener
     }
 
-    fun removeNotificationListener(listener: ValueEventListener) {
-        rootRef?.child("notifications")?.removeEventListener(listener)
-    }
-
-    /**
-     * Menambahkan notifikasi baru ke Firebase.
-     * Digunakan oleh aksi manual (pengosongan) maupun otomatis (BinObserver).
-     */
-    fun addNotification(title: String, message: String, type: String) {
+    fun addNotification(judul: String, pesan: String, tipe: String) {
         val ref = rootRef?.child("notifications")?.push() ?: return
-        ref.child("title").setValue(title)
-        ref.child("message").setValue(message)
-        ref.child("type").setValue(type)
-        ref.child("timestamp").setValue(System.currentTimeMillis())
-        ref.child("read").setValue(false)
+        ref.child("judul").setValue(judul)
+        ref.child("pesan").setValue(pesan)
+        ref.child("tipe").setValue(tipe)
+        ref.child("waktu").setValue(System.currentTimeMillis())
+        ref.child("sudahDibaca").setValue(false)
     }
 
     // ==========================================
-    // Riwayat (History) - Baca & Tulis
+    // Riwayat (History)
     // ==========================================
     fun listenHistory(callback: (List<Map<String, Any>>) -> Unit): ValueEventListener? {
         val ref = rootRef?.child("historyLogs") ?: return null
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val history = mutableListOf<Map<String, Any>>()
+                val riwayat = mutableListOf<Map<String, Any>>()
                 for (child in snapshot.children.reversed()) {
-                    val map = mutableMapOf<String, Any>()
-                    map["id"] = child.key ?: ""
-                    map["action"] = child.child("action").getValue(String::class.java) ?: ""
-                    map["binType"] = child.child("binType").getValue(String::class.java) ?: ""
-                    map["userId"] = child.child("userId").getValue(String::class.java) ?: ""
-                    map["fullName"] = child.child("fullName").getValue(String::class.java) ?: ""
-                    map["timestamp"] = child.child("timestamp").getValue(Long::class.java) ?: 0L
-
-                    history.add(map)
+                    riwayat.add(mapOf(
+                        "id" to (child.key ?: ""),
+                        "aksi" to (child.child("aksi").getValue(String::class.java) ?: ""),
+                        "tipeSampah" to (child.child("tipeSampah").getValue(String::class.java) ?: ""),
+                        "idPengguna" to (child.child("idPengguna").getValue(String::class.java) ?: ""),
+                        "namaLengkap" to (child.child("namaLengkap").getValue(String::class.java) ?: ""),
+                        "waktu" to (child.child("waktu").getValue(Long::class.java) ?: 0L)
+                    ))
                 }
-                callback(history)
+                callback(riwayat)
             }
-            override fun onCancelled(error: DatabaseError) {
-                Log.w(TAG, "listenHistory dibatalkan: ${error.message}")
-            }
+            override fun onCancelled(error: DatabaseError) {}
         }
-        ref.orderByChild("timestamp").addValueEventListener(listener)
+        ref.orderByChild("waktu").addValueEventListener(listener)
         return listener
     }
 
-    fun removeHistoryListener(listener: ValueEventListener) {
-        rootRef?.child("historyLogs")?.removeEventListener(listener)
-    }
-
-    fun addHistoryEntry(action: String, binType: String, userId: String, fullName: String) {
+    fun addHistoryEntry(aksi: String, tipeSampah: String, idPengguna: String, namaLengkap: String) {
         val ref = rootRef?.child("historyLogs")?.push() ?: return
-        ref.child("action").setValue(action)
-        ref.child("binType").setValue(binType)
-        ref.child("userId").setValue(userId)
-        ref.child("fullName").setValue(fullName)
-        ref.child("timestamp").setValue(System.currentTimeMillis())
+        ref.child("aksi").setValue(aksi)
+        ref.child("tipeSampah").setValue(tipeSampah)
+        ref.child("idPengguna").setValue(idPengguna)
+        ref.child("namaLengkap").setValue(namaLengkap)
+        ref.child("waktu").setValue(System.currentTimeMillis())
     }
-
 
     // ==========================================
-    // Pengelolaan Pengguna / Petugas
+    // Pengguna
     // ==========================================
     fun listenUsers(callback: (List<Map<String, Any>>) -> Unit): ValueEventListener? {
         val ref = rootRef?.child("users") ?: return null
@@ -259,111 +165,51 @@ object FirebaseManager {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val users = mutableListOf<Map<String, Any>>()
                 for (child in snapshot.children) {
-                    val map = mutableMapOf<String, Any>()
-                    map["id"] = child.key ?: ""
-                    map["name"] = child.child("name").getValue(String::class.java) ?: ""
-                    map["email"] = child.child("email").getValue(String::class.java) ?: ""
-                    map["role"] = child.child("role").getValue(String::class.java) ?: ""
-                    users.add(map)
+                    users.add(mapOf(
+                        "id" to (child.key ?: ""),
+                        "nama" to (child.child("nama").getValue(String::class.java) ?: ""),
+                        "email" to (child.child("email").getValue(String::class.java) ?: ""),
+                        "peran" to (child.child("peran").getValue(String::class.java) ?: "")
+                    ))
                 }
                 callback(users)
             }
-            override fun onCancelled(error: DatabaseError) {
-                Log.w(TAG, "listenUsers dibatalkan: ${error.message}")
-            }
+            override fun onCancelled(error: DatabaseError) {}
         }
         ref.addValueEventListener(listener)
         return listener
     }
 
-    fun removeUsersListener(listener: ValueEventListener) {
-        rootRef?.child("users")?.removeEventListener(listener)
-    }
-
-    fun addUser(
-        name: String,
-        email: String,
-        role: String,
-        onSuccess: () -> Unit = {},
-        onFailure: (String) -> Unit = {}
-    ) {
-        val ref = rootRef?.child("users")?.push() ?: run {
-            Log.w(TAG, "addUser: rootRef null, Firebase tidak terhubung")
-            onFailure("Firebase tidak terhubung. Periksa koneksi internet.")
-            return
-        }
-        val data = mapOf(
-            "name" to name,
-            "email" to email,
-            "role" to role
-        )
-        ref.setValue(data)
+    fun addUser(nama: String, email: String, peran: String, onSuccess: () -> Unit = {}, onFailure: (String) -> Unit = {}) {
+        val ref = rootRef?.child("users")?.push() ?: run { onFailure("Firebase error"); return }
+        ref.setValue(mapOf("nama" to nama, "email" to email, "peran" to peran))
             .addOnSuccessListener { onSuccess() }
-            .addOnFailureListener { e ->
-                Log.w(TAG, "addUser gagal: ${e.message}")
-                onFailure(e.message ?: "Gagal menyimpan data")
-            }
+            .addOnFailureListener { onFailure(it.message ?: "Error") }
     }
 
-    /**
-     * Memeriksa apakah email sudah didaftarkan oleh Admin di database.
-     */
     fun checkIfUserPreRegistered(email: String, callback: (Boolean, String, String, String) -> Unit) {
-        val ref = rootRef?.child("users") ?: run {
-            callback(false, "", "", "")
-            return
-        }
-        ref.addListenerForSingleValueEvent(object : ValueEventListener {
+        rootRef?.child("users")?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 for (child in snapshot.children) {
-                    val dbEmail = child.child("email").getValue(String::class.java) ?: ""
-                    if (dbEmail.trim().equals(email.trim(), ignoreCase = true)) {
-                        val id = child.key ?: ""
-                        val name = child.child("name").getValue(String::class.java) ?: ""
-                        val role = child.child("role").getValue(String::class.java) ?: ""
-                        callback(true, id, name, role)
+                    if ((child.child("email").getValue(String::class.java) ?: "").trim().equals(email.trim(), true)) {
+                        callback(true, child.key ?: "", child.child("nama").getValue(String::class.java) ?: "", child.child("peran").getValue(String::class.java) ?: "")
                         return
                     }
                 }
                 callback(false, "", "", "")
             }
-            override fun onCancelled(error: DatabaseError) {
-                Log.w(TAG, "checkIfUserPreRegistered dibatalkan: ${error.message}")
-                callback(false, "", "", "")
-            }
+            override fun onCancelled(error: DatabaseError) { callback(false, "", "", "") }
         })
     }
 
-    /**
-     * Menyimpan data awal pengguna saat pendaftaran pertama kali.
-     */
-    fun seedUserData(
-        uid: String,
-        name: String,
-        email: String,
-        role: String,
-        onComplete: () -> Unit
-    ) {
-        val ref = rootRef?.child("users")?.child(uid) ?: run {
-            onComplete()
-            return
-        }
-        val data = mapOf(
-            "name" to name,
-            "email" to email,
-            "role" to role
-        )
-        ref.setValue(data)
-            .addOnSuccessListener { onComplete() }
-            .addOnFailureListener {
-                Log.w(TAG, "seedUserData gagal: ${it.message}")
-                onComplete()
-            }
+    fun seedUserData(uid: String, nama: String, email: String, peran: String, onComplete: () -> Unit) {
+        rootRef?.child("users")?.child(uid)?.setValue(mapOf("nama" to nama, "email" to email, "peran" to peran))
+            ?.addOnCompleteListener { onComplete() }
     }
 
-    fun updateUser(userId: String, name: String, email: String) {
+    fun updateUser(userId: String, nama: String, email: String) {
         val ref = rootRef?.child("users")?.child(userId) ?: return
-        ref.child("name").setValue(name)
+        ref.child("nama").setValue(nama)
         ref.child("email").setValue(email)
     }
 
@@ -371,29 +217,17 @@ object FirebaseManager {
         rootRef?.child("users")?.child(userId)?.removeValue()
     }
 
-    /**
-     * Mengambil data pengguna (nama, role) satu kali berdasarkan UID.
-     */
-    fun getUserData(uid: String, callback: (name: String, role: String) -> Unit) {
-        val ref = rootRef?.child("users")?.child(uid) ?: run {
-            callback("", "")
-            return
-        }
-        ref.addListenerForSingleValueEvent(object : com.google.firebase.database.ValueEventListener {
-            override fun onDataChange(snapshot: com.google.firebase.database.DataSnapshot) {
-                val name = snapshot.child("name").getValue(String::class.java) ?: ""
-                val role = snapshot.child("role").getValue(String::class.java) ?: ""
-                callback(name, role)
+    fun getUserData(uid: String, callback: (nama: String, peran: String) -> Unit) {
+        rootRef?.child("users")?.child(uid)?.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                callback(snapshot.child("nama").getValue(String::class.java) ?: "", snapshot.child("peran").getValue(String::class.java) ?: "")
             }
-            override fun onCancelled(error: com.google.firebase.database.DatabaseError) {
-                Log.w(TAG, "getUserData dibatalkan: ${error.message}")
-                callback("", "")
-            }
+            override fun onCancelled(error: DatabaseError) { callback("", "") }
         })
     }
 
     // ==========================================
-    // Statistik - Ringkasan Harian
+    // Statistik & Notifikasi (Internal Helper)
     // ==========================================
     fun listenDailyStats(callback: (List<Map<String, Any>>) -> Unit): ValueEventListener? {
         val ref = rootRef?.child("statistics")?.child("daily") ?: return null
@@ -401,70 +235,41 @@ object FirebaseManager {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val stats = mutableListOf<Map<String, Any>>()
                 for (child in snapshot.children) {
-                    val map = mutableMapOf<String, Any>()
-                    map["date"] = child.key ?: ""
-                    map["organik"] = child.child("organik").getValue(Int::class.java) ?: 0
-                    map["nonOrganik"] = child.child("nonOrganik").getValue(Int::class.java) ?: 0
-                    stats.add(map)
+                    stats.add(mapOf(
+                        "tanggal" to (child.key ?: ""),
+                        "organik" to (child.child("organik").getValue(Int::class.java) ?: 0),
+                        "nonOrganik" to (child.child("nonOrganik").getValue(Int::class.java) ?: 0)
+                    ))
                 }
                 callback(stats)
             }
-            override fun onCancelled(error: DatabaseError) {
-                Log.w(TAG, "listenDailyStats dibatalkan: ${error.message}")
-            }
+            override fun onCancelled(error: DatabaseError) {}
         }
-        ref.orderByKey().limitToLast(7).addValueEventListener(listener)
+        ref.limitToLast(7).addValueEventListener(listener)
         return listener
     }
 
-    fun removeStatsListener(listener: ValueEventListener) {
-        rootRef?.child("statistics")?.child("daily")?.removeEventListener(listener)
-    }
-
-    /**
-     * Memperbarui ringkasan statistik harian berdasarkan tipe sampah.
-     */
-    fun updateDailyStats(binType: String, percentage: Int) {
-        val dateKey = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
-            .format(java.util.Date())
-        val field = if (binType == "organik") "organik" else "nonOrganik"
-        val ref = rootRef?.child("statistics")?.child("daily")?.child(dateKey) ?: return
-        ref.child(field).setValue(percentage.coerceIn(0, 100))
-    }
-
-    /**
-     * Menghitung jumlah kejadian "Penuh" (alert) dalam 7 hari terakhir.
-     */
     fun countPenuhEvents(callback: (Int) -> Unit): ValueEventListener? {
         val ref = rootRef?.child("historyLogs") ?: return null
-        val sevenDaysAgo = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000L)
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 var count = 0
                 for (child in snapshot.children) {
-                    val action = child.child("action").getValue(String::class.java) ?: ""
-                    val timestamp = child.child("timestamp").getValue(Long::class.java) ?: 0L
-                    if (action == "alert" && timestamp >= sevenDaysAgo) {
-                        count++
-                    }
+                    val aksi = child.child("aksi").getValue(String::class.java)
+                    if (aksi == "alert" || aksi == "penuh") count++
                 }
                 callback(count)
             }
-            override fun onCancelled(error: DatabaseError) {
-                Log.w(TAG, "countPenuhEvents dibatalkan: ${error.message}")
-            }
+            override fun onCancelled(error: DatabaseError) {}
         }
         ref.addValueEventListener(listener)
         return listener
     }
 
-    fun removePenuhListener(listener: ValueEventListener) {
-        rootRef?.child("historyLogs")?.removeEventListener(listener)
+    fun updateDailyStats(binType: String, percentage: Int) {
+        val dateKey = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date())
+        rootRef?.child("statistics")?.child("daily")?.child(dateKey)?.child(if (binType == "organik") "organik" else "nonOrganik")?.setValue(percentage)
     }
-
-    // ==========================================
-    // Pengaturan Notifikasi Pengguna
-    // ==========================================
 
     data class NotificationSettings(
         val hampirPenuh: Boolean = true,
@@ -473,66 +278,37 @@ object FirebaseManager {
         val sistem: Boolean = true
     )
 
-    /**
-     * Menyimpan pengaturan notifikasi untuk pengguna tertentu.
-     */
     fun saveNotificationSettings(userId: String, settings: NotificationSettings) {
-        val ref = rootRef?.child("users")?.child(userId)?.child("notification_settings") ?: return
+        val ref = rootRef?.child("users")?.child(userId)?.child("pengaturan_notifikasi") ?: return
         ref.child("hampir_penuh").setValue(settings.hampirPenuh)
         ref.child("penuh").setValue(settings.penuh)
         ref.child("selesai").setValue(settings.selesai)
         ref.child("sistem").setValue(settings.sistem)
     }
 
-    /**
-     * Memuat pengaturan notifikasi pengguna (satu kali baca).
-     */
-    fun loadNotificationSettings(userId: String, callback: (NotificationSettings) -> Unit) {
-        val ref = rootRef?.child("users")?.child(userId)?.child("notification_settings") ?: run {
-            callback(NotificationSettings())
-            return
-        }
-        ref.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val settings = NotificationSettings(
-                    hampirPenuh = snapshot.child("hampir_penuh").getValue(Boolean::class.java) ?: true,
-                    penuh = snapshot.child("penuh").getValue(Boolean::class.java) ?: true,
-                    selesai = snapshot.child("selesai").getValue(Boolean::class.java) ?: true,
-                    sistem = snapshot.child("sistem").getValue(Boolean::class.java) ?: true
-                )
-                callback(settings)
-            }
-            override fun onCancelled(error: DatabaseError) {
-                Log.w(TAG, "loadNotificationSettings dibatalkan: ${error.message}")
-                callback(NotificationSettings())
-            }
-        })
-    }
-
-    /**
-     * Mendengarkan perubahan pengaturan notifikasi secara real-time.
-     */
     fun listenNotificationSettings(userId: String, callback: (NotificationSettings) -> Unit): ValueEventListener? {
-        val ref = rootRef?.child("users")?.child(userId)?.child("notification_settings") ?: return null
+        val ref = rootRef?.child("users")?.child(userId)?.child("pengaturan_notifikasi") ?: return null
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val settings = NotificationSettings(
+                callback(NotificationSettings(
                     hampirPenuh = snapshot.child("hampir_penuh").getValue(Boolean::class.java) ?: true,
                     penuh = snapshot.child("penuh").getValue(Boolean::class.java) ?: true,
                     selesai = snapshot.child("selesai").getValue(Boolean::class.java) ?: true,
                     sistem = snapshot.child("sistem").getValue(Boolean::class.java) ?: true
-                )
-                callback(settings)
+                ))
             }
-            override fun onCancelled(error: DatabaseError) {
-                Log.w(TAG, "listenNotificationSettings dibatalkan: ${error.message}")
-            }
+            override fun onCancelled(error: DatabaseError) {}
         }
         ref.addValueEventListener(listener)
         return listener
     }
 
-    fun removeNotificationSettingsListener(userId: String, listener: ValueEventListener) {
-        rootRef?.child("users")?.child(userId)?.child("notification_settings")?.removeEventListener(listener)
-    }
+    fun removeBinListener(binType: String, listener: ValueEventListener) { rootRef?.child("bins")?.child(binType)?.removeEventListener(listener) }
+    fun removeDeviceListener(listener: ValueEventListener) { rootRef?.child("device")?.removeEventListener(listener) }
+    fun removeNotificationListener(listener: ValueEventListener) { rootRef?.child("notifications")?.removeEventListener(listener) }
+    fun removeHistoryListener(listener: ValueEventListener) { rootRef?.child("historyLogs")?.removeEventListener(listener) }
+    fun removeUsersListener(listener: ValueEventListener) { rootRef?.child("users")?.removeEventListener(listener) }
+    fun removeStatsListener(listener: ValueEventListener) { rootRef?.child("statistics")?.child("daily")?.removeEventListener(listener) }
+    fun removePenuhListener(listener: ValueEventListener) { rootRef?.child("historyLogs")?.removeEventListener(listener) }
+    fun removeNotificationSettingsListener(userId: String, listener: ValueEventListener) { rootRef?.child("users")?.child(userId)?.child("pengaturan_notifikasi")?.removeEventListener(listener) }
 }

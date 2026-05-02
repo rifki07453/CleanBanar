@@ -17,7 +17,6 @@ import com.google.firebase.database.ValueEventListener
 
 /**
  * Fragment untuk manajemen petugas lapangan oleh Admin.
- * Memungkinkan penambahan dan penghapusan akses petugas.
  */
 class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
 
@@ -50,17 +49,15 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
     }
 
     override fun observeData() {
-        // Mendengarkan daftar pengguna dari Firebase secara real-time
         usersListener = FirebaseManager.listenUsers { users ->
             binding.staffListContainer.removeAllViews()
-            
             if (users.isEmpty()) {
                 addEmptyState()
             } else {
                 for (user in users) {
                     addStaffCard(
                         userId = user["id"] as? String ?: "",
-                        name = user["name"] as? String ?: "",
+                        name = user["nama"] as? String ?: "",
                         email = user["email"] as? String ?: ""
                     )
                 }
@@ -68,25 +65,21 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
         }
     }
 
-    /**
-     * Membuat akun petugas baru di database.
-     */
     private fun createStaffAccount(name: String, email: String, password: String) {
         binding.btnCreateAccount.isEnabled = false
         binding.btnCreateAccount.text = "Memproses..."
 
+        // Menggunakan nama parameter baru (nama, peran)
         FirebaseManager.addUser(
-            name = name,
+            nama = name,
             email = email,
-            role = "Petugas",
+            peran = "Petugas",
             onSuccess = {
                 binding.etNewName.text.clear()
                 binding.etNewEmail.text.clear()
                 binding.etNewPassword.text?.clear()
-
                 binding.btnCreateAccount.isEnabled = true
                 binding.btnCreateAccount.text = "Buat Akun Petugas"
-
                 toast("✓ Akun petugas $name berhasil ditambahkan")
             },
             onFailure = { errorMsg ->
@@ -97,13 +90,10 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
         )
     }
 
-    /**
-     * Menampilkan dialog konfirmasi penghapusan petugas.
-     */
     private fun showDeleteDialog(userId: String, name: String) {
         AlertDialog.Builder(requireContext())
             .setTitle("Hapus Petugas")
-            .setMessage("Yakin ingin menghapus akses \"$name\"?\n\nCatatan: Data akan dihapus secara permanen dari database.")
+            .setMessage("Yakin ingin menghapus akses \"$name\"?\n\nCatatan: Data akan dihapus secara permanen.")
             .setPositiveButton("Hapus") { _, _ ->
                 FirebaseManager.deleteUser(userId)
                 toast("$name berhasil dihapus")
@@ -112,9 +102,6 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
             .show()
     }
 
-    /**
-     * Membangun kartu informasi petugas secara dinamis.
-     */
     private fun addStaffCard(userId: String, name: String, email: String) {
         val cardView = com.google.android.material.card.MaterialCardView(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(
@@ -181,10 +168,7 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
             imageTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#EF4444"))
             setPadding(8.dp, 8.dp, 8.dp, 8.dp)
             background = getRoundedRectDrawable(android.graphics.Color.TRANSPARENT, 8f.dpF)
-            
-            setOnClickListener {
-                showDeleteDialog(userId, name)
-            }
+            setOnClickListener { showDeleteDialog(userId, name) }
         }
 
         row.addView(avatarBg)
@@ -230,7 +214,6 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
     }
 
     private fun toast(msg: String) = Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
-
     private val Int.dp: Int get() = (this * resources.displayMetrics.density).toInt()
     private val Float.dpF: Float get() = this * resources.displayMetrics.density
 }

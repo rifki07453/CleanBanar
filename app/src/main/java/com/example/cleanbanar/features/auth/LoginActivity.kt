@@ -22,7 +22,6 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
     override fun setupViews() {
         authManager = AuthManager(this)
 
-        // Auto-login: jika FirebaseAuth masih punya sesi aktif & role tersimpan di cache
         if (authManager.isLoggedIn()) {
             navigateToDashboard(authManager.getUserRole())
             return
@@ -40,75 +39,50 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
             hideError()
             setLoading(true)
 
-            // Login via Firebase Authentication
             firebaseAuth.signInWithEmailAndPassword(email, password)
                 .addOnSuccessListener { authResult ->
                     val uid = authResult.user?.uid ?: return@addOnSuccessListener
 
-                    // Ambil role dari Realtime Database (node "cleanbanar/users/{uid}")
-                    FirebaseManager.getUserData(uid) { name, role ->
-                        if (role.isEmpty()) {
-                            // Data belum ada di DB → seed otomatis berdasarkan email
+                    FirebaseManager.getUserData(uid) { nama, peran ->
+                        if (peran.isEmpty()) {
                             val seedData = getSeedDataForEmail(email)
                             if (seedData == null) {
                                 setLoading(false)
                                 firebaseAuth.signOut()
-                                Toast.makeText(
-                                    this,
-                                    "Akun tidak memiliki akses sistem. Hubungi Administrator.",
-                                    Toast.LENGTH_LONG
-                                ).show()
+                                Toast.makeText(this, "Akun tidak memiliki akses sistem. Hubungi Administrator.", Toast.LENGTH_LONG).show()
                                 return@getUserData
                             }
 
-                            // Tulis data user ke Realtime Database lalu masuk
                             FirebaseManager.seedUserData(
                                 uid = uid,
-                                name = seedData.first,
+                                nama = seedData.first,
                                 email = email,
-                                role = seedData.second
+                                peran = seedData.second
                             ) {
                                 setLoading(false)
-                                authManager.saveSession(
-                                    uid = uid,
-                                    name = seedData.first,
-                                    email = email,
-                                    role = seedData.second
-                                )
+                                authManager.saveSession(uid = uid, name = seedData.first, email = email, role = seedData.second)
                                 Toast.makeText(this, "Selamat datang, ${seedData.first}!", Toast.LENGTH_SHORT).show()
                                 navigateToDashboard(seedData.second)
                             }
                         } else {
                             setLoading(false)
-                            // Simpan sesi ke SharedPreferences sebagai cache lokal
-                            authManager.saveSession(
-                                uid = uid,
-                                name = name,
-                                email = email,
-                                role = role
-                            )
-                            Toast.makeText(this, "Selamat datang, $name!", Toast.LENGTH_SHORT).show()
-                            navigateToDashboard(role)
+                            authManager.saveSession(uid = uid, name = nama, email = email, role = peran)
+                            Toast.makeText(this, "Selamat datang, $nama!", Toast.LENGTH_SHORT).show()
+                            navigateToDashboard(peran)
                         }
                     }
                 }
                 .addOnFailureListener { e ->
                     val errMsg = e.message ?: ""
-                    android.util.Log.d("LoginActivity", "Auth error: $errMsg")
-
                     when {
-                        // Jelas salah password (akun ada, tapi password salah)
-                        errMsg.contains("password is invalid") ||
-                        errMsg.contains("wrong-password") -> {
+                        errMsg.contains("password is invalid") || errMsg.contains("wrong-password") -> {
                             setLoading(false)
                             showError("Password salah")
                         }
-                        // Tidak ada koneksi
                         errMsg.contains("network") -> {
                             setLoading(false)
                             showError("Tidak ada koneksi internet")
                         }
-                        // Semua error lain → cek apakah email sudah didaftarkan Admin di DB
                         else -> checkAndRegisterStaff(email, password)
                     }
                 }
@@ -116,23 +90,17 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
     }
 
     private fun checkAndRegisterStaff(email: String, password: String) {
-        FirebaseManager.checkIfUserPreRegistered(email) { exists, oldId, name, role ->
+        FirebaseManager.checkIfUserPreRegistered(email) { exists, oldId, nama, peran ->
             if (exists) {
-                // Email sudah didaftarkan Admin. Buatkan akun Auth sekarang.
                 firebaseAuth.createUserWithEmailAndPassword(email, password)
                     .addOnSuccessListener { authResult ->
                         val uid = authResult.user?.uid ?: return@addOnSuccessListener
-                        
-                        // Pindahkan data dari ID lama (random push ID) ke ID Auth (uid)
-                        FirebaseManager.seedUserData(uid, name, email, role) {
-                            // Hapus data lama
+                        FirebaseManager.seedUserData(uid, nama, email, peran) {
                             FirebaseManager.deleteUser(oldId)
-                            
-                            // Simpan sesi dan arahkan ke dashboard
                             setLoading(false)
-                            authManager.saveSession(uid, name, email, role)
-                            Toast.makeText(this, "Akun berhasil diaktifkan! Selamat datang, $name", Toast.LENGTH_LONG).show()
-                            navigateToDashboard(role)
+                            authManager.saveSession(uid, nama, email, peran)
+                            Toast.makeText(this, "Akun berhasil diaktifkan! Selamat datang, $nama", Toast.LENGTH_LONG).show()
+                            navigateToDashboard(peran)
                         }
                     }
                     .addOnFailureListener { e ->
@@ -159,11 +127,6 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
         binding.errorContainer.visibility = android.view.View.GONE
     }
 
-    /**
-     * Menentukan data awal (name, role) berdasarkan email.
-     * Hanya berlaku untuk akun default sistem.
-     * Return null jika email tidak dikenali sebagai akun sistem.
-     */
     private fun getSeedDataForEmail(email: String): Pair<String, String>? {
         return when (email.lowercase()) {
             "admin@cleanbanar.com"   -> Pair("Administrator",    "Admin")
