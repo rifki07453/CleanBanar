@@ -41,26 +41,50 @@ class BluetoothHelper {
             try {
                 // Matikan pencarian perangkat agar proses koneksi lebih cepat
                 bluetoothAdapter?.cancelDiscovery()
+                var connected = false
+                var lastErrorMessage = ""
 
-                // Mencoba koneksi standar (SPP UUID)
-                bluetoothSocket = device.createRfcommSocketToServiceRecord(SPP_UUID)
-                
+                // TAHAP 1: Mencoba koneksi standar (Secure SPP)
                 try {
+                    bluetoothSocket = device.createRfcommSocketToServiceRecord(SPP_UUID)
                     bluetoothSocket?.connect()
-                } catch (e: IOException) {
-                    Log.w(TAG, "Metode standar gagal, mencoba metode fallback (reflection)...")
-                    // Fallback: Menggunakan refleksi untuk memanggil metode tersembunyi pada Android
-                    // Ini sering memperbaiki error "read ret -1" atau "socket closed" pada ESP32
-                    bluetoothSocket = device::class.java.getMethod("createRfcommSocket", Int::class.javaPrimitiveType)
-                        .invoke(device, 1) as BluetoothSocket
-                    bluetoothSocket?.connect()
+                    connected = true
+                    Log.d(TAG, "Terhubung via metode standar (Secure)")
+                } catch (e1: IOException) {
+                    Log.w(TAG, "Metode standar gagal: ${e1.message}. Mencoba Insecure...")
+                    
+                    // TAHAP 2: Mencoba Insecure Socket (Seringkali memperbaiki masalah pairing di Android baru)
+                    try {
+                        bluetoothSocket = device.createInsecureRfcommSocketToServiceRecord(SPP_UUID)
+                        bluetoothSocket?.connect()
+                        connected = true
+                        Log.d(TAG, "Terhubung via metode Insecure")
+                    } catch (e2: IOException) {
+                        Log.w(TAG, "Metode Insecure gagal: ${e2.message}. Mencoba Fallback Reflection...")
+                        
+                        // TAHAP 3: Metode Refleksi (Solusi pamungkas untuk error 'read ret -1' atau 'socket closed')
+                        try {
+                            bluetoothSocket = device::class.java.getMethod("createRfcommSocket", Int::class.javaPrimitiveType)
+                                .invoke(device, 1) as BluetoothSocket
+                            bluetoothSocket?.connect()
+                            connected = true
+                            Log.d(TAG, "Terhubung via metode Fallback Reflection")
+                        } catch (e3: Exception) {
+                            lastErrorMessage = e3.message ?: "Semua metode koneksi gagal"
+                        }
+                    }
                 }
 
-                outputStream = bluetoothSocket?.outputStream
-                onResult(true, "Terhubung ke ${device.name}")
+                if (connected) {
+                    outputStream = bluetoothSocket?.outputStream
+                    onResult(true, "Terhubung ke ${device.name}")
+                } else {
+                    onResult(false, "Gagal terhubung: $lastErrorMessage")
+                    close()
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "Koneksi gagal total: ${e.message}")
-                onResult(false, "Gagal terhubung: ${e.message}")
+                onResult(false, "Error Fatal: ${e.message}")
                 close()
             }
         }.start()
