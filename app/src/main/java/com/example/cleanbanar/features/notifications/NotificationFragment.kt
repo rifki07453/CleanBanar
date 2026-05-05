@@ -40,13 +40,13 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
                     addEmptyState()
                 } else {
                     for (notif in notifData) {
-                        val waktu = notif["waktu"] as Long
+                        val waktu = notif["waktu"] as? Long ?: 0L
                         addNotificationCard(
-                            title = notif["judul"] as String,
-                            message = notif["pesan"] as String,
-                            type = notif["tipe"] as String,
+                            title = notif["judul"] as? String ?: "Notifikasi",
+                            message = notif["pesan"] as? String ?: "",
+                            type = notif["tipe"] as? String ?: "info",
                             timeText = formatTimestamp(waktu),
-                            isUnread = !(notif["sudahDibaca"] as Boolean)
+                            isUnread = !(notif["sudahDibaca"] as? Boolean ?: true)
                         )
                     }
                 }

@@ -42,13 +42,24 @@ class BluetoothHelper {
                 // Matikan pencarian perangkat agar proses koneksi lebih cepat
                 bluetoothAdapter?.cancelDiscovery()
 
-                // Buat socket RFCOMM (Serial)
+                // Mencoba koneksi standar (SPP UUID)
                 bluetoothSocket = device.createRfcommSocketToServiceRecord(SPP_UUID)
-                bluetoothSocket?.connect()
+                
+                try {
+                    bluetoothSocket?.connect()
+                } catch (e: IOException) {
+                    Log.w(TAG, "Metode standar gagal, mencoba metode fallback (reflection)...")
+                    // Fallback: Menggunakan refleksi untuk memanggil metode tersembunyi pada Android
+                    // Ini sering memperbaiki error "read ret -1" atau "socket closed" pada ESP32
+                    bluetoothSocket = device::class.java.getMethod("createRfcommSocket", Int::class.javaPrimitiveType)
+                        .invoke(device, 1) as BluetoothSocket
+                    bluetoothSocket?.connect()
+                }
+
                 outputStream = bluetoothSocket?.outputStream
                 onResult(true, "Terhubung ke ${device.name}")
-            } catch (e: IOException) {
-                Log.e(TAG, "Koneksi gagal: ${e.message}")
+            } catch (e: Exception) {
+                Log.e(TAG, "Koneksi gagal total: ${e.message}")
                 onResult(false, "Gagal terhubung: ${e.message}")
                 close()
             }
