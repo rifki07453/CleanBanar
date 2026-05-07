@@ -181,7 +181,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
                 android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
                 android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
             ).apply { topMargin = 2.dpToPx() }
-            setLineSpacing(2f.dpToPx().toFloat(), 1f)
+            setLineSpacing(2.dpToPx().toFloat(), 1f)
         }
 
         info.addView(tvTitle)
@@ -216,6 +216,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
     }
 
     private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()
+    private fun Float.dpToPx(): Float = this * resources.displayMetrics.density
 
     /**
      * Menampilkan dialog Bottom Sheet untuk detail status perangkat dan konfigurasi WiFi.
@@ -370,10 +371,18 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
     }
 
     override fun onDestroyView() {
-        organikListener?.let { FirebaseManager.removeBinListener("organik", it) }
-        nonOrganikListener?.let { FirebaseManager.removeBinListener("nonOrganik", it) }
-        deviceListener?.let { FirebaseManager.removeDeviceListener(it) }
-        notifListener?.let { FirebaseManager.removeNotificationListener(it) }
+        val oL = organikListener
+        if (oL != null) FirebaseManager.removeBinListener("organik", oL)
+        
+        val nOL = nonOrganikListener
+        if (nOL != null) FirebaseManager.removeBinListener("nonOrganik", nOL)
+        
+        val dL = deviceListener
+        if (dL != null) FirebaseManager.removeDeviceListener(dL)
+        
+        val nL = notifListener
+        if (nL != null) FirebaseManager.removeNotificationListener(nL)
+        
         super.onDestroyView()
     }
 }
