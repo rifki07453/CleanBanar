@@ -217,6 +217,158 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
 
     private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()
 
+    /**
+     * Menampilkan dialog Bottom Sheet untuk detail status perangkat dan konfigurasi WiFi.
+     */
+    private fun showDeviceStatusBottomSheet() {
+        val bottomSheetDialog = com.google.android.material.bottomsheet.BottomSheetDialog(requireContext())
+        val view = layoutInflater.inflate(R.layout.bottom_sheet_device_status, null)
+        bottomSheetDialog.setContentView(view)
+
+        val tvConnectionStatus = view.findViewById<android.widget.TextView>(R.id.tvConnectionStatus)
+        val tvNetworkMode = view.findViewById<android.widget.TextView>(R.id.tvNetworkMode)
+        val tvLastSync = view.findViewById<android.widget.TextView>(R.id.tvLastSync)
+        val ivConnectionIcon = view.findViewById<android.widget.ImageView>(R.id.ivConnectionIcon)
+        val flConnectionIconBg = view.findViewById<android.widget.FrameLayout>(R.id.flConnectionIconBg)
+        
+        val btnModeWifi = view.findViewById<com.google.android.material.card.MaterialCardView>(R.id.btnModeWifi)
+        val btnModeBluetooth = view.findViewById<com.google.android.material.card.MaterialCardView>(R.id.btnModeBluetooth)
+
+        val isOnline = currentConnectionStatus == "ONLINE"
+        
+        fun updateUIMode(mode: String) {
+            tvLastSync.text = formatLastUpdate(lastSeenTimestamp)
+            
+            if (mode == "WIFI") {
+                btnModeWifi.strokeWidth = 2
+                btnModeWifi.strokeColor = android.graphics.Color.parseColor("#10B981")
+                btnModeWifi.setCardBackgroundColor(android.graphics.Color.parseColor("#ECFDF5"))
+                
+                btnModeBluetooth.strokeWidth = 1
+                btnModeBluetooth.strokeColor = android.graphics.Color.parseColor("#E5E7EB")
+                btnModeBluetooth.setCardBackgroundColor(android.graphics.Color.WHITE)
+
+                tvNetworkMode.text = "Terhubung via WiFi"
+                ivConnectionIcon.setImageResource(R.drawable.ic_wifi_status)
+                
+                if (isOnline) {
+                    tvConnectionStatus.text = "ONLINE"
+                    tvConnectionStatus.setTextColor(android.graphics.Color.parseColor("#16A34A"))
+                    flConnectionIconBg.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#D1FAE5"))
+                    ivConnectionIcon.setColorFilter(android.graphics.Color.parseColor("#16A34A"))
+                } else {
+                    tvConnectionStatus.text = "OFFLINE"
+                    tvConnectionStatus.setTextColor(android.graphics.Color.parseColor("#DC2626"))
+                    flConnectionIconBg.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FEE2E2"))
+                    ivConnectionIcon.setColorFilter(android.graphics.Color.parseColor("#DC2626"))
+                }
+            } else {
+                btnModeBluetooth.strokeWidth = 2
+                btnModeBluetooth.strokeColor = android.graphics.Color.parseColor("#3B82F6")
+                btnModeBluetooth.setCardBackgroundColor(android.graphics.Color.parseColor("#EFF6FF"))
+                
+                btnModeWifi.strokeWidth = 1
+                btnModeWifi.strokeColor = android.graphics.Color.parseColor("#E5E7EB")
+                btnModeWifi.setCardBackgroundColor(android.graphics.Color.WHITE)
+
+                tvNetworkMode.text = "Terhubung via Bluetooth"
+                ivConnectionIcon.setImageResource(R.drawable.ic_bluetooth_status)
+                
+                if (isOnline) {
+                    tvConnectionStatus.text = "ONLINE"
+                    tvConnectionStatus.setTextColor(android.graphics.Color.parseColor("#2563EB"))
+                    flConnectionIconBg.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#DBEAFE"))
+                    ivConnectionIcon.setColorFilter(android.graphics.Color.parseColor("#2563EB"))
+                } else {
+                    tvConnectionStatus.text = "OFFLINE"
+                    tvConnectionStatus.setTextColor(android.graphics.Color.parseColor("#DC2626"))
+                    flConnectionIconBg.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FEE2E2"))
+                    ivConnectionIcon.setColorFilter(android.graphics.Color.parseColor("#DC2626"))
+                }
+            }
+        }
+
+        updateUIMode(currentNetworkType)
+
+        btnModeWifi.setOnClickListener {
+            FirebaseManager.updateDeviceNetworkType("WIFI")
+            updateUIMode("WIFI")
+            android.widget.Toast.makeText(context, "Beralih ke mode WiFi", android.widget.Toast.LENGTH_SHORT).show()
+        }
+
+        btnModeBluetooth.setOnClickListener {
+            FirebaseManager.updateDeviceNetworkType("BLUETOOTH")
+            updateUIMode("BLUETOOTH")
+            android.widget.Toast.makeText(context, "Beralih ke mode Bluetooth", android.widget.Toast.LENGTH_SHORT).show()
+        }
+
+        // Logika Provisioning (Pengaturan WiFi via Bluetooth)
+        val etSsid = view.findViewById<TextInputEditText>(R.id.etSsid)
+        val etPassword = view.findViewById<TextInputEditText>(R.id.etPassword)
+        val btnSendConfig = view.findViewById<MaterialButton>(R.id.btnSendConfig)
+
+        btnSendConfig.setOnClickListener {
+            val ssid = etSsid.text.toString().trim()
+            val pass = etPassword.text.toString().trim()
+
+            if (ssid.isEmpty()) {
+                Toast.makeText(context, "Nama WiFi tidak boleh kosong", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            checkBluetoothAndSend(ssid, pass)
+        }
+
+        bottomSheetDialog.show()
+    }
+
+    /**
+     * Memeriksa izin Bluetooth dan mengirimkan kredensial WiFi ke ESP32.
+     */
+    private fun checkBluetoothAndSend(ssid: String, pass: String) {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.ACCESS_FINE_LOCATION), 1001)
+            return
+        }
+
+        val devices = bluetoothHelper.getPairedDevices()
+        val espDevice = devices.find { it.name?.contains("CleanBanar", ignoreCase = true) == true }
+
+        if (espDevice == null) {
+            Toast.makeText(context, "ESP32 (CleanBanar) tidak ditemukan di daftar Bluetooth terpasang", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        Toast.makeText(context, "Menghubungkan ke ${espDevice.name}...", Toast.LENGTH_SHORT).show()
+        
+        bluetoothHelper.connect(espDevice) { success, message ->
+            activity?.runOnUiThread {
+                if (success) {
+                    val configStr = "SET_WIFI:$ssid,$pass\n"
+                    if (bluetoothHelper.sendData(configStr)) {
+                        Toast.makeText(context, "Konfigurasi terkirim! ESP32 akan segera terhubung ke WiFi.", Toast.LENGTH_LONG).show()
+                        bluetoothHelper.close()
+                    } else {
+                        Toast.makeText(context, "Gagal mengirim data via Bluetooth", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun formatLastUpdate(timestamp: Long): String {
+        if (timestamp == 0L) return "Menunggu data..."
+        val diff = System.currentTimeMillis() - timestamp
+        val minutes = diff / 60000
+        return when {
+            minutes < 1 -> "Baru saja"
+            minutes < 60 -> "$minutes menit lalu"
+            else -> "${minutes / 60} jam lalu"
+        }
+    }
+
     override fun onDestroyView() {
         organikListener?.let { FirebaseManager.removeBinListener("organik", it) }
         nonOrganikListener?.let { FirebaseManager.removeBinListener("nonOrganik", it) }
