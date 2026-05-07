@@ -17,7 +17,7 @@
             android:id="@+id/headerBlock"
             android:layout_width="match_parent"
             android:layout_height="250dp"
-            android:background="@drawable/profile_header_rounded_bg"
+            android:background="@drawable/bg_petugas_header"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
@@ -53,13 +53,12 @@
             android:background="@drawable/bg_rounded_light_green_glass"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent">
-            <!-- Example using user icon, adjust to leaf if exist -->
+            <!-- App Icon -->
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:src="@drawable/ic_organik"
-                app:tint="#6EE7B7"
-                android:padding="16dp" />
+                android:src="@mipmap/ic_launcher_round"
+                android:padding="8dp" />
         </FrameLayout>
 
         <!-- Total Petugas -->
@@ -200,9 +199,9 @@
                         <FrameLayout
                             android:layout_width="48dp"
                             android:layout_height="48dp"
-                            android:background="#ECFDF5"
+                            android:background="@drawable/bg_rounded_light_blue"
+                            android:backgroundTint="#ECFDF5"
                             android:layout_marginBottom="12dp">
-                            <View android:layout_width="match_parent" android:layout_height="match_parent" android:background="@drawable/bg_rounded_light_blue" android:backgroundTint="#ECFDF5"/>
                             <ImageView
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"

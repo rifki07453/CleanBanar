@@ -51,10 +51,6 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         authManager = AuthManager(requireContext())
         binding.tvSystemName.text = "Sistem Terpusat"
 
-        binding.btnDecorativeTrash.setOnClickListener {
-            Toast.makeText(requireContext(), "Menyegarkan status...", Toast.LENGTH_SHORT).show()
-        }
-
         // Tampilkan kartu awal dengan nilai 0%
         rebuildCards()
     }
