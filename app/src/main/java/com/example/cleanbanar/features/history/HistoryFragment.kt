@@ -33,7 +33,13 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>() {
 
         binding.swipeRefreshLayout.setOnRefreshListener {
             Handler(Looper.getMainLooper()).postDelayed({
-                binding.swipeRefreshLayout.isRefreshing = false
+                try {
+                    if (isAdded) {
+                        binding.swipeRefreshLayout.isRefreshing = false
+                    }
+                } catch (e: Exception) {
+                    // Abaikan jika fragment sudah dihancurkan
+                }
             }, 1200)
         }
     }
