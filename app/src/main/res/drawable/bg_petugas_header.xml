@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Base Background Gradient -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#059669"
+                android:endColor="#10B981"
+                android:angle="315" />
+            <corners
+                android:bottomLeftRadius="40dp"
+                android:bottomRightRadius="40dp" />
+        </shape>
+    </item>
+
+    <!-- Top Right Circle -->
+    <item
+        android:top="-80dp"
+        android:right="-80dp"
+        android:bottom="80dp"
+        android:left="200dp">
+        <shape android:shape="oval">
+            <solid android:color="#1AFFFFFF" />
+        </shape>
+    </item>
+
+    <!-- Bottom Left Circle -->
+    <item
+        android:top="140dp"
+        android:right="260dp"
+        android:bottom="-60dp"
+        android:left="-60dp">
+        <shape android:shape="oval">
+            <solid android:color="#14FFFFFF" />
+        </shape>
+    </item>
+</layer-list>

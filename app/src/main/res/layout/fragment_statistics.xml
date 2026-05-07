@@ -32,19 +32,6 @@
                 android:textSize="24sp"
                 android:textColor="@color/gray_900" />
                 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnRingkasan"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:text="Ringkasan"
-                android:textColor="@color/gray_800"
-                android:textSize="11sp"
-                android:insetTop="0dp"
-                android:insetBottom="0dp"
-                app:cornerRadius="8dp"
-                app:strokeColor="#d1d5db"
-                app:strokeWidth="1dp"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
         </LinearLayout>
 
         <!-- Divider -->
