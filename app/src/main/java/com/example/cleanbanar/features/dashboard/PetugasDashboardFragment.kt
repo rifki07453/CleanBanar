@@ -137,7 +137,7 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         val iconBg = if (isOrganik) R.drawable.ic_bg_circle_green else R.drawable.ic_bg_circle_blue
         val iconSrc = R.drawable.ic_trash_modern
         val iconColor = if (isOrganik) {
-            resources.getColor(R.color.emerald_600, null)
+            resources.getColor(R.color.green_600, null)
         } else {
             android.graphics.Color.parseColor("#2563EB") // Biru solid yang lebih kalem (Blue-600) agar sama persis style nya dengan organik
         }

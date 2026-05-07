@@ -295,112 +295,12 @@
                             android:layout_centerVertical="true" />
                     </RelativeLayout>
 
-                    <!-- List Items (Simulated static for now) -->
-                    
-                    <!-- Item 1 -->
+                    <!-- List Items Container -->
                     <LinearLayout
+                        android:id="@+id/recentActivityContainer"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="16dp"
-                        android:gravity="top">
-
-                        <FrameLayout
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:background="@drawable/bg_rounded_light_blue">
-                            <ImageView
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:src="@drawable/ic_trash_modern"
-                                app:tint="#2563EB"
-                                android:padding="8dp" />
-                        </FrameLayout>
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:layout_marginStart="12dp">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Tempat Sampah Organik Penuh"
-                                android:textColor="#111827"
-                                android:textStyle="bold"
-                                android:textSize="12sp" />
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Sistem otomatis memberi notifikasi tugasan ke petugas lapangan."
-                                android:textColor="#6B7280"
-                                android:textSize="10sp"
-                                android:layout_marginTop="2dp"
-                                android:lineSpacingExtra="2dp"/>
-                        </LinearLayout>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="10 mnt lalu"
-                            android:textColor="#9CA3AF"
-                            android:textSize="9sp"
-                            android:layout_marginStart="8dp" />
-                    </LinearLayout>
-
-                    <!-- Item 2 -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="top">
-
-                        <FrameLayout
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:background="@drawable/bg_badge_green">
-                            <!-- We use badge green as background, but with rounded rect corners 12dp since it exists -->
-                            <ImageView
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:src="@android:drawable/ic_input_add" 
-                                android:rotation="45"
-                                app:tint="#059669"
-                                android:padding="8dp" /> <!-- Actually a checkmark, using input_add rotated for a check hack, or better just use ic_menu_agenda -->
-                        </FrameLayout>
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:layout_marginStart="12dp">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Sistem Berjalan Normal"
-                                android:textColor="#111827"
-                                android:textStyle="bold"
-                                android:textSize="12sp" />
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Sinkronisasi status dengan modul IoT terkini berhasil dilakukan."
-                                android:textColor="#6B7280"
-                                android:textSize="10sp"
-                                android:layout_marginTop="2dp"
-                                android:lineSpacingExtra="2dp"/>
-                        </LinearLayout>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="1 jam lalu"
-                            android:textColor="#9CA3AF"
-                            android:textSize="9sp"
-                            android:layout_marginStart="8dp" />
-                    </LinearLayout>
+                        android:orientation="vertical" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
