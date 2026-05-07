@@ -134,24 +134,27 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
             ).apply { bottomMargin = 24.dpToPx() }
         }
 
-        val iconBg = if (isOrganik) R.drawable.ic_bg_circle_green else R.drawable.ic_bg_circle_blue
+        val iconBgColor = if (isOrganik) android.graphics.Color.parseColor("#ECFDF5")
+                          else android.graphics.Color.parseColor("#EFF6FF")
         val iconSrc = R.drawable.ic_trash_modern
-        val iconColor = if (isOrganik) {
-            resources.getColor(R.color.green_600, null)
-        } else {
-            android.graphics.Color.parseColor("#CC2563EB") // Biru 80% opacity agar lebih soft seperti organik
+        val iconColor = if (isOrganik) android.graphics.Color.parseColor("#16A34A")
+                        else android.graphics.Color.parseColor("#2563EB")
+
+        val iconCircleBg = android.graphics.drawable.GradientDrawable().apply {
+            shape = android.graphics.drawable.GradientDrawable.OVAL
+            setColor(iconBgColor)
         }
 
         val icon = ImageView(requireContext()).apply {
             id = View.generateViewId()
-            layoutParams = RelativeLayout.LayoutParams(40.dpToPx(), 40.dpToPx()).apply {
+            layoutParams = RelativeLayout.LayoutParams(48.dpToPx(), 48.dpToPx()).apply {
                 addRule(RelativeLayout.CENTER_VERTICAL)
             }
-            setBackgroundResource(iconBg)
+            background = iconCircleBg
             setImageResource(iconSrc)
             setColorFilter(iconColor)
-            scaleType = ImageView.ScaleType.CENTER
-            setPadding(8.dpToPx(), 8.dpToPx(), 8.dpToPx(), 8.dpToPx())
+            scaleType = ImageView.ScaleType.CENTER_INSIDE
+            setPadding(12.dpToPx(), 12.dpToPx(), 12.dpToPx(), 12.dpToPx())
         }
 
         val titleCol = LinearLayout(requireContext()).apply {
