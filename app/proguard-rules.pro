@@ -1,6 +1,9 @@
-# ============================================================
-# CleanBanar ProGuard Rules
-# ============================================================
+# Sembunyikan informasi source file dan baris kode (sangat penting untuk keamanan)
+-keepattributes !SourceFile,!LineNumberTable
+-renamesourcefileattribute ""
+
+# Sembunyikan informasi debug lainnya
+-keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod
 
 # Sembunyikan informasi source file (tidak perlu untuk debug)
 -renamesourcefileattribute SourceFile
