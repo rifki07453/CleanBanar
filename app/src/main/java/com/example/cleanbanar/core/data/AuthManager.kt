@@ -70,4 +70,14 @@ class AuthManager(context: Context) {
         firebaseAuth.signOut()
         prefs.edit().clear().apply()
     }
+
+    /** Update nama lokal di SharedPreferences */
+    fun updateName(name: String) {
+        prefs.edit().putString(KEY_USER_NAME, name).apply()
+    }
+
+    /** Update email lokal di SharedPreferences */
+    fun updateEmail(email: String) {
+        prefs.edit().putString(KEY_USER_EMAIL, email).apply()
+    }
 }

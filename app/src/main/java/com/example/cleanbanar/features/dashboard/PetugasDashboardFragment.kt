@@ -139,7 +139,7 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         val iconColor = if (isOrganik) {
             resources.getColor(R.color.green_600, null)
         } else {
-            android.graphics.Color.parseColor("#2563EB") // Biru solid yang lebih kalem (Blue-600) agar sama persis style nya dengan organik
+            android.graphics.Color.parseColor("#CC2563EB") // Biru 80% opacity agar lebih soft seperti organik
         }
 
         val icon = ImageView(requireContext()).apply {

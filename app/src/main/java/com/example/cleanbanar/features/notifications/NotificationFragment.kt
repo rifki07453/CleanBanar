@@ -85,16 +85,16 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
 
         val isNonOrganik = title.lowercase().contains("non")
         val (iconRes, iconBgColor, iconTintColor) = when (type) {
-            "danger" -> Triple(android.R.drawable.ic_dialog_alert, "#FEF2F2", resources.getColor(R.color.red_500, null))
-            "warning" -> Triple(android.R.drawable.ic_popup_reminder, "#FEFCE8", resources.getColor(R.color.amber_600, null))
+            "danger" -> Triple(R.drawable.ic_trash_modern, "#FEF2F2", resources.getColor(R.color.red_500, null))
+            "warning" -> Triple(R.drawable.ic_trash_modern, "#FEFCE8", resources.getColor(R.color.amber_600, null))
             "success" -> {
                 if (isNonOrganik) {
-                    Triple(android.R.drawable.ic_input_add, "#EFF6FF", resources.getColor(R.color.blue_500, null))
+                    Triple(R.drawable.ic_trash_modern, "#EFF6FF", android.graphics.Color.parseColor("#2563EB"))
                 } else {
-                    Triple(android.R.drawable.ic_input_add, "#ECFDF5", resources.getColor(R.color.emerald_500, null))
+                    Triple(R.drawable.ic_trash_modern, "#ECFDF5", android.graphics.Color.parseColor("#16A34A"))
                 }
             }
-            else -> Triple(android.R.drawable.ic_dialog_info, "#F9FAFB", android.graphics.Color.parseColor("#6B7280"))
+            else -> Triple(R.drawable.ic_trash_modern, "#F9FAFB", android.graphics.Color.parseColor("#6B7280"))
         }
 
         val iconFrame = android.widget.FrameLayout(requireContext()).apply {
@@ -110,7 +110,6 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
                 android.widget.FrameLayout.LayoutParams.MATCH_PARENT
             )
             setImageResource(iconRes)
-            if (iconRes == android.R.drawable.ic_input_add) rotation = 45f
             setColorFilter(iconTintColor)
             setPadding(12.dpToPx(), 12.dpToPx(), 12.dpToPx(), 12.dpToPx())
         }
