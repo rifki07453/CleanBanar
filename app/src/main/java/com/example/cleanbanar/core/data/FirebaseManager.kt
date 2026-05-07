@@ -17,9 +17,9 @@ object FirebaseManager {
 
     private val database: FirebaseDatabase? by lazy {
         try {
-            FirebaseDatabase.getInstance("https://cleanbanar-default-rtdb.asia-southeast1.firebasedatabase.app")
+            // URL diambil dari google-services.json, tidak di-hardcode di kode
+            FirebaseDatabase.getInstance()
         } catch (e: Exception) {
-            Log.w(TAG, "Firebase belum dikonfigurasi: ${e.message}")
             null
         }
     }
@@ -55,15 +55,26 @@ object FirebaseManager {
     }
 
     fun emptyBin(binType: String, userId: String, userName: String) {
-        val binLabel = if (binType == "organik") "Organik" else "Non-Organik"
-        updateBinStatus(binType, 0, "Normal")
-        rootRef?.child("bins")?.child(binType)?.child("terakhirDikosongkan")?.setValue(System.currentTimeMillis())
-
-        // Catat ke riwayat menggunakan ID pengguna asli, bukan "SYSTEM"
-        addHistoryEntry("pengosongan", binType, userId, userName)
-        addNotification("$binLabel Dikosongkan", "Sampah $binLabel telah dikosongkan oleh $userName.", "success")
-        updateDailyStats(binType, 0)
+        val safeBinType = sanitize(binType)
+        val safeUserName = sanitize(userName)
+        val safeUserId = sanitize(userId)
+        val binLabel = if (safeBinType == "organik") "Organik" else "Non-Organik"
+        updateBinStatus(safeBinType, 0, "Normal")
+        rootRef?.child("bins")?.child(safeBinType)?.child("terakhirDikosongkan")?.setValue(System.currentTimeMillis())
+        addHistoryEntry("pengosongan", safeBinType, safeUserId, safeUserName)
+        addNotification("$binLabel Dikosongkan", "Sampah $binLabel telah dikosongkan oleh $safeUserName.", "success")
+        updateDailyStats(safeBinType, 0)
     }
+
+    /** Sanitasi input agar aman ditulis sebagai Firebase path key */
+    private fun sanitize(input: String): String =
+        input.trim()
+            .replace(".", "_")
+            .replace("#", "")
+            .replace("$", "")
+            .replace("[", "")
+            .replace("]", "")
+            .replace("/", "_")
 
     // ==========================================
     // Status Perangkat
