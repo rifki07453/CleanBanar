@@ -12,23 +12,25 @@
         android:paddingBottom="24dp">
 
         <!-- Header -->
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
             android:paddingStart="24dp"
             android:paddingEnd="24dp"
             android:paddingTop="56dp"
-            android:paddingBottom="24dp">
+            android:paddingBottom="24dp"
+            android:gravity="center_vertical">
             
             <TextView
                 android:id="@+id/tvStatsTitle"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="Statistik"
                 android:textStyle="bold"
                 android:textSize="24sp"
-                android:textColor="@color/gray_900"
-                android:layout_centerVertical="true" />
+                android:textColor="@color/gray_900" />
                 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnRingkasan"
@@ -42,10 +44,8 @@
                 app:cornerRadius="8dp"
                 app:strokeColor="#d1d5db"
                 app:strokeWidth="1dp"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true" />
-        </RelativeLayout>
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+        </LinearLayout>
 
         <!-- Divider -->
         <View

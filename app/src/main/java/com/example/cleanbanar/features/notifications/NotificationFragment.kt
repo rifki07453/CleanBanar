@@ -67,10 +67,11 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
             cardElevation = 0f.dpToPxF()
             setCardBackgroundColor(resources.getColor(R.color.white, null))
             
+            val isNonOrganik = title.lowercase().contains("non")
             val strokeCol = when (type) {
                 "danger" -> android.graphics.Color.parseColor("#FCA5A5")
                 "warning" -> android.graphics.Color.parseColor("#FDE047")
-                "success" -> android.graphics.Color.parseColor("#60A5FA")
+                "success" -> if (isNonOrganik) android.graphics.Color.parseColor("#93C5FD") else android.graphics.Color.parseColor("#6EE7B7")
                 else -> android.graphics.Color.parseColor("#F3F4F6")
             }
             setStrokeColor(strokeCol)
@@ -82,11 +83,18 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
             setPadding(16.dpToPx(), 16.dpToPx(), 16.dpToPx(), 16.dpToPx())
         }
 
+        val isNonOrganik = title.lowercase().contains("non")
         val (iconRes, iconBgColor, iconTintColor) = when (type) {
             "danger" -> Triple(android.R.drawable.ic_dialog_alert, "#FEF2F2", resources.getColor(R.color.red_500, null))
             "warning" -> Triple(android.R.drawable.ic_popup_reminder, "#FEFCE8", resources.getColor(R.color.amber_600, null))
-            "success" -> Triple(android.R.drawable.ic_input_add, "#F9FAFB", android.graphics.Color.parseColor("#111827"))
-            else -> Triple(android.R.drawable.ic_dialog_dialer, "#EFF6FF", android.graphics.Color.parseColor("#1E3A8A"))
+            "success" -> {
+                if (isNonOrganik) {
+                    Triple(android.R.drawable.ic_input_add, "#EFF6FF", resources.getColor(R.color.blue_500, null))
+                } else {
+                    Triple(android.R.drawable.ic_input_add, "#ECFDF5", resources.getColor(R.color.emerald_500, null))
+                }
+            }
+            else -> Triple(android.R.drawable.ic_dialog_info, "#F9FAFB", android.graphics.Color.parseColor("#6B7280"))
         }
 
         val iconFrame = android.widget.FrameLayout(requireContext()).apply {

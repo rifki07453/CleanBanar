@@ -140,7 +140,11 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
 
         val iconBg = if (isOrganik) R.drawable.ic_bg_circle_green else R.drawable.ic_bg_circle_blue
         val iconSrc = R.drawable.ic_trash_modern
-        val tintColor = if (isOrganik) R.color.emerald_600 else R.color.blue_600
+        val iconColor = if (isOrganik) {
+            resources.getColor(R.color.emerald_600, null)
+        } else {
+            android.graphics.Color.parseColor("#993B82F6") // 60% opacity blue
+        }
 
         val icon = ImageView(requireContext()).apply {
             id = View.generateViewId()
@@ -149,7 +153,7 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
             }
             setBackgroundResource(iconBg)
             setImageResource(iconSrc)
-            setColorFilter(resources.getColor(tintColor, null))
+            setColorFilter(iconColor)
             scaleType = ImageView.ScaleType.CENTER
             setPadding(8.dpToPx(), 8.dpToPx(), 8.dpToPx(), 8.dpToPx())
         }
