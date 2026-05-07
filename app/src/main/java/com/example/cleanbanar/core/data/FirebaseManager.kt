@@ -54,13 +54,14 @@ object FirebaseManager {
         ref.child("terakhirUpdate").setValue(System.currentTimeMillis())
     }
 
-    fun emptyBin(binType: String, aktor: String) {
+    fun emptyBin(binType: String, userId: String, userName: String) {
         val binLabel = if (binType == "organik") "Organik" else "Non-Organik"
         updateBinStatus(binType, 0, "Normal")
         rootRef?.child("bins")?.child(binType)?.child("terakhirDikosongkan")?.setValue(System.currentTimeMillis())
 
-        addHistoryEntry("pengosongan", binType, "SYSTEM", aktor)
-        addNotification("$binLabel Dikosongkan", "Sampah $binLabel telah dikosongkan oleh $aktor.", "success")
+        // Catat ke riwayat menggunakan ID pengguna asli, bukan "SYSTEM"
+        addHistoryEntry("pengosongan", binType, userId, userName)
+        addNotification("$binLabel Dikosongkan", "Sampah $binLabel telah dikosongkan oleh $userName.", "success")
         updateDailyStats(binType, 0)
     }
 

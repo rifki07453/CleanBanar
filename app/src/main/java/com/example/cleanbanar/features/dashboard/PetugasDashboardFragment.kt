@@ -319,16 +319,8 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         button.text = "Memuat..."
 
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-            // Update status di Firebase
-            FirebaseManager.emptyBin(binType, authManager.getUserName())
-            
-            // Catat di riwayat
-            FirebaseManager.addHistoryEntry(
-                aksi = "pengosongan",
-                tipeSampah = binType,
-                idPengguna = authManager.getUserId(),
-                namaLengkap = authManager.getUserName()
-            )
+            // Update status di Firebase (Ini sudah otomatis mencatat history)
+            FirebaseManager.emptyBin(binType, authManager.getUserId(), authManager.getUserName())
 
             if (isAdded) {
                 button.isEnabled = true

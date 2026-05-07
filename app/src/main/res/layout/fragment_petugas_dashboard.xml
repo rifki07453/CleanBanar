@@ -30,7 +30,7 @@
             android:letterSpacing="0.05"
             android:textStyle="bold"
             android:layout_marginStart="24dp"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="56dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -53,13 +53,13 @@
             android:id="@+id/btnDecorativeTrash"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            app:icon="@android:drawable/ic_menu_delete"
+            app:icon="@drawable/ic_trash_modern"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
             app:iconTint="@color/white"
             app:cornerRadius="24dp"
             app:backgroundTint="#26FFFFFF"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="48dp"
             android:layout_marginEnd="24dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"/>
