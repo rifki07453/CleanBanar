@@ -1,21 +1,50 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# ============================================================
+# CleanBanar ProGuard Rules
+# ============================================================
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Sembunyikan informasi source file (tidak perlu untuk debug)
+-renamesourcefileattribute SourceFile
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Jaga nama class Kotlin agar reflection tetap berfungsi
+-keep class kotlin.** { *; }
+-keep class kotlin.Metadata { *; }
+-keepclassmembers class **$WhenMappings { <fields>; }
+-keepclassmembers class kotlin.Lazy { *; }
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Firebase Realtime Database — jaga model data agar tidak ter-obfuscate
+-keep class com.google.firebase.** { *; }
+-keep class com.google.android.gms.** { *; }
+-dontwarn com.google.firebase.**
+-dontwarn com.google.android.gms.**
+
+# Firebase Auth
+-keepclassmembers class com.google.firebase.auth.** { *; }
+
+# Jaga semua data class di package core.data
+-keep class com.example.cleanbanar.core.data.** { *; }
+
+# Jaga enum agar tidak ter-strip
+-keepclassmembers enum * { public static **[] values(); public static ** valueOf(java.lang.String); }
+
+# Android Architecture Component — ViewModel & LiveData
+-keep class androidx.lifecycle.** { *; }
+
+# Material Components
+-keep class com.google.android.material.** { *; }
+-dontwarn com.google.android.material.**
+
+# Jaga fragment binding (ViewBinding)
+-keep class com.example.cleanbanar.databinding.** { *; }
+
+# Jaga activity dan fragment agar tidak ter-rename
+-keep public class * extends androidx.fragment.app.Fragment
+-keep public class * extends androidx.appcompat.app.AppCompatActivity
+
+# Hapus log di release build (keamanan: tidak ada info bocor ke logcat)
+-assumenosideeffects class android.util.Log {
+    public static *** d(...);
+    public static *** v(...);
+    public static *** i(...);
+    public static *** w(...);
+    public static *** e(...);
+}
