@@ -26,7 +26,7 @@
                 android:layout_height="wrap_content"
                 android:text="Statistik"
                 android:textStyle="bold"
-                android:textSize="20sp"
+                android:textSize="24sp"
                 android:textColor="@color/gray_900"
                 android:layout_centerVertical="true" />
                 

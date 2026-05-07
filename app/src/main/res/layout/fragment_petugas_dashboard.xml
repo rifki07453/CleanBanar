@@ -48,12 +48,12 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvOverviewTitle" />
 
-        <!-- Decorative Trashcan Button top right -->
+        <!-- Refresh Button top right -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnDecorativeTrash"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            app:icon="@drawable/ic_trash_modern"
+            app:icon="@android:drawable/ic_popup_sync"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
             app:iconTint="@color/white"

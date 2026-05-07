@@ -139,7 +139,8 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         }
 
         val iconBg = if (isOrganik) R.drawable.ic_bg_circle_green else R.drawable.ic_bg_circle_blue
-        val iconSrc = if (isOrganik) R.drawable.ic_leaf_green else R.drawable.ic_bottle_blue
+        val iconSrc = R.drawable.ic_trash_modern
+        val tintColor = if (isOrganik) R.color.emerald_600 else R.color.blue_600
 
         val icon = ImageView(requireContext()).apply {
             id = View.generateViewId()
@@ -148,6 +149,7 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
             }
             setBackgroundResource(iconBg)
             setImageResource(iconSrc)
+            setColorFilter(resources.getColor(tintColor, null))
             scaleType = ImageView.ScaleType.CENTER
             setPadding(8.dpToPx(), 8.dpToPx(), 8.dpToPx(), 8.dpToPx())
         }
