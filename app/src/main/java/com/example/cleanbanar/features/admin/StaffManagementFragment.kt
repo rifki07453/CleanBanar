@@ -42,6 +42,7 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
             when {
                 name.isEmpty() -> toast("Harap isi Nama Lengkap")
                 email.isEmpty() -> toast("Harap isi Email")
+                !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> toast("Format email tidak valid")
                 password.length < 6 -> toast("Password minimal 6 karakter")
                 else -> createStaffAccount(name, email, password)
             }

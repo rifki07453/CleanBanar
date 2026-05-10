@@ -41,7 +41,9 @@ object FirebaseManager {
                 val terakhirDikosongkan = snapshot.child("terakhirDikosongkan").getValue(Long::class.java) ?: 0L
                 callback(persentase, status, terakhirUpdate, terakhirDikosongkan)
             }
-            override fun onCancelled(error: DatabaseError) {}
+            override fun onCancelled(error: DatabaseError) {
+                Log.e(TAG, "listenBinStatus error: ${error.message} (code=${error.code})")
+            }
         }
         ref.addValueEventListener(listener)
         return listener
@@ -88,7 +90,9 @@ object FirebaseManager {
                 val tipe = snapshot.child("tipeJaringan").getValue(String::class.java) ?: "WIFI"
                 callback(status, terakhir, tipe)
             }
-            override fun onCancelled(error: DatabaseError) {}
+            override fun onCancelled(error: DatabaseError) {
+                Log.e(TAG, "listenDeviceStatus error: ${error.message} (code=${error.code})")
+            }
         }
         ref.addValueEventListener(listener)
         return listener
@@ -118,7 +122,9 @@ object FirebaseManager {
                 }
                 callback(daftar)
             }
-            override fun onCancelled(error: DatabaseError) {}
+            override fun onCancelled(error: DatabaseError) {
+                Log.e(TAG, "listenNotifications error: ${error.message} (code=${error.code})")
+            }
         }
         ref.orderByChild("waktu").addValueEventListener(listener)
         return listener
@@ -153,7 +159,9 @@ object FirebaseManager {
                 }
                 callback(riwayat)
             }
-            override fun onCancelled(error: DatabaseError) {}
+            override fun onCancelled(error: DatabaseError) {
+                Log.e(TAG, "listenHistory error: ${error.message} (code=${error.code})")
+            }
         }
         ref.orderByChild("waktu").addValueEventListener(listener)
         return listener
@@ -186,7 +194,9 @@ object FirebaseManager {
                 }
                 callback(users)
             }
-            override fun onCancelled(error: DatabaseError) {}
+            override fun onCancelled(error: DatabaseError) {
+                Log.e(TAG, "listenUsers error: ${error.message} (code=${error.code})")
+            }
         }
         ref.addValueEventListener(listener)
         return listener
@@ -255,7 +265,9 @@ object FirebaseManager {
                 }
                 callback(stats)
             }
-            override fun onCancelled(error: DatabaseError) {}
+            override fun onCancelled(error: DatabaseError) {
+                Log.e(TAG, "listenDailyStats error: ${error.message} (code=${error.code})")
+            }
         }
         ref.limitToLast(7).addValueEventListener(listener)
         return listener
@@ -272,7 +284,9 @@ object FirebaseManager {
                 }
                 callback(count)
             }
-            override fun onCancelled(error: DatabaseError) {}
+            override fun onCancelled(error: DatabaseError) {
+                Log.e(TAG, "countPenuhEvents error: ${error.message} (code=${error.code})")
+            }
         }
         ref.addValueEventListener(listener)
         return listener
@@ -309,7 +323,9 @@ object FirebaseManager {
                     sistem = snapshot.child("sistem").getValue(Boolean::class.java) ?: true
                 ))
             }
-            override fun onCancelled(error: DatabaseError) {}
+            override fun onCancelled(error: DatabaseError) {
+                Log.e(TAG, "listenNotificationSettings error: ${error.message} (code=${error.code})")
+            }
         }
         ref.addValueEventListener(listener)
         return listener

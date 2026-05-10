@@ -122,9 +122,15 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                 val newName = etNama.text.toString().trim()
                 val newEmail = etEmail.text.toString().trim()
 
-                if (newName.isEmpty()) {
-                    Toast.makeText(requireContext(), "Nama tidak boleh kosong", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
+                when {
+                    newName.isEmpty() -> {
+                        Toast.makeText(requireContext(), "Nama tidak boleh kosong", Toast.LENGTH_SHORT).show()
+                        return@setPositiveButton
+                    }
+                    newEmail.isNotEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(newEmail).matches() -> {
+                        Toast.makeText(requireContext(), "Format email tidak valid", Toast.LENGTH_SHORT).show()
+                        return@setPositiveButton
+                    }
                 }
 
                 val userId = authManager.getUserId()
@@ -132,11 +138,11 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
 
                 // Update sesi lokal
                 authManager.updateName(newName)
-                authManager.updateEmail(newEmail)
+                if (newEmail.isNotEmpty()) authManager.updateEmail(newEmail)
 
                 // Update tampilan header profil
                 binding.tvProfileName.text = newName
-                binding.tvProfileEmail.text = newEmail
+                if (newEmail.isNotEmpty()) binding.tvProfileEmail.text = newEmail
 
                 Toast.makeText(requireContext(), "Profil berhasil diperbarui", Toast.LENGTH_SHORT).show()
             }
