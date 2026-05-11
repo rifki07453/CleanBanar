@@ -255,13 +255,16 @@ object FirebaseManager {
     }
 
     fun getAdminPhone(callback: (String) -> Unit) {
-        rootRef?.child("users")?.orderByChild("peran")?.equalTo("Admin")?.addListenerForSingleValueEvent(object : ValueEventListener {
+        rootRef?.child("users")?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 for (child in snapshot.children) {
-                    val phone = child.child("nomorHp").getValue(String::class.java) ?: ""
-                    if (phone.isNotEmpty()) {
-                        callback(phone)
-                        return
+                    val role = child.child("peran").getValue(String::class.java) ?: ""
+                    if (role == "Admin") {
+                        val phone = child.child("nomorHp").getValue(String::class.java) ?: ""
+                        if (phone.isNotEmpty()) {
+                            callback(phone)
+                            return
+                        }
                     }
                 }
                 callback("")
