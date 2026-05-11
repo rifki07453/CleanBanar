@@ -25,11 +25,17 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     private val authStateListener = FirebaseAuth.AuthStateListener { auth ->
         if (auth.currentUser == null) {
             // Token expired atau user di-sign out — paksa kembali ke login
-            val intent = Intent(this, LoginActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            if (!isFinishing && !isDestroyed) {
+                try {
+                    val intent = Intent(this, LoginActivity::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    }
+                    startActivity(intent)
+                    finish()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
-            startActivity(intent)
-            finish()
         }
     }
 

@@ -54,14 +54,18 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
 
         // Keluar Akun
         binding.btnLogout.setOnClickListener {
-            val ctx = context ?: return@setOnClickListener
-            
-            // Hentikan background service agar tidak memory leak/crash
-            com.example.cleanbanar.features.dashboard.BinObserverService.stopService(ctx)
-            
-            // Hapus sesi lokal dan sign out Firebase
-            // Redirection ke halaman login akan otomatis di-handle oleh AuthStateListener di MainActivity
-            authManager.logout()
+            try {
+                val ctx = context ?: return@setOnClickListener
+                
+                // Hentikan observer dan service secara sinkron
+                com.example.cleanbanar.features.dashboard.BinObserver.stop()
+                com.example.cleanbanar.features.dashboard.BinObserverService.stopService(ctx)
+                
+                // Hapus sesi lokal dan sign out Firebase
+                authManager.logout()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 

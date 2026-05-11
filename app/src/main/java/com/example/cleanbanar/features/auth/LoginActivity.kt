@@ -72,7 +72,7 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                 .addOnSuccessListener { authResult ->
                     val uid = authResult.user?.uid ?: return@addOnSuccessListener
 
-                    FirebaseManager.getUserData(uid) { nama, peran ->
+                    FirebaseManager.getUserData(uid) { nama, peran, nomorHp ->
                         if (peran.isEmpty()) {
                             val seedData = getSeedDataForEmail(email)
                             if (seedData == null) {
@@ -86,16 +86,17 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                                 uid = uid,
                                 nama = seedData.first,
                                 email = email,
-                                peran = seedData.second
+                                peran = seedData.second,
+                                nomorHp = ""
                             ) {
                                 setLoading(false)
-                                authManager.saveSession(uid = uid, name = seedData.first, email = email, role = seedData.second)
+                                authManager.saveSession(uid = uid, name = seedData.first, email = email, role = seedData.second, phone = "")
                                 Toast.makeText(this, "Selamat datang, ${seedData.first}!", Toast.LENGTH_SHORT).show()
                                 navigateToDashboard(seedData.second)
                             }
                         } else {
                             setLoading(false)
-                            authManager.saveSession(uid = uid, name = nama, email = email, role = peran)
+                            authManager.saveSession(uid = uid, name = nama, email = email, role = peran, phone = nomorHp)
                             Toast.makeText(this, "Selamat datang, $nama!", Toast.LENGTH_SHORT).show()
                             navigateToDashboard(peran)
                         }
@@ -119,15 +120,15 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
     }
 
     private fun checkAndRegisterStaff(email: String, password: String) {
-        FirebaseManager.checkIfUserPreRegistered(email) { exists, oldId, nama, peran ->
+        FirebaseManager.checkIfUserPreRegistered(email) { exists, oldId, nama, peran, nomorHp ->
             if (exists) {
                 firebaseAuth.createUserWithEmailAndPassword(email, password)
                     .addOnSuccessListener { authResult ->
                         val uid = authResult.user?.uid ?: return@addOnSuccessListener
-                        FirebaseManager.seedUserData(uid, nama, email, peran) {
+                        FirebaseManager.seedUserData(uid, nama, email, peran, nomorHp) {
                             FirebaseManager.deleteUser(oldId)
                             setLoading(false)
-                            authManager.saveSession(uid, nama, email, peran)
+                            authManager.saveSession(uid, nama, email, peran, nomorHp)
                             Toast.makeText(this, "Akun berhasil diaktifkan! Selamat datang, $nama", Toast.LENGTH_LONG).show()
                             navigateToDashboard(peran)
                         }
