@@ -66,6 +66,16 @@
                 android:text="email@contoh.com"
                 android:textColor="#A7F3D0" 
                 android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tvProfilePhone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="08123456789"
+                android:textColor="#D1FAE5" 
+                android:textSize="12sp"
+                android:layout_marginTop="2dp"
+                android:visibility="gone" />
             
         </LinearLayout>
     </LinearLayout>

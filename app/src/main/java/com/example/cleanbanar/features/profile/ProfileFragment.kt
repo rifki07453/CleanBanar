@@ -36,6 +36,14 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         // Tampilkan data user dari sesi lokal
         binding.tvProfileName.text = authManager.getUserName()
         binding.tvProfileEmail.text = authManager.getUserEmail()
+        
+        val phone = authManager.getUserPhone()
+        if (phone.isNotEmpty()) {
+            binding.tvProfilePhone.text = phone
+            binding.tvProfilePhone.visibility = View.VISIBLE
+        } else {
+            binding.tvProfilePhone.visibility = View.GONE
+        }
 
         // Edit Profil — dinamis & tersimpan ke Firebase
         binding.btnEditProfil.setOnClickListener {
@@ -174,6 +182,13 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                 // Update tampilan header profil
                 binding.tvProfileName.text = newName
                 if (newEmail.isNotEmpty()) binding.tvProfileEmail.text = newEmail
+                
+                if (newPhone.isNotEmpty()) {
+                    binding.tvProfilePhone.text = newPhone
+                    binding.tvProfilePhone.visibility = View.VISIBLE
+                } else {
+                    binding.tvProfilePhone.visibility = View.GONE
+                }
 
                 Toast.makeText(requireContext(), "Profil berhasil diperbarui", Toast.LENGTH_SHORT).show()
             }
