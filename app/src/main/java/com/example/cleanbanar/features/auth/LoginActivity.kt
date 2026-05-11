@@ -37,47 +37,23 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
         }
 
         binding.tvForgotPassword.setOnClickListener {
-            val emailInput = binding.etEmail.text.toString().trim()
-            val layout = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                setPadding(24.dpToPx(), 16.dpToPx(), 24.dpToPx(), 0)
-            }
-            
-            val etResetEmail = android.widget.EditText(this).apply {
-                hint = "Masukkan email Anda"
-                inputType = android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
-                background = resources.getDrawable(R.drawable.edit_text_bg, null)
-                setPadding(16.dpToPx(), 0, 16.dpToPx(), 0)
-                layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, 50.dpToPx()
-                ).apply { bottomMargin = 12.dpToPx() }
-                if (emailInput.isNotEmpty()) {
-                    setText(emailInput)
+            FirebaseManager.getAdminPhone { adminPhone ->
+                var phoneToUse = adminPhone
+                if (phoneToUse.isEmpty()) {
+                    phoneToUse = "6281234567890" // Nomor default jika Admin belum set nomor HP
+                } else if (phoneToUse.startsWith("0")) {
+                    phoneToUse = "62" + phoneToUse.substring(1)
                 }
-            }
-            layout.addView(etResetEmail)
 
-            AlertDialog.Builder(this)
-                .setTitle("Lupa Password?")
-                .setMessage("Kami akan mengirimkan link untuk mereset password ke email Anda.")
-                .setView(layout)
-                .setPositiveButton("Kirim Link") { _, _ ->
-                    val emailToReset = etResetEmail.text.toString().trim()
-                    if (emailToReset.isEmpty()) {
-                        Toast.makeText(this, "Email tidak boleh kosong", Toast.LENGTH_SHORT).show()
-                        return@setPositiveButton
-                    }
-                    
-                    firebaseAuth.sendPasswordResetEmail(emailToReset)
-                        .addOnSuccessListener {
-                            Toast.makeText(this, "Link reset password telah dikirim ke $emailToReset", Toast.LENGTH_LONG).show()
-                        }
-                        .addOnFailureListener { e ->
-                            Toast.makeText(this, "Gagal mengirim link: ${e.message}", Toast.LENGTH_LONG).show()
-                        }
+                val url = "https://api.whatsapp.com/send?phone=$phoneToUse&text=Halo%20Admin,%20saya%20ingin%20mereset%20password%20akun%20CleanBanar%20saya."
+                val intent = Intent(Intent.ACTION_VIEW)
+                intent.data = android.net.Uri.parse(url)
+                try {
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    Toast.makeText(this, "Gagal membuka WhatsApp. Pastikan aplikasi terinstal.", Toast.LENGTH_SHORT).show()
                 }
-                .setNegativeButton("Batal", null)
-                .show()
+            }
         }
 
         binding.btnLogin.setOnClickListener {

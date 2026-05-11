@@ -18,6 +18,7 @@ class AuthManager(context: Context) {
         private const val KEY_USER_NAME = "user_name"
         private const val KEY_USER_EMAIL = "user_email"
         private const val KEY_USER_ROLE = "user_role"
+        private const val KEY_USER_PHONE = "user_phone"
     }
 
     private val prefs: SharedPreferences = try {
@@ -49,12 +50,13 @@ class AuthManager(context: Context) {
     /**
      * Menyimpan data sesi pengguna ke SharedPreferences.
      */
-    fun saveSession(uid: String, name: String, email: String, role: String) {
+    fun saveSession(uid: String, name: String, email: String, role: String, phone: String = "") {
         prefs.edit().apply {
             putString(KEY_USER_ID, uid)
             putString(KEY_USER_NAME, name)
             putString(KEY_USER_EMAIL, email)
             putString(KEY_USER_ROLE, role)
+            putString(KEY_USER_PHONE, phone)
             apply()
         }
     }
@@ -73,6 +75,11 @@ class AuthManager(context: Context) {
      * Mendapatkan peran pengguna yang sedang masuk (Admin/Petugas).
      */
     fun getUserRole(): String = prefs.getString(KEY_USER_ROLE, "") ?: ""
+
+    /**
+     * Mendapatkan nomor HP pengguna yang sedang masuk.
+     */
+    fun getUserPhone(): String = prefs.getString(KEY_USER_PHONE, "") ?: ""
 
     /**
      * Mendapatkan UID pengguna yang sedang masuk.
@@ -95,5 +102,10 @@ class AuthManager(context: Context) {
     /** Update email lokal di SharedPreferences */
     fun updateEmail(email: String) {
         prefs.edit().putString(KEY_USER_EMAIL, email).apply()
+    }
+
+    /** Update nomor HP lokal di SharedPreferences */
+    fun updatePhone(phone: String) {
+        prefs.edit().putString(KEY_USER_PHONE, phone).apply()
     }
 }

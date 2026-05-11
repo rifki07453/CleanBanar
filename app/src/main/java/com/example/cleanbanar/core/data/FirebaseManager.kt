@@ -193,7 +193,8 @@ object FirebaseManager {
                         "id" to (child.key ?: ""),
                         "nama" to (child.child("nama").getValue(String::class.java) ?: ""),
                         "email" to (child.child("email").getValue(String::class.java) ?: ""),
-                        "peran" to (child.child("peran").getValue(String::class.java) ?: "")
+                        "peran" to (child.child("peran").getValue(String::class.java) ?: ""),
+                        "nomorHp" to (child.child("nomorHp").getValue(String::class.java) ?: "")
                     ))
                 }
                 callback(users)
@@ -206,49 +207,66 @@ object FirebaseManager {
         return listener
     }
 
-    fun addUser(nama: String, email: String, peran: String, onSuccess: () -> Unit = {}, onFailure: (String) -> Unit = {}) {
+    fun addUser(nama: String, email: String, peran: String, nomorHp: String = "", onSuccess: () -> Unit = {}, onFailure: (String) -> Unit = {}) {
         val ref = rootRef?.child("users")?.push() ?: run { onFailure("Firebase error"); return }
-        ref.setValue(mapOf("nama" to nama, "email" to email, "peran" to peran))
+        ref.setValue(mapOf("nama" to nama, "email" to email, "peran" to peran, "nomorHp" to nomorHp))
             .addOnSuccessListener { onSuccess() }
             .addOnFailureListener { onFailure(it.message ?: "Error") }
     }
 
-    fun checkIfUserPreRegistered(email: String, callback: (Boolean, String, String, String) -> Unit) {
+    fun checkIfUserPreRegistered(email: String, callback: (Boolean, String, String, String, String) -> Unit) {
         rootRef?.child("users")?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 for (child in snapshot.children) {
                     if ((child.child("email").getValue(String::class.java) ?: "").trim().equals(email.trim(), true)) {
-                        callback(true, child.key ?: "", child.child("nama").getValue(String::class.java) ?: "", child.child("peran").getValue(String::class.java) ?: "")
+                        callback(true, child.key ?: "", child.child("nama").getValue(String::class.java) ?: "", child.child("peran").getValue(String::class.java) ?: "", child.child("nomorHp").getValue(String::class.java) ?: "")
                         return
                     }
                 }
-                callback(false, "", "", "")
+                callback(false, "", "", "", "")
             }
-            override fun onCancelled(error: DatabaseError) { callback(false, "", "", "") }
+            override fun onCancelled(error: DatabaseError) { callback(false, "", "", "", "") }
         })
     }
 
-    fun seedUserData(uid: String, nama: String, email: String, peran: String, onComplete: () -> Unit) {
-        rootRef?.child("users")?.child(uid)?.setValue(mapOf("nama" to nama, "email" to email, "peran" to peran))
+    fun seedUserData(uid: String, nama: String, email: String, peran: String, nomorHp: String = "", onComplete: () -> Unit) {
+        rootRef?.child("users")?.child(uid)?.setValue(mapOf("nama" to nama, "email" to email, "peran" to peran, "nomorHp" to nomorHp))
             ?.addOnCompleteListener { onComplete() }
     }
 
-    fun updateUser(userId: String, nama: String, email: String) {
+    fun updateUser(userId: String, nama: String, email: String, nomorHp: String) {
         val ref = rootRef?.child("users")?.child(userId) ?: return
         ref.child("nama").setValue(nama)
         ref.child("email").setValue(email)
+        ref.child("nomorHp").setValue(nomorHp)
     }
 
     fun deleteUser(userId: String) {
         rootRef?.child("users")?.child(userId)?.removeValue()
     }
 
-    fun getUserData(uid: String, callback: (nama: String, peran: String) -> Unit) {
+    fun getUserData(uid: String, callback: (nama: String, peran: String, nomorHp: String) -> Unit) {
         rootRef?.child("users")?.child(uid)?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                callback(snapshot.child("nama").getValue(String::class.java) ?: "", snapshot.child("peran").getValue(String::class.java) ?: "")
+                callback(snapshot.child("nama").getValue(String::class.java) ?: "", snapshot.child("peran").getValue(String::class.java) ?: "", snapshot.child("nomorHp").getValue(String::class.java) ?: "")
             }
-            override fun onCancelled(error: DatabaseError) { callback("", "") }
+            override fun onCancelled(error: DatabaseError) { callback("", "", "") }
+        })
+    }
+
+    fun getAdminPhone(callback: (String) -> Unit) {
+        rootRef?.child("users")?.orderByChild("peran")?.equalTo("Admin")?.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                for (child in snapshot.children) {
+                    val phone = child.child("nomorHp").getValue(String::class.java) ?: ""
+                    if (phone.isNotEmpty()) {
+                        callback(phone)
+                        return
+                    }
+                }
+                callback("")
+            }
+            override fun onCancelled(error: DatabaseError) { callback("") }
         })
     }
 

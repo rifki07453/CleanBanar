@@ -37,6 +37,7 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
         binding.btnCreateAccount.setOnClickListener {
             val name = binding.etNewName.text.toString().trim()
             val email = binding.etNewEmail.text.toString().trim()
+            val phone = binding.etNewPhone.text.toString().trim()
             val password = binding.etNewPassword.text.toString().trim()
 
             when {
@@ -44,7 +45,7 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
                 email.isEmpty() -> toast("Harap isi Email")
                 !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> toast("Format email tidak valid")
                 password.length < 6 -> toast("Password minimal 6 karakter")
-                else -> createStaffAccount(name, email, password)
+                else -> createStaffAccount(name, email, password, phone)
             }
         }
     }
@@ -66,7 +67,7 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
         }
     }
 
-    private fun createStaffAccount(name: String, email: String, password: String) {
+    private fun createStaffAccount(name: String, email: String, password: String, phone: String) {
         binding.btnCreateAccount.isEnabled = false
         binding.btnCreateAccount.text = "Memproses..."
 
@@ -75,9 +76,11 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
             nama = name,
             email = email,
             peran = "Petugas",
+            nomorHp = phone,
             onSuccess = {
                 binding.etNewName.text.clear()
                 binding.etNewEmail.text.clear()
+                binding.etNewPhone.text.clear()
                 binding.etNewPassword.text?.clear()
                 binding.btnCreateAccount.isEnabled = true
                 binding.btnCreateAccount.text = "Buat Akun Petugas"

@@ -110,6 +110,25 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 50.dpToPx()
+            ).apply { bottomMargin = 12.dpToPx() }
+        }
+
+        val labelPhone = TextView(requireContext()).apply {
+            text = "Nomor WhatsApp (Opsional)"
+            textSize = 12f
+            setTextColor(android.graphics.Color.parseColor("#6B7280"))
+            setPadding(0, 0, 0, 4.dpToPx())
+        }
+        val etPhone = EditText(requireContext()).apply {
+            setText(authManager.getUserPhone())
+            textSize = 14f
+            inputType = android.text.InputType.TYPE_CLASS_PHONE
+            background = resources.getDrawable(R.drawable.edit_text_bg, null)
+            setPadding(16.dpToPx(), 0, 16.dpToPx(), 0)
+            setTextColor(android.graphics.Color.parseColor("#111827"))
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                50.dpToPx()
             )
         }
 
@@ -117,6 +136,8 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         layout.addView(etNama)
         layout.addView(labelEmail)
         layout.addView(etEmail)
+        layout.addView(labelPhone)
+        layout.addView(etPhone)
 
         AlertDialog.Builder(requireContext())
             .setTitle("Edit Profil")
@@ -124,6 +145,8 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             .setPositiveButton("Simpan") { _, _ ->
                 val newName = etNama.text.toString().trim()
                 val newEmail = etEmail.text.toString().trim()
+
+                val newPhone = etPhone.text.toString().trim()
 
                 when {
                     newName.isEmpty() -> {
@@ -137,11 +160,12 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                 }
 
                 val userId = authManager.getUserId()
-                FirebaseManager.updateUser(userId, newName, newEmail)
+                FirebaseManager.updateUser(userId, newName, newEmail, newPhone)
 
                 // Update sesi lokal
                 authManager.updateName(newName)
                 if (newEmail.isNotEmpty()) authManager.updateEmail(newEmail)
+                authManager.updatePhone(newPhone)
 
                 // Update tampilan header profil
                 binding.tvProfileName.text = newName
