@@ -9,25 +9,45 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:paddingHorizontal="24dp"
         android:paddingTop="56dp"
-        android:paddingBottom="16dp">
+        android:paddingBottom="16dp"
+        android:gravity="center_vertical">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Notifikasi"
+                android:textStyle="bold"
+                android:textSize="24sp"
+                android:textColor="@color/gray_900" />
+            <TextView
+                android:id="@+id/tvNotifSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Peringatan status tong sampah"
+                android:textSize="13sp"
+                android:textColor="@color/gray_500"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
+
         <TextView
+            android:id="@+id/tvClearAll"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Notifikasi"
-            android:textStyle="bold"
-            android:textSize="24sp"
-            android:textColor="@color/gray_900" />
-        <TextView
-            android:id="@+id/tvNotifSubtitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Peringatan status tong sampah"
+            android:text="Hapus Semua"
             android:textSize="13sp"
-            android:textColor="@color/gray_500"
-            android:layout_marginTop="4dp" />
+            android:textStyle="bold"
+            android:textColor="@color/red_500"
+            android:paddingVertical="8dp"
+            android:paddingStart="16dp"
+            android:visibility="gone" />
     </LinearLayout>
 
     <!-- Notification List -->

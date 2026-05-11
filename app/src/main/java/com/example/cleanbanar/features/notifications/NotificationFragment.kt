@@ -10,6 +10,7 @@ import com.example.cleanbanar.R
 import com.example.cleanbanar.core.data.FirebaseManager
 import com.example.cleanbanar.core.ui.BaseFragment
 import com.example.cleanbanar.databinding.FragmentNotificationBinding
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.database.ValueEventListener
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -26,7 +27,18 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
         return FragmentNotificationBinding.inflate(inflater, container, false)
     }
 
-    override fun setupViews() {}
+    override fun setupViews() {
+        binding.tvClearAll.setOnClickListener {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Hapus Semua Notifikasi")
+                .setMessage("Apakah Anda yakin ingin menghapus semua notifikasi? Tindakan ini tidak dapat dibatalkan.")
+                .setPositiveButton("Hapus") { _, _ ->
+                    FirebaseManager.clearAllNotifications()
+                }
+                .setNegativeButton("Batal", null)
+                .show()
+        }
+    }
 
     override fun observeData() {
         // Mendengarkan data notifikasi dari Firebase
@@ -37,8 +49,10 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
                 binding.notifListContainer.removeAllViews()
 
                 if (notifData.isEmpty()) {
+                    binding.tvClearAll.visibility = android.view.View.GONE
                     addEmptyState()
                 } else {
+                    binding.tvClearAll.visibility = android.view.View.VISIBLE
                     for (notif in notifData) {
                         val waktu = notif["waktu"] as? Long ?: 0L
                         addNotificationCard(

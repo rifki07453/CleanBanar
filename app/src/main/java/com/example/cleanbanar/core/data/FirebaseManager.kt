@@ -139,6 +139,10 @@ object FirebaseManager {
         ref.child("sudahDibaca").setValue(false)
     }
 
+    fun clearAllNotifications() {
+        rootRef?.child("notifications")?.removeValue()
+    }
+
     // ==========================================
     // Riwayat (History)
     // ==========================================
