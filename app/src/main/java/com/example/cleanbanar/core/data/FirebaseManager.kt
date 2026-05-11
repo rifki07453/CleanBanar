@@ -126,7 +126,7 @@ object FirebaseManager {
                 Log.e(TAG, "listenNotifications error: ${error.message} (code=${error.code})")
             }
         }
-        ref.orderByChild("waktu").addValueEventListener(listener)
+        ref.orderByChild("waktu").limitToLast(30).addValueEventListener(listener)
         return listener
     }
 
@@ -163,7 +163,7 @@ object FirebaseManager {
                 Log.e(TAG, "listenHistory error: ${error.message} (code=${error.code})")
             }
         }
-        ref.orderByChild("waktu").addValueEventListener(listener)
+        ref.orderByChild("waktu").limitToLast(50).addValueEventListener(listener)
         return listener
     }
 
