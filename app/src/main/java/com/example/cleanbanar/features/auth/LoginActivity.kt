@@ -3,6 +3,9 @@ package com.example.cleanbanar.features.auth
 import android.content.Intent
 import android.view.LayoutInflater
 import android.widget.Toast
+import android.app.AlertDialog
+import android.widget.LinearLayout
+import com.example.cleanbanar.R
 import com.example.cleanbanar.core.data.AuthManager
 import com.example.cleanbanar.core.data.FirebaseManager
 import com.example.cleanbanar.core.ui.BaseActivity
@@ -31,6 +34,50 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
         if (authManager.isLoggedIn()) {
             navigateToDashboard(authManager.getUserRole())
             return
+        }
+
+        binding.tvForgotPassword.setOnClickListener {
+            val emailInput = binding.etEmail.text.toString().trim()
+            val layout = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(24.dpToPx(), 16.dpToPx(), 24.dpToPx(), 0)
+            }
+            
+            val etResetEmail = android.widget.EditText(this).apply {
+                hint = "Masukkan email Anda"
+                inputType = android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+                background = resources.getDrawable(R.drawable.edit_text_bg, null)
+                setPadding(16.dpToPx(), 0, 16.dpToPx(), 0)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, 50.dpToPx()
+                ).apply { bottomMargin = 12.dpToPx() }
+                if (emailInput.isNotEmpty()) {
+                    setText(emailInput)
+                }
+            }
+            layout.addView(etResetEmail)
+
+            AlertDialog.Builder(this)
+                .setTitle("Lupa Password?")
+                .setMessage("Kami akan mengirimkan link untuk mereset password ke email Anda.")
+                .setView(layout)
+                .setPositiveButton("Kirim Link") { _, _ ->
+                    val emailToReset = etResetEmail.text.toString().trim()
+                    if (emailToReset.isEmpty()) {
+                        Toast.makeText(this, "Email tidak boleh kosong", Toast.LENGTH_SHORT).show()
+                        return@setPositiveButton
+                    }
+                    
+                    firebaseAuth.sendPasswordResetEmail(emailToReset)
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "Link reset password telah dikirim ke $emailToReset", Toast.LENGTH_LONG).show()
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "Gagal mengirim link: ${e.message}", Toast.LENGTH_LONG).show()
+                        }
+                }
+                .setNegativeButton("Batal", null)
+                .show()
         }
 
         binding.btnLogin.setOnClickListener {
@@ -152,4 +199,6 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
         startActivity(intent)
         finish()
     }
+
+    private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()
 }

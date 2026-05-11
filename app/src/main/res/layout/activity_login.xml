@@ -111,7 +111,7 @@
                 app:endIconMode="password_toggle"
                 app:endIconTint="@color/gray_400"
                 app:boxBackgroundMode="none"
-                android:layout_marginBottom="24dp">
+                android:layout_marginBottom="12dp">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etPassword"
@@ -125,6 +125,20 @@
                     android:textColorHint="@color/gray_400"
                     android:autofillHints="password" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:id="@+id/tvForgotPassword"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:text="Lupa Password?"
+                android:textColor="@color/emerald_600"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="24dp"
+                android:padding="4dp"
+                android:clickable="true"
+                android:focusable="true" />
 
             <!-- Error State Container (Hidden by default) -->
             <LinearLayout

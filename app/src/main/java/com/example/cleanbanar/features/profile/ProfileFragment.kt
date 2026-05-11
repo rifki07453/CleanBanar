@@ -54,11 +54,14 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
 
         // Keluar Akun
         binding.btnLogout.setOnClickListener {
-            FirebaseAuth.getInstance().signOut()
+            val ctx = context ?: return@setOnClickListener
+            
+            // Hentikan background service agar tidak memory leak/crash
+            com.example.cleanbanar.features.dashboard.BinObserverService.stopService(ctx)
+            
+            // Hapus sesi lokal dan sign out Firebase
+            // Redirection ke halaman login akan otomatis di-handle oleh AuthStateListener di MainActivity
             authManager.logout()
-            val intent = Intent(requireContext(), LoginActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
         }
     }
 
