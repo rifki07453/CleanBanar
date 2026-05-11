@@ -234,11 +234,16 @@ object FirebaseManager {
             ?.addOnCompleteListener { onComplete() }
     }
 
-    fun updateUser(userId: String, nama: String, email: String, nomorHp: String) {
+    fun updateUser(userId: String, nama: String, email: String, nomorHp: String, peran: String) {
         val ref = rootRef?.child("users")?.child(userId) ?: return
         ref.child("nama").setValue(nama)
         ref.child("email").setValue(email)
         ref.child("nomorHp").setValue(nomorHp)
+        
+        // Simpan nomor admin ke node publik agar bisa dibaca dari halaman login
+        if (peran == "Admin" && nomorHp.isNotEmpty()) {
+            rootRef?.child("public_info")?.child("admin_phone")?.setValue(nomorHp)
+        }
     }
 
     fun deleteUser(userId: String) {
@@ -255,19 +260,10 @@ object FirebaseManager {
     }
 
     fun getAdminPhone(callback: (String) -> Unit) {
-        rootRef?.child("users")?.addListenerForSingleValueEvent(object : ValueEventListener {
+        rootRef?.child("public_info")?.child("admin_phone")?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                for (child in snapshot.children) {
-                    val role = child.child("peran").getValue(String::class.java) ?: ""
-                    if (role == "Admin") {
-                        val phone = child.child("nomorHp").getValue(String::class.java) ?: ""
-                        if (phone.isNotEmpty()) {
-                            callback(phone)
-                            return
-                        }
-                    }
-                }
-                callback("")
+                val phone = snapshot.getValue(String::class.java) ?: ""
+                callback(phone)
             }
             override fun onCancelled(error: DatabaseError) { callback("") }
         })

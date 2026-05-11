@@ -172,7 +172,8 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                 }
 
                 val userId = authManager.getUserId()
-                FirebaseManager.updateUser(userId, newName, newEmail, newPhone)
+                val userRole = authManager.getUserRole()
+                FirebaseManager.updateUser(userId, newName, newEmail, newPhone, userRole)
 
                 // Update sesi lokal
                 authManager.updateName(newName)
