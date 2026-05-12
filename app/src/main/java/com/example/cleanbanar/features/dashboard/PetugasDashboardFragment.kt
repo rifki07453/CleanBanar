@@ -373,12 +373,19 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
      */
     private fun formatLastUpdate(timestamp: Long): String {
         if (timestamp == 0L) return "Belum diupdate"
-        val diff = System.currentTimeMillis() - timestamp
-        val minutes = diff / 60000
+        val diff   = System.currentTimeMillis() - timestamp
+        val menit  = diff / 60_000L
+        val jam    = diff / 3_600_000L
+        val hari   = diff / 86_400_000L
+        val minggu = diff / 604_800_000L
+        val bulan  = diff / 2_592_000_000L
         return when {
-            minutes < 1 -> "Baru saja"
-            minutes < 60 -> "Update $minutes min lalu"
-            else -> "Update ${minutes / 60} jam lalu"
+            menit  < 1  -> "Baru saja"
+            menit  < 60 -> "$menit menit lalu"
+            jam    < 24 -> "$jam jam lalu"
+            hari   < 7  -> "$hari hari lalu"
+            minggu < 4  -> "$minggu minggu lalu"
+            else        -> "$bulan bulan lalu"
         }
     }
 
