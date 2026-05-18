@@ -186,3 +186,39 @@ Untuk memverifikasi bahwa fitur keamanan di atas berfungsi dengan baik, Anda dap
 | Profile            | Profil               |
 
 *Catatan: Fungsionalitas Manajemen Petugas khusus Admin kini telah terpadu sempurna ke dalam Dasbor utama sebagai kartu akses cepat, memberikan ruang yang lebih leluasa pada bilah navigasi bawah (bottom navigation).*
+
+## Persyaratan Sistem
+
+| Komponen             | Keterangan                                               |
+| -------------------- | -------------------------------------------------------- |
+| **Minimum Android**  | Android 9.0 Pie (API Level 28)                           |
+| **Target Android**   | Android 15 (API Level 35)                                |
+| **Compile SDK**      | API Level 35                                             |
+| **Bahasa Kotlin**    | JVM Target 17 (JDK 17)                                   |
+| **Build Tools**      | Gradle (Kotlin DSL) + Android Studio                     |
+| **Firebase SDK**     | Firebase BoM 33.7.0 (Auth, Realtime Database, Analytics) |
+| **Security Library** | androidx.security:security-crypto 1.1.0-alpha06          |
+| **Versi Aplikasi**   | 1.0 (versionCode 1)                                      |
+
+> **Catatan Build**: Mode *release* mengaktifkan ProGuard (`isMinifyEnabled = true`) dan *resource shrinking* (`isShrinkResources = true`) untuk mengecilkan ukuran APK dan mempersulit proses *reverse engineering*. Mode *debug* dikonfigurasi dengan `isDebuggable = false` sebagai lapisan keamanan tambahan.
+
+## Anggota Tim
+
+Proyek ini dikerjakan sebagai bagian dari mata kuliah **Proyek Berbasis Laboratorium (PBL) Semester 4**.
+
+| No  | Nama                | NIM          |
+| --- | ------------------- | ------------ |
+| 1   | *Taupik Rifki*      | *2401301078* |
+| 2   | *Muhammad Rifki*    | *2401301121* |
+| 3   | *Ibnu Qurtubi*      | *2401301124* |
+| 4   | *Rizka Ika Maulida* | *2401301113* |
+| 5   | *Mariatul Kiftiah*  | *2401301093* |
+
+## Lisensi
+
+Proyek ini dibuat untuk keperluan akademik dan **tidak dimaksudkan untuk penggunaan komersial**. Seluruh hak cipta dimiliki oleh tim pengembang sebagai bagian dari tugas perkuliahan.
+
+```
+Copyright © 2026 Tim CleanBanar — PBL Semester 4
+Hak Cipta Dilindungi. Dilarang mendistribusikan ulang tanpa izin tertulis.
+```
