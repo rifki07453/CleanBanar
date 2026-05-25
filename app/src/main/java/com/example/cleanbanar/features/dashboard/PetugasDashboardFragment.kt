@@ -283,6 +283,34 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
 
         statusRow.addView(tvEstimate)
 
+        // Hitung hari sejak terakhir dikosongkan
+        val diffEmptied = System.currentTimeMillis() - bin.lastEmptied
+        val daysSinceEmptied = diffEmptied / 86_400_000L // milidetik ke hari
+
+        val tvWarning = TextView(requireContext()).apply {
+            textSize = 8f
+            setTextColor(resources.getColor(R.color.red_500, null))
+            layoutParams = RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                addRule(RelativeLayout.ALIGN_PARENT_START)
+            }
+            visibility = View.GONE
+        }
+
+        if (bin.lastEmptied > 0L) {
+            if (isOrganik && daysSinceEmptied >= 3) {
+                tvWarning.text = "⚠️ Mulai membusuk (>$daysSinceEmptied hari)"
+                tvWarning.visibility = View.VISIBLE
+            } else if (!isOrganik && daysSinceEmptied >= 7) {
+                tvWarning.text = "⚠️ Sudah menumpuk (>$daysSinceEmptied hari)"
+                tvWarning.visibility = View.VISIBLE
+            }
+        }
+        
+        statusRow.addView(tvWarning)
+
         // Tombol Pengosongan
         val btnEmpty = MaterialButton(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(

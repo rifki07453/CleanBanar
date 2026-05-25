@@ -18,6 +18,7 @@ class BinObserverService : Service() {
         super.onCreate()
         authManager = AuthManager(this)
         createNotificationChannel()
+        com.example.cleanbanar.core.utils.NotificationHelper.createNotificationChannel(this)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -32,7 +33,7 @@ class BinObserverService : Service() {
         }
 
         // Start the observer logic (re-using the singleton for state tracking)
-        BinObserver.start(userId)
+        BinObserver.start(this, userId)
 
         return START_STICKY
     }
