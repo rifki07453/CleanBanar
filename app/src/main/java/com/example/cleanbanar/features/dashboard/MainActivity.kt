@@ -15,11 +15,22 @@ import com.example.cleanbanar.features.profile.ProfileFragment
 import com.example.cleanbanar.features.statistics.StatisticsFragment
 import com.google.firebase.auth.FirebaseAuth
 import android.widget.Toast
-
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     private lateinit var authManager: AuthManager
     private var userRole: String = "Admin"
+
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (!isGranted) {
+                Toast.makeText(this, "Izin notifikasi diperlukan untuk menerima peringatan penuh", Toast.LENGTH_SHORT).show()
+            }
+        }
 
     // Auth state listener — auto-redirect ke login jika sesi habis
     private val authStateListener = FirebaseAuth.AuthStateListener { auth ->
@@ -65,6 +76,18 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
         // Start BinObserverService for persistent background monitoring
         BinObserverService.startService(this)
+
+        askNotificationPermission()
+    }
+
+    private fun askNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
     }
 
     override fun onStart() {
