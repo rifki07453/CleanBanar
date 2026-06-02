@@ -25,11 +25,11 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
     }
 
     override fun setupViews() {
-        // Keamanan: Cegah screenshot dan screen recording pada halaman login
-        window.setFlags(
-            android.view.WindowManager.LayoutParams.FLAG_SECURE,
-            android.view.WindowManager.LayoutParams.FLAG_SECURE
-        )
+        // Keamanan: Cegah screenshot dan screen recording pada halaman login (dinonaktifkan sementara untuk development/simulator)
+        // window.setFlags(
+        //     android.view.WindowManager.LayoutParams.FLAG_SECURE,
+        //     android.view.WindowManager.LayoutParams.FLAG_SECURE
+        // )
 
         authManager = AuthManager(this)
 
