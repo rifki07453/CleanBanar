@@ -18,6 +18,8 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
     private lateinit var authManager: AuthManager
     private val firebaseAuth = FirebaseAuth.getInstance()
 
+    private var cachedAdminPhone: String = ""
+
     override fun inflateBinding(layoutInflater: LayoutInflater): ActivityLoginBinding {
         return ActivityLoginBinding.inflate(layoutInflater)
     }
@@ -36,23 +38,26 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
             return
         }
 
-        binding.tvForgotPassword.setOnClickListener {
-            FirebaseManager.getAdminPhone { adminPhone ->
-                var phoneToUse = adminPhone
-                if (phoneToUse.isEmpty()) {
-                    phoneToUse = "6281234567890" // Nomor default jika Admin belum set nomor HP
-                } else if (phoneToUse.startsWith("0")) {
-                    phoneToUse = "62" + phoneToUse.substring(1)
-                }
+        // Ambil nomor admin di background saat halaman pertama kali dimuat
+        FirebaseManager.getAdminPhone { phone ->
+            cachedAdminPhone = phone
+        }
 
-                val url = "https://api.whatsapp.com/send?phone=$phoneToUse&text=Halo%20Admin,%20saya%20ingin%20mereset%20password%20akun%20CleanBanar%20saya."
-                val intent = Intent(Intent.ACTION_VIEW)
-                intent.data = android.net.Uri.parse(url)
-                try {
-                    startActivity(intent)
-                } catch (e: Exception) {
-                    Toast.makeText(this, "Gagal membuka WhatsApp. Pastikan aplikasi terinstal.", Toast.LENGTH_SHORT).show()
-                }
+        binding.tvForgotPassword.setOnClickListener {
+            var phoneToUse = cachedAdminPhone
+            if (phoneToUse.isEmpty()) {
+                phoneToUse = "6281234567890" // Nomor default jika Admin belum set nomor HP
+            } else if (phoneToUse.startsWith("0")) {
+                phoneToUse = "62" + phoneToUse.substring(1)
+            }
+
+            val url = "https://api.whatsapp.com/send?phone=$phoneToUse&text=Halo%20Admin,%20saya%20ingin%20mereset%20password%20akun%20CleanBanar%20saya."
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.data = android.net.Uri.parse(url)
+            try {
+                startActivity(intent)
+            } catch (e: Exception) {
+                Toast.makeText(this, "Gagal membuka WhatsApp. Pastikan aplikasi terinstal.", Toast.LENGTH_SHORT).show()
             }
         }
 
