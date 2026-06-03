@@ -5,17 +5,18 @@ import com.example.cleanbanar.core.data.FirebaseManager
 import com.google.firebase.database.ValueEventListener
 
 /**
- * BinObserver — Pemicu notifikasi berdasarkan ambang batas (threshold).
+ * BinObserver — Pemicu notifikasi berdasarkan ambang batas (threshold) untuk banyak perangkat.
  */
 object BinObserver {
 
     private const val TAG = "BinObserver"
 
-    private var previousOrganik: Int = -1
-    private var previousNonOrganik: Int = -1
+    private val previousOrganikMap = mutableMapOf<String, Int>()
+    private val previousNonOrganikMap = mutableMapOf<String, Int>()
 
-    private var organikListener: ValueEventListener? = null
-    private var nonOrganikListener: ValueEventListener? = null
+    private var devicesListener: ValueEventListener? = null
+    private val binListeners = mutableMapOf<String, Pair<ValueEventListener, ValueEventListener>>()
+    
     private var settingsListener: ValueEventListener? = null
 
     private var isRunning = false
@@ -36,37 +37,72 @@ object BinObserver {
             }
         }
 
-        organikListener = FirebaseManager.listenBinStatus("organik") { persentase, _, _, terakhirDikosongkan ->
-            handleThreshold("organik", persentase, previousOrganik)
-            handleStaleWaste("organik", terakhirDikosongkan, 3)
-            previousOrganik = persentase
-        }
-
-        nonOrganikListener = FirebaseManager.listenBinStatus("nonOrganik") { persentase, _, _, terakhirDikosongkan ->
-            handleThreshold("nonOrganik", persentase, previousNonOrganik)
-            handleStaleWaste("nonOrganik", terakhirDikosongkan, 7)
-            previousNonOrganik = persentase
+        devicesListener = FirebaseManager.listenDevices { devices ->
+            val currentDeviceIds = devices.map { it.id }.toSet()
+            
+            // Hapus listener untuk perangkat yang sudah dihapus
+            val removedDevices = binListeners.keys - currentDeviceIds
+            for (deviceId in removedDevices) {
+                val listeners = binListeners[deviceId]
+                if (listeners != null) {
+                    FirebaseManager.removeBinListener(deviceId, "organik", listeners.first)
+                    FirebaseManager.removeBinListener(deviceId, "nonOrganik", listeners.second)
+                }
+                binListeners.remove(deviceId)
+                previousOrganikMap.remove(deviceId)
+                previousNonOrganikMap.remove(deviceId)
+            }
+            
+            // Tambahkan listener untuk perangkat baru
+            for (device in devices) {
+                if (!binListeners.containsKey(device.id)) {
+                    previousOrganikMap[device.id] = -1
+                    previousNonOrganikMap[device.id] = -1
+                    
+                    val orgListener = FirebaseManager.listenBinStatus(device.id, "organik") { persentase, _, _, terakhirDikosongkan ->
+                        handleThreshold(device.id, device.nama, "organik", persentase, previousOrganikMap[device.id] ?: -1)
+                        handleStaleWaste(device.id, "organik", terakhirDikosongkan, 3)
+                        previousOrganikMap[device.id] = persentase
+                    }
+                    
+                    val nonOrgListener = FirebaseManager.listenBinStatus(device.id, "nonOrganik") { persentase, _, _, terakhirDikosongkan ->
+                        handleThreshold(device.id, device.nama, "nonOrganik", persentase, previousNonOrganikMap[device.id] ?: -1)
+                        handleStaleWaste(device.id, "nonOrganik", terakhirDikosongkan, 7)
+                        previousNonOrganikMap[device.id] = persentase
+                    }
+                    
+                    if (orgListener != null && nonOrgListener != null) {
+                        binListeners[device.id] = Pair(orgListener, nonOrgListener)
+                    }
+                }
+            }
         }
     }
 
     fun stop() {
-        organikListener?.let { FirebaseManager.removeBinListener("organik", it) }
-        nonOrganikListener?.let { FirebaseManager.removeBinListener("nonOrganik", it) }
+        devicesListener?.let { FirebaseManager.removeDeviceListener(it) }
+        devicesListener = null
+        
+        for ((deviceId, listeners) in binListeners) {
+            FirebaseManager.removeBinListener(deviceId, "organik", listeners.first)
+            FirebaseManager.removeBinListener(deviceId, "nonOrganik", listeners.second)
+        }
+        binListeners.clear()
+        
         settingsListener?.let {
             if (currentUserId.isNotEmpty()) {
                 FirebaseManager.removeNotificationSettingsListener(currentUserId, it)
             }
         }
-        organikListener = null
-        nonOrganikListener = null
         settingsListener = null
-        previousOrganik = -1
-        previousNonOrganik = -1
+        
+        previousOrganikMap.clear()
+        previousNonOrganikMap.clear()
         isRunning = false
         appContext = null
     }
 
-    private fun handleThreshold(binType: String, currentPercent: Int, previousPercent: Int) {
+    private fun handleThreshold(deviceId: String, deviceName: String, binType: String, currentPercent: Int, previousPercent: Int) {
         if (previousPercent == -1) return
         if (currentPercent <= previousPercent) return
         if (currentPercent < 0 || currentPercent > 100) return
@@ -78,12 +114,12 @@ object BinObserver {
                 aksi = "alert",
                 tipeSampah = binType,
                 idPengguna = "SYSTEM",
-                namaLengkap = "Sistem Otomatis"
+                namaLengkap = "Sistem Otomatis ($deviceName)"
             )
 
             if (currentSettings.penuh) {
                 val judul = "$binLabel Penuh!"
-                val pesan = "Kapasitas $binLabel telah mencapai $currentPercent%. Segera kosongkan."
+                val pesan = "Kapasitas $binLabel di $deviceName telah mencapai $currentPercent%. Segera kosongkan."
                 FirebaseManager.addNotification(
                     judul = judul,
                     pesan = pesan,
@@ -101,7 +137,7 @@ object BinObserver {
         if (currentPercent >= 80 && previousPercent < 80) {
             if (currentSettings.hampirPenuh) {
                 val judul = "$binLabel Hampir Penuh"
-                val pesan = "Kapasitas $binLabel di angka $currentPercent%. Segera perhatikan."
+                val pesan = "Kapasitas $binLabel di $deviceName di angka $currentPercent%. Segera perhatikan."
                 FirebaseManager.addNotification(
                     judul = judul,
                     pesan = pesan,
@@ -116,7 +152,7 @@ object BinObserver {
         }
     }
 
-    private fun handleStaleWaste(binType: String, terakhirDikosongkan: Long, maxDays: Int) {
+    private fun handleStaleWaste(deviceId: String, binType: String, terakhirDikosongkan: Long, maxDays: Int) {
         if (terakhirDikosongkan == 0L || appContext == null) return
         
         val diff = System.currentTimeMillis() - terakhirDikosongkan
@@ -124,16 +160,16 @@ object BinObserver {
         
         if (days >= maxDays) {
             val prefs = appContext!!.getSharedPreferences("CleanBanarPrefs", android.content.Context.MODE_PRIVATE)
-            val lastNotifKey = "stale_notif_$binType"
+            val lastNotifKey = "stale_notif_${deviceId}_$binType"
             val lastNotifTime = prefs.getLong(lastNotifKey, 0L)
             
             // Throttle 24 jam (86_400_000 ms)
             if (System.currentTimeMillis() - lastNotifTime > 86_400_000L) {
                 val judul = "Peringatan Waktu Inap"
                 val pesan = if (binType == "organik") {
-                    "Sampah Organik sudah $days hari belum dikosongkan dan mungkin mulai berbau."
+                    "Sampah Organik di alat ini sudah $days hari belum dikosongkan dan mungkin mulai berbau."
                 } else {
-                    "Sampah Non-Organik sudah menumpuk selama $days hari."
+                    "Sampah Non-Organik di alat ini sudah menumpuk selama $days hari."
                 }
                 
                 FirebaseManager.addNotification(judul, pesan, "warning")

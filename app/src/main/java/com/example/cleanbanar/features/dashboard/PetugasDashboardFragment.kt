@@ -19,18 +19,16 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.google.firebase.database.ValueEventListener
 
-/**
- * Fragment untuk Dashboard Petugas Lapangan.
- * Menampilkan status tempat sampah secara real-time dan aksi pengosongan.
- */
 class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>() {
 
     private lateinit var authManager: AuthManager
-    private var organikListener: ValueEventListener? = null
-    private var nonOrganikListener: ValueEventListener? = null
+    
+    private var devicesListener: ValueEventListener? = null
+    private val binListeners = mutableMapOf<String, Pair<ValueEventListener, ValueEventListener>>()
 
-    // Data class untuk melacak status tempat sampah
     private data class BinData(
+        val deviceId: String,
+        val deviceName: String,
         val type: String,
         var fillPercentage: Int = 0,
         var status: String = "Normal",
@@ -38,10 +36,8 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         var lastEmptied: Long = 0L
     )
 
-    private val binDataMap = mutableMapOf(
-        "organik" to BinData("organik"),
-        "nonOrganik" to BinData("nonOrganik")
-    )
+    // Key: "deviceId_binType"
+    private val binDataMap = mutableMapOf<String, BinData>()
 
     override fun inflateBinding(inflater: LayoutInflater, container: ViewGroup?): FragmentPetugasDashboardBinding {
         return FragmentPetugasDashboardBinding.inflate(inflater, container, false)
@@ -50,35 +46,90 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
     override fun setupViews() {
         authManager = AuthManager(requireContext())
         binding.tvSystemName.text = "Sistem Terpusat"
-
-        // Tampilkan kartu awal dengan nilai 0%
         rebuildCards()
     }
 
     override fun observeData() {
-        // Pantau status tempat sampah organik
-        organikListener = FirebaseManager.listenBinStatus("organik") { fillPercentage, status, lastUpdate, lastEmptied ->
-            if (!isAdded) return@listenBinStatus
-            binDataMap["organik"] = BinData("organik", fillPercentage, status, lastUpdate, lastEmptied)
-            rebuildCards()
-            updateOverallStatus()
-        }
+        devicesListener = FirebaseManager.listenDevices { devices ->
+            if (!isAdded) return@listenDevices
+            
+            val currentDeviceIds = devices.map { it.id }.toSet()
+            
+            // Hapus listener & data perangkat yang sudah tidak ada
+            val removedDevices = binListeners.keys - currentDeviceIds
+            for (deviceId in removedDevices) {
+                val listeners = binListeners[deviceId]
+                if (listeners != null) {
+                    FirebaseManager.removeBinListener(deviceId, "organik", listeners.first)
+                    FirebaseManager.removeBinListener(deviceId, "nonOrganik", listeners.second)
+                }
+                binListeners.remove(deviceId)
+                binDataMap.remove("${deviceId}_organik")
+                binDataMap.remove("${deviceId}_nonOrganik")
+            }
+            
+            for (device in devices) {
+                if (!binDataMap.containsKey("${device.id}_organik")) {
+                    binDataMap["${device.id}_organik"] = BinData(device.id, device.nama, "organik")
+                } else {
+                    binDataMap["${device.id}_organik"]?.let { it.copy(deviceName = device.nama) }
+                }
+                
+                if (!binDataMap.containsKey("${device.id}_nonOrganik")) {
+                    binDataMap["${device.id}_nonOrganik"] = BinData(device.id, device.nama, "nonOrganik")
+                } else {
+                    binDataMap["${device.id}_nonOrganik"]?.let { it.copy(deviceName = device.nama) }
+                }
 
-        // Pantau status tempat sampah non-organik
-        nonOrganikListener = FirebaseManager.listenBinStatus("nonOrganik") { fillPercentage, status, lastUpdate, lastEmptied ->
-            if (!isAdded) return@listenBinStatus
-            binDataMap["nonOrganik"] = BinData("nonOrganik", fillPercentage, status, lastUpdate, lastEmptied)
+                if (!binListeners.containsKey(device.id)) {
+                    val orgListener = FirebaseManager.listenBinStatus(device.id, "organik") { fillPercentage, status, lastUpdate, lastEmptied ->
+                        if (!isAdded) return@listenBinStatus
+                        binDataMap["${device.id}_organik"]?.apply {
+                            this.fillPercentage = fillPercentage
+                            this.status = status
+                            this.lastUpdate = lastUpdate
+                            this.lastEmptied = lastEmptied
+                        }
+                        rebuildCards()
+                        updateOverallStatus()
+                    }
+                    
+                    val nonOrgListener = FirebaseManager.listenBinStatus(device.id, "nonOrganik") { fillPercentage, status, lastUpdate, lastEmptied ->
+                        if (!isAdded) return@listenBinStatus
+                        binDataMap["${device.id}_nonOrganik"]?.apply {
+                            this.fillPercentage = fillPercentage
+                            this.status = status
+                            this.lastUpdate = lastUpdate
+                            this.lastEmptied = lastEmptied
+                        }
+                        rebuildCards()
+                        updateOverallStatus()
+                    }
+                    
+                    if (orgListener != null && nonOrgListener != null) {
+                        binListeners[device.id] = Pair(orgListener, nonOrgListener)
+                    }
+                }
+            }
+            
             rebuildCards()
             updateOverallStatus()
         }
     }
 
-    /**
-     * Membangun ulang kartu tempat sampah dan mengurutkannya berdasarkan urgensi (kapasitas tertinggi).
-     */
     private fun rebuildCards() {
         binding.cardsContainer.removeAllViews()
         val sortedBins = binDataMap.values.sortedByDescending { it.fillPercentage }
+
+        if (sortedBins.isEmpty()) {
+            val tv = TextView(requireContext()).apply {
+                text = "Belum ada perangkat yang terdaftar."
+                setTextColor(resources.getColor(R.color.gray_500, null))
+                setPadding(0, 32.dpToPx(), 0, 0)
+            }
+            binding.cardsContainer.addView(tv)
+            return
+        }
 
         for (bin in sortedBins) {
             val card = buildBinCard(bin)
@@ -86,15 +137,11 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         }
     }
 
-    /**
-     * Membangun kartu (CardView) tempat sampah secara dinamis.
-     */
     private fun buildBinCard(bin: BinData): MaterialCardView {
         val isOrganik = bin.type == "organik"
         val label = if (isOrganik) "Organik" else "Non-Organik"
         val percent = bin.fillPercentage
 
-        // Tentukan status berdasarkan kapasitas
         val (badgeText, badgeDrawable, badgeTextColor, progressDrawableRes) = when {
             percent >= 95 -> Quadruple("PENUH", R.drawable.badge_red_bg, R.color.red_500, R.drawable.progress_bar_red)
             percent >= 80 -> Quadruple("HAMPIR PENUH", R.drawable.badge_amber_bg, R.color.amber_600, R.drawable.progress_bar_amber)
@@ -108,7 +155,6 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
             else -> "Perkiraan penuh dlm 2 hari"
         }
 
-        // Wadah Kartu
         val cardView = MaterialCardView(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -126,7 +172,6 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
             setPadding(24.dpToPx(), 24.dpToPx(), 24.dpToPx(), 24.dpToPx())
         }
 
-        // Baris Atas: Ikon + Judul + Badge
         val topRow = RelativeLayout(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -170,7 +215,7 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         }
 
         val tvTitle = TextView(requireContext()).apply {
-            text = label
+            text = "$label (${bin.deviceName})"
             setTypeface(typeface, Typeface.BOLD)
             textSize = 14f
             setTextColor(resources.getColor(R.color.gray_900, null))
@@ -206,7 +251,6 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         topRow.addView(titleCol)
         topRow.addView(tvBadge)
 
-        // Baris Kapasitas
         val capacityRow = RelativeLayout(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -243,7 +287,6 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         capacityRow.addView(tvCapLabel)
         capacityRow.addView(tvPercent)
 
-        // Progress Bar
         val actualProgressDrawableRes = if (isOrganik) {
             R.drawable.progress_bar_green
         } else {
@@ -261,7 +304,6 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
             scaleY = 1.0f 
         }
 
-        // Baris Status
         val statusRow = RelativeLayout(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -283,9 +325,8 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
 
         statusRow.addView(tvEstimate)
 
-        // Hitung hari sejak terakhir dikosongkan
         val diffEmptied = System.currentTimeMillis() - bin.lastEmptied
-        val daysSinceEmptied = diffEmptied / 86_400_000L // milidetik ke hari
+        val daysSinceEmptied = diffEmptied / 86_400_000L
 
         val tvWarning = TextView(requireContext()).apply {
             textSize = 8f
@@ -311,7 +352,6 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         
         statusRow.addView(tvWarning)
 
-        // Tombol Pengosongan
         val btnEmpty = MaterialButton(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -329,7 +369,7 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
             cornerRadius = 10.dpToPx()
 
             setOnClickListener {
-                handleEmptyBin(bin.type, this, isOrganik)
+                handleEmptyBin(bin.deviceId, bin.type, this, isOrganik)
             }
         }
 
@@ -343,17 +383,13 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         return cardView
     }
 
-    /**
-     * Menangani proses pengosongan tempat sampah.
-     */
-    private fun handleEmptyBin(binType: String, button: MaterialButton, isOrganik: Boolean) {
+    private fun handleEmptyBin(deviceId: String, binType: String, button: MaterialButton, isOrganik: Boolean) {
         val originalText = button.text
         button.isEnabled = false
         button.text = "Memuat..."
 
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-            // Update status di Firebase (Ini sudah otomatis mencatat history)
-            FirebaseManager.emptyBin(binType, authManager.getUserId(), authManager.getUserName())
+            FirebaseManager.emptyBin(deviceId, binType, authManager.getUserId(), authManager.getUserName())
 
             if (isAdded) {
                 button.isEnabled = true
@@ -362,7 +398,6 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
                 val txtColor = if (isOrganik) R.color.emerald_600 else R.color.blue_600
                 button.setTextColor(resources.getColor(txtColor, null))
 
-                // Kembalikan teks tombol setelah 2 detik
                 android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
                     if (isAdded) {
                         button.text = originalText
@@ -374,9 +409,6 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         }, 800)
     }
 
-    /**
-     * Memperbarui status sistem secara keseluruhan.
-     */
     private fun updateOverallStatus() {
         val maxPercent = binDataMap.values.maxOfOrNull { it.fillPercentage } ?: 0
 
@@ -396,9 +428,6 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         }
     }
 
-    /**
-     * Memformat waktu update terakhir ke format yang mudah dibaca.
-     */
     private fun formatLastUpdate(timestamp: Long): String {
         if (timestamp == 0L) return "Belum diupdate"
         val diff   = System.currentTimeMillis() - timestamp
@@ -418,8 +447,12 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
     }
 
     override fun onDestroyView() {
-        organikListener?.let { FirebaseManager.removeBinListener("organik", it) }
-        nonOrganikListener?.let { FirebaseManager.removeBinListener("nonOrganik", it) }
+        devicesListener?.let { FirebaseManager.removeDeviceListener(it) }
+        for ((deviceId, listeners) in binListeners) {
+            FirebaseManager.removeBinListener(deviceId, "organik", listeners.first)
+            FirebaseManager.removeBinListener(deviceId, "nonOrganik", listeners.second)
+        }
+        binListeners.clear()
         super.onDestroyView()
     }
 

@@ -31,8 +31,8 @@ object FirebaseManager {
     // ==========================================
     // Status Tempat Sampah
     // ==========================================
-    fun listenBinStatus(binType: String, callback: (persentase: Int, status: String, terakhirUpdate: Long, terakhirDikosongkan: Long) -> Unit): ValueEventListener? {
-        val ref = rootRef?.child("bins")?.child(binType) ?: return null
+    fun listenBinStatus(deviceId: String, binType: String, callback: (persentase: Int, status: String, terakhirUpdate: Long, terakhirDikosongkan: Long) -> Unit): ValueEventListener? {
+        val ref = rootRef?.child("devices")?.child(deviceId)?.child("bins")?.child(binType) ?: return null
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val persentase = snapshot.child("persentaseIsi").getValue(Int::class.java) ?: 0
@@ -49,22 +49,22 @@ object FirebaseManager {
         return listener
     }
 
-    fun updateBinStatus(binType: String, persentase: Int, status: String) {
-        val ref = rootRef?.child("bins")?.child(binType) ?: return
+    fun updateBinStatus(deviceId: String, binType: String, persentase: Int, status: String) {
+        val ref = rootRef?.child("devices")?.child(deviceId)?.child("bins")?.child(binType) ?: return
         ref.child("persentaseIsi").setValue(persentase.coerceIn(0, 100))
         ref.child("status").setValue(status)
         ref.child("terakhirUpdate").setValue(System.currentTimeMillis())
     }
 
-    fun emptyBin(binType: String, userId: String, userName: String) {
+    fun emptyBin(deviceId: String, binType: String, userId: String, userName: String) {
         val safeBinType = sanitize(binType)
         val safeUserName = sanitize(userName)
         val safeUserId = sanitize(userId)
         val binLabel = if (safeBinType == "organik") "Organik" else "Non-Organik"
-        updateBinStatus(safeBinType, 0, "Normal")
-        rootRef?.child("bins")?.child(safeBinType)?.child("terakhirDikosongkan")?.setValue(System.currentTimeMillis())
+        updateBinStatus(deviceId, safeBinType, 0, "Normal")
+        rootRef?.child("devices")?.child(deviceId)?.child("bins")?.child(safeBinType)?.child("terakhirDikosongkan")?.setValue(System.currentTimeMillis())
         addHistoryEntry("pengosongan", safeBinType, safeUserId, safeUserName)
-        addNotification("$binLabel Dikosongkan", "Sampah $binLabel telah dikosongkan oleh $safeUserName.", "success")
+        addNotification("$binLabel Dikosongkan", "Sampah $binLabel pada perangkat $deviceId telah dikosongkan oleh $safeUserName.", "success")
         updateDailyStats(safeBinType, 0)
     }
 
@@ -81,25 +81,60 @@ object FirebaseManager {
     // ==========================================
     // Status Perangkat
     // ==========================================
-    fun listenDeviceStatus(callback: (statusKoneksi: String, terakhirTerlihat: Long, tipeJaringan: String) -> Unit): ValueEventListener? {
-        val ref = rootRef?.child("device") ?: return null
+    fun listenDevices(callback: (List<DeviceModel>) -> Unit): ValueEventListener? {
+        val ref = rootRef?.child("devices") ?: return null
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val status = snapshot.child("statusKoneksi").getValue(String::class.java) ?: "OFFLINE"
-                val terakhir = snapshot.child("terakhirTerlihat").getValue(Long::class.java) ?: 0L
-                val tipe = snapshot.child("tipeJaringan").getValue(String::class.java) ?: "WIFI"
-                callback(status, terakhir, tipe)
+                val devices = mutableListOf<DeviceModel>()
+                for (child in snapshot.children) {
+                    val id = child.child("id").getValue(String::class.java) ?: child.key ?: ""
+                    val nama = child.child("nama").getValue(String::class.java) ?: ""
+                    val status = child.child("statusKoneksi").getValue(String::class.java) ?: "OFFLINE"
+                    val terakhir = child.child("terakhirTerlihat").getValue(Long::class.java) ?: 0L
+                    val tipe = child.child("tipeJaringan").getValue(String::class.java) ?: "WIFI"
+                    
+                    val pinsNode = child.child("config").child("pins")
+                    val pins = PinConfig(
+                        trigOrganik = pinsNode.child("trigOrganik").getValue(Int::class.java) ?: 12,
+                        echoOrganik = pinsNode.child("echoOrganik").getValue(Int::class.java) ?: 13,
+                        trigNonOrganik = pinsNode.child("trigNonOrganik").getValue(Int::class.java) ?: 14,
+                        echoNonOrganik = pinsNode.child("echoNonOrganik").getValue(Int::class.java) ?: 15
+                    )
+                    
+                    devices.add(DeviceModel(id, nama, status, terakhir, tipe, DeviceConfig(pins)))
+                }
+                callback(devices)
             }
             override fun onCancelled(error: DatabaseError) {
-                Log.e(TAG, "listenDeviceStatus error: ${error.message} (code=${error.code})")
+                Log.e(TAG, "listenDevices error: ${error.message} (code=${error.code})")
             }
         }
         ref.addValueEventListener(listener)
         return listener
     }
 
-    fun updateDeviceNetworkType(tipe: String) {
-        rootRef?.child("device")?.child("tipeJaringan")?.setValue(tipe)
+    fun addDevice(id: String, nama: String, pins: PinConfig) {
+        val ref = rootRef?.child("devices")?.child(id) ?: return
+        ref.child("id").setValue(id)
+        ref.child("nama").setValue(nama)
+        ref.child("statusKoneksi").setValue("OFFLINE")
+        ref.child("terakhirTerlihat").setValue(0L)
+        ref.child("tipeJaringan").setValue("WIFI")
+        ref.child("config").child("pins").setValue(pins)
+        ref.child("bins").child("organik").setValue(mapOf("persentaseIsi" to 0, "status" to "Normal", "terakhirUpdate" to 0L, "terakhirDikosongkan" to 0L))
+        ref.child("bins").child("nonOrganik").setValue(mapOf("persentaseIsi" to 0, "status" to "Normal", "terakhirUpdate" to 0L, "terakhirDikosongkan" to 0L))
+    }
+
+    fun deleteDevice(id: String) {
+        rootRef?.child("devices")?.child(id)?.removeValue()
+    }
+
+    fun updateDevicePins(id: String, pins: PinConfig) {
+        rootRef?.child("devices")?.child(id)?.child("config")?.child("pins")?.setValue(pins)
+    }
+
+    fun updateDeviceNetworkType(deviceId: String, tipe: String) {
+        rootRef?.child("devices")?.child(deviceId)?.child("tipeJaringan")?.setValue(tipe)
     }
 
     // ==========================================
@@ -338,7 +373,21 @@ object FirebaseManager {
 
     fun updateDailyStats(binType: String, percentage: Int) {
         val dateKey = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date())
-        rootRef?.child("statistics")?.child("daily")?.child(dateKey)?.child(if (binType == "organik") "organik" else "nonOrganik")?.setValue(percentage)
+        val ref = rootRef?.child("statistics")?.child("daily")?.child(dateKey)?.child(if (binType == "organik") "organik" else "nonOrganik")
+        if (ref == null) return
+        
+        // Jangan timpa dengan 0 (saat dikosongkan), agar bar chart tetap menampilkan max capacity di hari tersebut
+        if (percentage == 0) return
+        
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val currentMax = snapshot.getValue(Int::class.java) ?: 0
+                if (percentage > currentMax) {
+                    ref.setValue(percentage)
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {}
+        })
     }
 
     data class NotificationSettings(
@@ -375,8 +424,8 @@ object FirebaseManager {
         return listener
     }
 
-    fun removeBinListener(binType: String, listener: ValueEventListener) { rootRef?.child("bins")?.child(binType)?.removeEventListener(listener) }
-    fun removeDeviceListener(listener: ValueEventListener) { rootRef?.child("device")?.removeEventListener(listener) }
+    fun removeBinListener(deviceId: String, binType: String, listener: ValueEventListener) { rootRef?.child("devices")?.child(deviceId)?.child("bins")?.child(binType)?.removeEventListener(listener) }
+    fun removeDeviceListener(listener: ValueEventListener) { rootRef?.child("devices")?.removeEventListener(listener) }
     fun removeNotificationListener(listener: ValueEventListener) { rootRef?.child("notifications")?.removeEventListener(listener) }
     fun removeHistoryListener(listener: ValueEventListener) { rootRef?.child("historyLogs")?.removeEventListener(listener) }
     fun removeUsersListener(listener: ValueEventListener) { rootRef?.child("users")?.removeEventListener(listener) }

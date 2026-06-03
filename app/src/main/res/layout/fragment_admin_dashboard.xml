@@ -212,7 +212,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Status\nPerangkat"
+                            android:text="Manajemen\nPerangkat"
                             android:textColor="#111827"
                             android:textSize="14sp"
                             android:textStyle="bold"
