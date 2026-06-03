@@ -215,7 +215,12 @@ object FirebaseManager {
     }
 
     fun checkIfUserPreRegistered(email: String, callback: (Boolean, String, String, String, String) -> Unit) {
-        rootRef?.child("users")?.addListenerForSingleValueEvent(object : ValueEventListener {
+        val ref = rootRef?.child("users")
+        if (ref == null) {
+            callback(false, "", "", "", "")
+            return
+        }
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 for (child in snapshot.children) {
                     if ((child.child("email").getValue(String::class.java) ?: "").trim().equals(email.trim(), true)) {
@@ -230,8 +235,13 @@ object FirebaseManager {
     }
 
     fun seedUserData(uid: String, nama: String, email: String, peran: String, nomorHp: String = "", onComplete: () -> Unit) {
-        rootRef?.child("users")?.child(uid)?.setValue(mapOf("nama" to nama, "email" to email, "peran" to peran, "nomorHp" to nomorHp))
-            ?.addOnCompleteListener { onComplete() }
+        val ref = rootRef?.child("users")?.child(uid)
+        if (ref == null) {
+            onComplete()
+            return
+        }
+        ref.setValue(mapOf("nama" to nama, "email" to email, "peran" to peran, "nomorHp" to nomorHp))
+            .addOnCompleteListener { onComplete() }
     }
 
     fun updateUser(userId: String, nama: String, email: String, nomorHp: String, peran: String) {
@@ -251,7 +261,12 @@ object FirebaseManager {
     }
 
     fun getUserData(uid: String, callback: (nama: String, peran: String, nomorHp: String) -> Unit) {
-        rootRef?.child("users")?.child(uid)?.addListenerForSingleValueEvent(object : ValueEventListener {
+        val ref = rootRef?.child("users")?.child(uid)
+        if (ref == null) {
+            callback("", "", "")
+            return
+        }
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 callback(snapshot.child("nama").getValue(String::class.java) ?: "", snapshot.child("peran").getValue(String::class.java) ?: "", snapshot.child("nomorHp").getValue(String::class.java) ?: "")
             }
@@ -260,7 +275,12 @@ object FirebaseManager {
     }
 
     fun getAdminPhone(callback: (String) -> Unit) {
-        rootRef?.child("public_info")?.child("admin_phone")?.addListenerForSingleValueEvent(object : ValueEventListener {
+        val ref = rootRef?.child("public_info")?.child("admin_phone")
+        if (ref == null) {
+            callback("")
+            return
+        }
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val phone = snapshot.getValue(String::class.java) ?: ""
                 callback(phone)
@@ -295,7 +315,10 @@ object FirebaseManager {
     }
 
     fun countPenuhEvents(callback: (Int) -> Unit): ValueEventListener? {
-        val ref = rootRef?.child("historyLogs") ?: return null
+        val ref = rootRef?.child("historyLogs") ?: run {
+            callback(0)
+            return null
+        }
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 var count = 0

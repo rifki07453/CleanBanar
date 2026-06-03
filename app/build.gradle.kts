@@ -35,6 +35,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+    @Suppress("DEPRECATION")
     kotlinOptions {
         jvmTarget = "17"
     }
@@ -65,6 +66,7 @@ dependencies {
     implementation("com.google.firebase:firebase-database-ktx")
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-analytics-ktx")
+    implementation("com.google.firebase:firebase-messaging-ktx")
 
     // UI
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
