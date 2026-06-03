@@ -27,7 +27,7 @@ class DeviceAdapter(
 
     override fun getItemCount(): Int = devices.size
 
-    inner class ViewHolder(private val binding: ItemDeviceAdminBinding) : RecyclerView.Adapter.ViewHolder(binding.root) {
+    inner class ViewHolder(private val binding: ItemDeviceAdminBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(device: DeviceModel) {
             binding.tvDeviceName.text = device.nama
             binding.tvDeviceId.text = "ID: ${device.id}"
