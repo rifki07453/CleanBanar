@@ -88,30 +88,34 @@ object FirebaseManager {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val devices = mutableListOf<DeviceModel>()
                 for (child in snapshot.children) {
-                    val id = child.child("id").getValue(String::class.java) ?: child.key ?: ""
-                    val nama = child.child("nama").getValue(String::class.java) ?: ""
-                    val status = child.child("statusKoneksi").getValue(String::class.java) ?: "OFFLINE"
-                    val terakhir = child.child("terakhirTerlihat").getValue(Long::class.java) ?: 0L
-                    val tipe = child.child("tipeJaringan").getValue(String::class.java) ?: "WIFI"
-                    
-                    val pinsNode = child.child("config").child("pins")
-                    val pins = PinConfig(
-                        trigOrganik = pinsNode.child("trigOrganik").getValue(Int::class.java) ?: 5,
-                        echoOrganik = pinsNode.child("echoOrganik").getValue(Int::class.java) ?: 18,
-                        trigNonOrganik = pinsNode.child("trigNonOrganik").getValue(Int::class.java) ?: 16,
-                        echoNonOrganik = pinsNode.child("echoNonOrganik").getValue(Int::class.java) ?: 17,
-                        trigLuarOrganik = pinsNode.child("trigLuarOrganik").getValue(Int::class.java) ?: 22,
-                        echoLuarOrganik = pinsNode.child("echoLuarOrganik").getValue(Int::class.java) ?: 23,
-                        trigLuarNonOrganik = pinsNode.child("trigLuarNonOrganik").getValue(Int::class.java) ?: 19,
-                        echoLuarNonOrganik = pinsNode.child("echoLuarNonOrganik").getValue(Int::class.java) ?: 21,
-                        servoOrganik = pinsNode.child("servoOrganik").getValue(Int::class.java) ?: 4,
-                        servoNonOrganik = pinsNode.child("servoNonOrganik").getValue(Int::class.java) ?: 15
-                    )
-                    
-                    val tinggiTong = child.child("config").child("tinggiTong").getValue(Double::class.java) ?: 50.0
-                    val batasPenuh = child.child("config").child("batasPenuh").getValue(Double::class.java) ?: 5.0
-                    
-                    devices.add(DeviceModel(id, nama, status, terakhir, tipe, DeviceConfig(pins, tinggiTong, batasPenuh)))
+                    try {
+                        val id = child.child("id").getValue(String::class.java) ?: child.key ?: ""
+                        val nama = child.child("nama").getValue(String::class.java) ?: ""
+                        val status = child.child("statusKoneksi").getValue(String::class.java) ?: "OFFLINE"
+                        val terakhir = child.child("terakhirTerlihat").getValue(Any::class.java)?.toString()?.toLongOrNull() ?: 0L
+                        val tipe = child.child("tipeJaringan").getValue(String::class.java) ?: "WIFI"
+                        
+                        val pinsNode = child.child("config").child("pins")
+                        val pins = PinConfig(
+                            trigOrganik = pinsNode.child("trigOrganik").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 5,
+                            echoOrganik = pinsNode.child("echoOrganik").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 18,
+                            trigNonOrganik = pinsNode.child("trigNonOrganik").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 16,
+                            echoNonOrganik = pinsNode.child("echoNonOrganik").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 17,
+                            trigLuarOrganik = pinsNode.child("trigLuarOrganik").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 22,
+                            echoLuarOrganik = pinsNode.child("echoLuarOrganik").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 23,
+                            trigLuarNonOrganik = pinsNode.child("trigLuarNonOrganik").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 19,
+                            echoLuarNonOrganik = pinsNode.child("echoLuarNonOrganik").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 21,
+                            servoOrganik = pinsNode.child("servoOrganik").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 4,
+                            servoNonOrganik = pinsNode.child("servoNonOrganik").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 15
+                        )
+                        
+                        val tinggiTong = child.child("config").child("tinggiTong").getValue(Any::class.java)?.toString()?.toDoubleOrNull() ?: 50.0
+                        val batasPenuh = child.child("config").child("batasPenuh").getValue(Any::class.java)?.toString()?.toDoubleOrNull() ?: 5.0
+                        
+                        devices.add(DeviceModel(id, nama, status, terakhir, tipe, DeviceConfig(pins, tinggiTong, batasPenuh)))
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Gagal memproses device ${child.key}: ${e.message}")
+                    }
                 }
                 callback(devices)
             }
