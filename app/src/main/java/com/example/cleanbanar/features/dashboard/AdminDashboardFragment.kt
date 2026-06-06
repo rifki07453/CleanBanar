@@ -286,6 +286,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         dialog.show()
     }
 
+    @Suppress("DEPRECATION")
     private fun checkBluetoothAndSend(ssid: String, pass: String) {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(arrayOf(Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.ACCESS_FINE_LOCATION), 1001)
