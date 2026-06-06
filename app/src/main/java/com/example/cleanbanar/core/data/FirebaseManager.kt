@@ -54,6 +54,7 @@ object FirebaseManager {
         ref.child("persentaseIsi").setValue(persentase.coerceIn(0, 100))
         ref.child("status").setValue(status)
         ref.child("terakhirUpdate").setValue(System.currentTimeMillis())
+        updateDailyStats(binType, persentase)
     }
 
     fun emptyBin(deviceId: String, binType: String, userId: String, userName: String) {
@@ -65,7 +66,7 @@ object FirebaseManager {
         rootRef?.child("devices")?.child(deviceId)?.child("bins")?.child(safeBinType)?.child("terakhirDikosongkan")?.setValue(System.currentTimeMillis())
         addHistoryEntry("pengosongan", safeBinType, safeUserId, safeUserName)
         addNotification("$binLabel Dikosongkan", "Sampah $binLabel pada perangkat $deviceId telah dikosongkan oleh $safeUserName.", "success")
-        updateDailyStats(safeBinType, 0)
+        incrementEmptyCount(safeBinType)
     }
 
     /** Sanitasi input agar aman ditulis sebagai Firebase path key */
@@ -352,7 +353,9 @@ object FirebaseManager {
                     stats.add(mapOf(
                         "tanggal" to (child.key ?: ""),
                         "organik" to (child.child("organik").getValue(Int::class.java) ?: 0),
-                        "nonOrganik" to (child.child("nonOrganik").getValue(Int::class.java) ?: 0)
+                        "nonOrganik" to (child.child("nonOrganik").getValue(Int::class.java) ?: 0),
+                        "organikEmptyCount" to (child.child("organikEmptyCount").getValue(Int::class.java) ?: 0),
+                        "nonOrganikEmptyCount" to (child.child("nonOrganikEmptyCount").getValue(Int::class.java) ?: 0)
                     ))
                 }
                 callback(stats)
@@ -361,7 +364,7 @@ object FirebaseManager {
                 Log.e(TAG, "listenDailyStats error: ${error.message} (code=${error.code})")
             }
         }
-        ref.limitToLast(7).addValueEventListener(listener)
+        ref.limitToLast(35).addValueEventListener(listener)
         return listener
     }
 
@@ -401,6 +404,19 @@ object FirebaseManager {
                 if (percentage > currentMax) {
                     ref.setValue(percentage)
                 }
+            }
+            override fun onCancelled(error: DatabaseError) {}
+        })
+    }
+
+    fun incrementEmptyCount(binType: String) {
+        val dateKey = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date())
+        val field = if (binType == "organik") "organikEmptyCount" else "nonOrganikEmptyCount"
+        val ref = rootRef?.child("statistics")?.child("daily")?.child(dateKey)?.child(field) ?: return
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val currentCount = snapshot.getValue(Int::class.java) ?: 0
+                ref.setValue(currentCount + 1)
             }
             override fun onCancelled(error: DatabaseError) {}
         })

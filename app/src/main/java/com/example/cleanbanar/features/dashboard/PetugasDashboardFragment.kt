@@ -4,6 +4,7 @@ import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
@@ -17,7 +18,11 @@ import com.example.cleanbanar.core.ui.BaseFragment
 import com.example.cleanbanar.databinding.FragmentPetugasDashboardBinding
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.database.ValueEventListener
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 
 class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>() {
 
@@ -38,6 +43,20 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
 
     // Key: "deviceId_binType"
     private val binDataMap = mutableMapOf<String, BinData>()
+
+    // ==========================================
+    // QR Code Scanning State
+    // ==========================================
+    private var selectedBinToVerify: BinData? = null
+
+    private val barcodeLauncher = registerForActivityResult(ScanContract()) { result ->
+        if (result.contents != null) {
+            val scannedCode = result.contents.trim()
+            verifyAndProceed(scannedCode)
+        } else {
+            Toast.makeText(requireContext(), "Pindaian dibatalkan", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     override fun inflateBinding(inflater: LayoutInflater, container: ViewGroup?): FragmentPetugasDashboardBinding {
         return FragmentPetugasDashboardBinding.inflate(inflater, container, false)
@@ -80,7 +99,7 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
                 } else {
                     binDataMap["${device.id}_nonOrganik"]?.let { it.copy(deviceName = device.nama) }
                 }
-
+ 
                 if (!binListeners.containsKey(device.id)) {
                     val orgListener = FirebaseManager.listenBinStatus(device.id, "organik") { fillPercentage, status, lastUpdate, lastEmptied ->
                         if (!isAdded) return@listenBinStatus
@@ -120,7 +139,7 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
     private fun rebuildCards() {
         binding.cardsContainer.removeAllViews()
         val sortedBins = binDataMap.values.sortedByDescending { it.fillPercentage }
-
+ 
         if (sortedBins.isEmpty()) {
             val tv = TextView(requireContext()).apply {
                 text = "Belum ada perangkat yang terdaftar."
@@ -130,7 +149,7 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
             binding.cardsContainer.addView(tv)
             return
         }
-
+ 
         for (bin in sortedBins) {
             val card = buildBinCard(bin)
             binding.cardsContainer.addView(card)
@@ -357,7 +376,7 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 42.dpToPx()
             )
-            text = "Tandai Telah Dikosongkan"
+            text = "Pindai QR Baksampah"
             val txtColor = if (isOrganik) R.color.emerald_600 else R.color.blue_600
             val bgColor = if (isOrganik) R.color.green_50 else R.color.blue_50
             
@@ -369,7 +388,7 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
             cornerRadius = 10.dpToPx()
 
             setOnClickListener {
-                handleEmptyBin(bin.deviceId, bin.type, this, isOrganik)
+                showVerificationOptions(bin)
             }
         }
 
@@ -383,30 +402,148 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         return cardView
     }
 
-    private fun handleEmptyBin(deviceId: String, binType: String, button: MaterialButton, isOrganik: Boolean) {
-        val originalText = button.text
-        button.isEnabled = false
-        button.text = "Memuat..."
+    // ==========================================
+    // QR Code Verification Flow logic
+    // ==========================================
 
-        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-            FirebaseManager.emptyBin(deviceId, binType, authManager.getUserId(), authManager.getUserName())
-
-            if (isAdded) {
-                button.isEnabled = true
-                button.text = "✓ Dikosongkan"
-
-                val txtColor = if (isOrganik) R.color.emerald_600 else R.color.blue_600
-                button.setTextColor(resources.getColor(txtColor, null))
-
-                android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                    if (isAdded) {
-                        button.text = originalText
-                    }
-                }, 2000)
-
-                Toast.makeText(requireContext(), "Berhasil dikosongkan", Toast.LENGTH_SHORT).show()
+    private fun showVerificationOptions(bin: BinData) {
+        selectedBinToVerify = bin
+        
+        val options = arrayOf("Pindai QR Code (Kamera)", "Ketik ID Manual")
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Verifikasi Kehadiran")
+            .setItems(options) { dialog, which ->
+                when (which) {
+                    0 -> startQRScan()
+                    1 -> showManualIdInputDialog()
+                }
+                dialog.dismiss()
             }
-        }, 800)
+            .show()
+    }
+
+    private fun startQRScan() {
+        val options = ScanOptions().apply {
+            setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+            setPrompt("Arahkan kamera ke QR Code di baksampah ${selectedBinToVerify?.deviceName}")
+            setCameraId(0) 
+            setBeepEnabled(true)
+            setBarcodeImageEnabled(false)
+            setOrientationLocked(true)
+        }
+        barcodeLauncher.launch(options)
+    }
+
+    private fun showManualIdInputDialog() {
+        val target = selectedBinToVerify ?: return
+        
+        val inputLayout = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(24.dpToPx(), 16.dpToPx(), 24.dpToPx(), 16.dpToPx())
+        }
+
+        val etInput = TextInputEditText(requireContext()).apply {
+            hint = "Contoh: ${target.deviceId}"
+            maxLines = 1
+        }
+        inputLayout.addView(etInput)
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Masukkan ID Perangkat")
+            .setMessage("Silakan ketik ID perangkat untuk ${target.deviceName}:")
+            .setView(inputLayout)
+            .setPositiveButton("Verifikasi") { dialog, _ ->
+                val typedId = etInput.text.toString().trim()
+                if (typedId.isEmpty()) {
+                    Toast.makeText(requireContext(), "ID tidak boleh kosong", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+                verifyAndProceed(typedId)
+                dialog.dismiss()
+            }
+            .setNegativeButton("Batal", null)
+            .show()
+    }
+
+    private fun verifyAndProceed(code: String) {
+        val target = selectedBinToVerify ?: return
+        if (code.equals(target.deviceId, ignoreCase = true)) {
+            showConfirmationDialog(target)
+        } else {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Verifikasi Gagal")
+                .setMessage("QR Code/ID yang dimasukkan ($code) tidak cocok dengan tempat sampah ini (${target.deviceName} / ${target.deviceId}).")
+                .setPositiveButton("Tutup", null)
+                .show()
+        }
+    }
+
+    private fun showConfirmationDialog(bin: BinData) {
+        val orgBin = binDataMap["${bin.deviceId}_organik"]
+        val nonOrgBin = binDataMap["${bin.deviceId}_nonOrganik"]
+
+        val orgPercent = orgBin?.fillPercentage ?: 0
+        val nonOrgPercent = nonOrgBin?.fillPercentage ?: 0
+
+        val dialogView = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(24.dpToPx(), 16.dpToPx(), 24.dpToPx(), 16.dpToPx())
+        }
+
+        val tvDesc = TextView(requireContext()).apply {
+            text = "Pilih bak sampah yang telah selesai dikosongkan:"
+            textSize = 12f
+            setTextColor(resources.getColor(R.color.gray_600, null))
+            setPadding(0, 0, 0, 16.dpToPx())
+        }
+        dialogView.addView(tvDesc)
+
+        // Checkbox Organik
+        val cbOrganik = CheckBox(requireContext()).apply {
+            text = "Bak Organik ($orgPercent% terisi)"
+            textSize = 14f
+            isChecked = bin.type == "organik" || orgPercent >= 80
+            setTextColor(resources.getColor(R.color.gray_900, null))
+        }
+        dialogView.addView(cbOrganik)
+
+        // Checkbox Non-Organik
+        val cbNonOrganik = CheckBox(requireContext()).apply {
+            text = "Bak Non-Organik ($nonOrgPercent% terisi)"
+            textSize = 14f
+            isChecked = bin.type == "nonOrganik" || nonOrgPercent >= 80
+            setTextColor(resources.getColor(R.color.gray_900, null))
+            setPadding(0, 8.dpToPx(), 0, 0)
+        }
+        dialogView.addView(cbNonOrganik)
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Konfirmasi Pengosongan")
+            .setView(dialogView)
+            .setPositiveButton("Kosongkan") { dialog, _ ->
+                val emptyOrganik = cbOrganik.isChecked
+                val emptyNonOrganik = cbNonOrganik.isChecked
+                
+                if (!emptyOrganik && !emptyNonOrganik) {
+                    Toast.makeText(requireContext(), "Tidak ada bak yang dipilih", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                executeEmptying(bin.deviceId, emptyOrganik, emptyNonOrganik)
+                dialog.dismiss()
+            }
+            .setNegativeButton("Batal", null)
+            .show()
+    }
+
+    private fun executeEmptying(deviceId: String, emptyOrg: Boolean, emptyNonOrg: Boolean) {
+        if (emptyOrg) {
+            FirebaseManager.emptyBin(deviceId, "organik", authManager.getUserId(), authManager.getUserName())
+        }
+        if (emptyNonOrg) {
+            FirebaseManager.emptyBin(deviceId, "nonOrganik", authManager.getUserId(), authManager.getUserName())
+        }
+        Toast.makeText(requireContext(), "Berhasil dikosongkan", Toast.LENGTH_SHORT).show()
     }
 
     private fun updateOverallStatus() {

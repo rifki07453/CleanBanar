@@ -256,7 +256,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Da Grafik Kapasitas (7 Hari) Card -->
+        <!-- Grafik Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -272,23 +272,77 @@
                 android:orientation="vertical"
                 android:padding="20dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Grafik Kapasitas (7 Hari)"
-                    android:textStyle="bold"
-                    android:textSize="12sp"
-                    android:textColor="@color/gray_900"
-                    android:layout_marginBottom="16dp" />
-
-                <!-- Chart area placeholder / built programmatically -->
+                <!-- Header Grafik dengan Toggle Mode -->
                 <LinearLayout
-                    android:id="@+id/chartContainer"
                     android:layout_width="match_parent"
-                    android:layout_height="140dp"
+                    android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="bottom"
-                    android:baselineAligned="false" />
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+                    
+                    <TextView
+                        android:id="@+id/tvChartTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Grafik Kapasitas"
+                        android:textStyle="bold"
+                        android:textSize="12sp"
+                        android:textColor="@color/gray_900" />
+
+                    <com.google.android.material.button.MaterialButtonToggleGroup
+                        android:id="@+id/toggleGroupChartMode"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:singleSelection="true"
+                        app:checkedButton="@id/btnModeCapacity">
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnModeCapacity"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:text="Kapasitas"
+                            android:textSize="9sp"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            android:paddingHorizontal="8dp" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnModeEmptyCount"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:text="Pengosongan"
+                            android:textSize="9sp"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            android:paddingHorizontal="8dp" />
+                    </com.google.android.material.button.MaterialButtonToggleGroup>
+                </LinearLayout>
+
+                <!-- Chart & Y-Axis Area -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <!-- Sumbu Y -->
+                    <LinearLayout
+                        android:id="@+id/yAxisContainer"
+                        android:layout_width="28dp"
+                        android:layout_height="140dp"
+                        android:orientation="vertical"
+                        android:gravity="end"
+                        android:paddingEnd="6dp" />
+
+                    <!-- Chart Container -->
+                    <LinearLayout
+                        android:id="@+id/chartContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="140dp"
+                        android:orientation="horizontal"
+                        android:gravity="bottom"
+                        android:baselineAligned="false" />
+                </LinearLayout>
 
                 <!-- Legend -->
                 <LinearLayout
@@ -303,9 +357,10 @@
                         android:background="@drawable/ic_bg_circle_green"
                         android:layout_gravity="center_vertical" />
                     <TextView
+                        android:id="@+id/tvLegendOrganik"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text=" Organik(%)   "
+                        android:text=" Organik (%)   "
                         android:textSize="11sp"
                         android:textColor="@color/gray_700" />
                     <View
@@ -314,13 +369,141 @@
                         android:background="@drawable/ic_bg_circle_blue"
                         android:layout_gravity="center_vertical" />
                     <TextView
+                        android:id="@+id/tvLegendNonOrganik"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text=" Non-Organik(%)"
+                        android:text=" Non-Organik (%)"
                         android:textSize="11sp"
                         android:textColor="@color/gray_700" />
                 </LinearLayout>
 
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Perbandingan & Tren Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="20dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+            app:strokeColor="#f1f3f5"
+            app:strokeWidth="1dp"
+            app:cardBackgroundColor="@color/white">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <!-- Header Perbandingan -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+                    
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Tren & Perbandingan"
+                        android:textStyle="bold"
+                        android:textSize="12sp"
+                        android:textColor="@color/gray_900" />
+
+                    <!-- Spinner Period -->
+                    <Spinner
+                        android:id="@+id/spinnerComparePeriod"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:spinnerMode="dropdown" />
+                </LinearLayout>
+
+                <!-- Comparison Content -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:baselineAligned="false">
+
+                    <!-- Organik Compare -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="ORGANIK"
+                            android:textSize="10sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/gray_500" />
+                        
+                        <TextView
+                            android:id="@+id/tvCompareOrganikValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/gray_900"
+                            android:layout_marginTop="8dp" />
+                        
+                        <TextView
+                            android:id="@+id/tvCompareOrganikTrend"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Tidak ada data pembanding"
+                            android:textSize="10sp"
+                            android:textColor="@color/gray_400"
+                            android:layout_marginTop="4dp" />
+                    </LinearLayout>
+
+                    <!-- Separator Line -->
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="match_parent"
+                        android:background="#f1f3f5"
+                        android:layout_marginHorizontal="16dp" />
+
+                    <!-- Non-Organik Compare -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="NON-ORGANIK"
+                            android:textSize="10sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/gray_500" />
+                        
+                        <TextView
+                            android:id="@+id/tvCompareNonOrganikValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/gray_900"
+                            android:layout_marginTop="8dp" />
+                        
+                        <TextView
+                            android:id="@+id/tvCompareNonOrganikTrend"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Tidak ada data pembanding"
+                            android:textSize="10sp"
+                            android:textColor="@color/gray_400"
+                            android:layout_marginTop="4dp" />
+                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

@@ -129,8 +129,6 @@ object BinObserver {
                     com.example.cleanbanar.core.utils.NotificationHelper.showNotification(it, judul, pesan)
                 }
             }
-
-            FirebaseManager.updateDailyStats(binType, currentPercent)
             return
         }
 
@@ -147,8 +145,6 @@ object BinObserver {
                     com.example.cleanbanar.core.utils.NotificationHelper.showNotification(it, judul, pesan)
                 }
             }
-
-            FirebaseManager.updateDailyStats(binType, currentPercent)
         }
     }
 
