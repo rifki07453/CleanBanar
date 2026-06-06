@@ -161,7 +161,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:hint="Trig Dalam">
+                    android:hint="Sensor Penuh (Trig)">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etDetailTrigOrg"
                         android:layout_width="match_parent"
@@ -174,7 +174,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:hint="Echo Dalam">
+                    android:hint="Sensor Penuh (Echo)">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etDetailEchoOrg"
                         android:layout_width="match_parent"
@@ -187,7 +187,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:hint="Trig Luar">
+                    android:hint="Sensor Tangan (Trig)">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etDetailTrigLuarOrg"
                         android:layout_width="match_parent"
@@ -200,7 +200,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:hint="Echo Luar">
+                    android:hint="Sensor Tangan (Echo)">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etDetailEchoLuarOrg"
                         android:layout_width="match_parent"
@@ -212,7 +212,7 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Servo Pin">
+                    android:hint="Motor Servo Buka">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etDetailServoOrg"
                         android:layout_width="match_parent"
@@ -242,7 +242,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:hint="Trig Dalam">
+                    android:hint="Sensor Penuh (Trig)">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etDetailTrigNonOrg"
                         android:layout_width="match_parent"
@@ -255,7 +255,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:hint="Echo Dalam">
+                    android:hint="Sensor Penuh (Echo)">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etDetailEchoNonOrg"
                         android:layout_width="match_parent"
@@ -268,7 +268,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:hint="Trig Luar">
+                    android:hint="Sensor Tangan (Trig)">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etDetailTrigLuarNonOrg"
                         android:layout_width="match_parent"
@@ -281,7 +281,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:hint="Echo Luar">
+                    android:hint="Sensor Tangan (Echo)">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etDetailEchoLuarNonOrg"
                         android:layout_width="match_parent"
@@ -293,7 +293,7 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Servo Pin">
+                    android:hint="Motor Servo Buka">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etDetailServoNonOrg"
                         android:layout_width="match_parent"
