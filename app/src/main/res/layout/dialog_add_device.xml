@@ -311,4 +311,5 @@
             app:backgroundTint="#10B981"
             android:layout_marginStart="8dp" />
     </LinearLayout>
+</LinearLayout>
 </androidx.core.widget.NestedScrollView>
