@@ -1,12 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/bg_rounded_light_blue"
-    android:backgroundTint="@color/white"
-    android:orientation="vertical"
-    android:padding="24dp">
+    android:backgroundTint="@color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
 
     <TextView
         android:layout_width="match_parent"
@@ -35,7 +38,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
-        android:hint="Nama Perangkat">
+        android:hint="Lokasi/Nama Perangkat (ex: Gedung A)">
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etDeviceName"
             android:layout_width="match_parent"
@@ -129,7 +132,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:hint="Trig Dalam">
+                android:hint="Sensor Penuh (Trig)">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etTrigOrg"
                     android:layout_width="match_parent"
@@ -143,7 +146,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:hint="Echo Dalam">
+                android:hint="Sensor Penuh (Echo)">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etEchoOrg"
                     android:layout_width="match_parent"
@@ -157,7 +160,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:hint="Trig Luar">
+                android:hint="Sensor Tangan (Trig)">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etTrigLuarOrg"
                     android:layout_width="match_parent"
@@ -171,7 +174,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:hint="Echo Luar">
+                android:hint="Sensor Tangan (Echo)">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etEchoLuarOrg"
                     android:layout_width="match_parent"
@@ -184,7 +187,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Servo Pin">
+                android:hint="Motor Servo Buka">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etServoOrg"
                     android:layout_width="match_parent"
@@ -215,7 +218,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:hint="Trig Dalam">
+                android:hint="Sensor Penuh (Trig)">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etTrigNonOrg"
                     android:layout_width="match_parent"
@@ -229,7 +232,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:hint="Echo Dalam">
+                android:hint="Sensor Penuh (Echo)">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etEchoNonOrg"
                     android:layout_width="match_parent"
@@ -243,7 +246,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:hint="Trig Luar">
+                android:hint="Sensor Tangan (Trig)">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etTrigLuarNonOrg"
                     android:layout_width="match_parent"
@@ -257,7 +260,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:hint="Echo Luar">
+                android:hint="Sensor Tangan (Echo)">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etEchoLuarNonOrg"
                     android:layout_width="match_parent"
@@ -270,7 +273,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Servo Pin">
+                android:hint="Motor Servo Buka">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etServoNonOrg"
                     android:layout_width="match_parent"
@@ -309,3 +312,4 @@
             android:layout_marginStart="8dp" />
     </LinearLayout>
 </LinearLayout>
+</androidx.core.widget.NestedScrollView>
