@@ -294,30 +294,38 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         }
 
         val devices = bluetoothHelper.getPairedDevices()
-        val espDevice = devices.find { it.name?.contains("CleanBanar", ignoreCase = true) == true }
 
-        if (espDevice == null) {
-            Toast.makeText(context, "Perangkat CleanBanar tidak ditemukan di daftar Bluetooth terpasang", Toast.LENGTH_LONG).show()
+        if (devices.isEmpty()) {
+            Toast.makeText(context, "Tidak ada perangkat Bluetooth yang terpasang (paired). Silakan pasangkan dulu di Pengaturan HP Anda.", Toast.LENGTH_LONG).show()
             return
         }
 
-        Toast.makeText(context, "Menghubungkan ke ${espDevice.name}...", Toast.LENGTH_SHORT).show()
-        
-        bluetoothHelper.connect(espDevice) { success, message ->
-            activity?.runOnUiThread {
-                if (success) {
-                    val configStr = "SET_WIFI:$ssid,$pass\n"
-                    if (bluetoothHelper.sendData(configStr)) {
-                        Toast.makeText(context, "Konfigurasi terkirim!", Toast.LENGTH_LONG).show()
-                        bluetoothHelper.close()
-                    } else {
-                        Toast.makeText(context, "Gagal mengirim data", Toast.LENGTH_SHORT).show()
+        val deviceNames = devices.map { it.name ?: "Unknown Device (${it.address})" }.toTypedArray()
+
+        android.app.AlertDialog.Builder(requireContext())
+            .setTitle("Pilih Perangkat (Sudah Paired)")
+            .setItems(deviceNames) { _, which ->
+                val selectedDevice = devices[which]
+                Toast.makeText(context, "Menghubungkan ke ${selectedDevice.name}...", Toast.LENGTH_SHORT).show()
+                
+                bluetoothHelper.connect(selectedDevice) { success, message ->
+                    activity?.runOnUiThread {
+                        if (success) {
+                            val configStr = "SET_WIFI:$ssid,$pass\n"
+                            if (bluetoothHelper.sendData(configStr)) {
+                                Toast.makeText(context, "Konfigurasi terkirim!", Toast.LENGTH_LONG).show()
+                                bluetoothHelper.close()
+                            } else {
+                                Toast.makeText(context, "Gagal mengirim data", Toast.LENGTH_SHORT).show()
+                            }
+                        } else {
+                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        }
                     }
-                } else {
-                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                 }
             }
-        }
+            .setNegativeButton("Batal", null)
+            .show()
     }
 
     private fun addActivityItem(title: String, message: String, timestamp: Long, type: String) {
