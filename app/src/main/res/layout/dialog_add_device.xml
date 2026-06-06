@@ -46,6 +46,55 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="Konfigurasi Sensor"
+        android:textColor="#4B5563"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:baselineAligned="false">
+        
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="12dp"
+            android:hint="Tinggi Tong (cm)">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etTinggiTong"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="50.0"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="12dp"
+            android:hint="Batas Penuh (cm)">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etBatasPenuh"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="5.0"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="Konfigurasi PIN (Default)"
         android:textColor="#4B5563"
         android:textSize="14sp"
@@ -80,12 +129,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:hint="Trig Pin">
+                android:hint="Trig Dalam">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etTrigOrg"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="12"
+                    android:text="5"
                     android:inputType="number" />
             </com.google.android.material.textfield.TextInputLayout>
             
@@ -93,12 +142,54 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Echo Pin">
+                android:layout_marginBottom="8dp"
+                android:hint="Echo Dalam">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etEchoOrg"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="13"
+                    android:text="18"
+                    android:inputType="number" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:hint="Trig Luar">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etTrigLuarOrg"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="22"
+                    android:inputType="number" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:hint="Echo Luar">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etEchoLuarOrg"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="23"
+                    android:inputType="number" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Servo Pin">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etServoOrg"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="4"
                     android:inputType="number" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
@@ -124,12 +215,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:hint="Trig Pin">
+                android:hint="Trig Dalam">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etTrigNonOrg"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="14"
+                    android:text="16"
                     android:inputType="number" />
             </com.google.android.material.textfield.TextInputLayout>
             
@@ -137,9 +228,51 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Echo Pin">
+                android:layout_marginBottom="8dp"
+                android:hint="Echo Dalam">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etEchoNonOrg"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="17"
+                    android:inputType="number" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:hint="Trig Luar">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etTrigLuarNonOrg"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="19"
+                    android:inputType="number" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:hint="Echo Luar">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etEchoLuarNonOrg"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="21"
+                    android:inputType="number" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Servo Pin">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etServoNonOrg"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="15"

@@ -95,13 +95,22 @@ object FirebaseManager {
                     
                     val pinsNode = child.child("config").child("pins")
                     val pins = PinConfig(
-                        trigOrganik = pinsNode.child("trigOrganik").getValue(Int::class.java) ?: 12,
-                        echoOrganik = pinsNode.child("echoOrganik").getValue(Int::class.java) ?: 13,
-                        trigNonOrganik = pinsNode.child("trigNonOrganik").getValue(Int::class.java) ?: 14,
-                        echoNonOrganik = pinsNode.child("echoNonOrganik").getValue(Int::class.java) ?: 15
+                        trigOrganik = pinsNode.child("trigOrganik").getValue(Int::class.java) ?: 5,
+                        echoOrganik = pinsNode.child("echoOrganik").getValue(Int::class.java) ?: 18,
+                        trigNonOrganik = pinsNode.child("trigNonOrganik").getValue(Int::class.java) ?: 16,
+                        echoNonOrganik = pinsNode.child("echoNonOrganik").getValue(Int::class.java) ?: 17,
+                        trigLuarOrganik = pinsNode.child("trigLuarOrganik").getValue(Int::class.java) ?: 22,
+                        echoLuarOrganik = pinsNode.child("echoLuarOrganik").getValue(Int::class.java) ?: 23,
+                        trigLuarNonOrganik = pinsNode.child("trigLuarNonOrganik").getValue(Int::class.java) ?: 19,
+                        echoLuarNonOrganik = pinsNode.child("echoLuarNonOrganik").getValue(Int::class.java) ?: 21,
+                        servoOrganik = pinsNode.child("servoOrganik").getValue(Int::class.java) ?: 4,
+                        servoNonOrganik = pinsNode.child("servoNonOrganik").getValue(Int::class.java) ?: 15
                     )
                     
-                    devices.add(DeviceModel(id, nama, status, terakhir, tipe, DeviceConfig(pins)))
+                    val tinggiTong = child.child("config").child("tinggiTong").getValue(Double::class.java) ?: 50.0
+                    val batasPenuh = child.child("config").child("batasPenuh").getValue(Double::class.java) ?: 5.0
+                    
+                    devices.add(DeviceModel(id, nama, status, terakhir, tipe, DeviceConfig(pins, tinggiTong, batasPenuh)))
                 }
                 callback(devices)
             }
@@ -121,6 +130,8 @@ object FirebaseManager {
         ref.child("terakhirTerlihat").setValue(0L)
         ref.child("tipeJaringan").setValue("WIFI")
         ref.child("config").child("pins").setValue(pins)
+        ref.child("config").child("tinggiTong").setValue(50.0)
+        ref.child("config").child("batasPenuh").setValue(5.0)
         ref.child("bins").child("organik").setValue(mapOf("persentaseIsi" to 0, "status" to "Normal", "terakhirUpdate" to 0L, "terakhirDikosongkan" to 0L))
         ref.child("bins").child("nonOrganik").setValue(mapOf("persentaseIsi" to 0, "status" to "Normal", "terakhirUpdate" to 0L, "terakhirDikosongkan" to 0L))
     }
@@ -131,6 +142,11 @@ object FirebaseManager {
 
     fun updateDevicePins(id: String, pins: PinConfig) {
         rootRef?.child("devices")?.child(id)?.child("config")?.child("pins")?.setValue(pins)
+    }
+
+    fun updateDeviceConfig(id: String, tinggiTong: Double, batasPenuh: Double) {
+        rootRef?.child("devices")?.child(id)?.child("config")?.child("tinggiTong")?.setValue(tinggiTong)
+        rootRef?.child("devices")?.child(id)?.child("config")?.child("batasPenuh")?.setValue(batasPenuh)
     }
 
     fun updateDeviceNetworkType(deviceId: String, tipe: String) {

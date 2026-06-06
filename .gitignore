@@ -27,3 +27,7 @@ Thumbs.db
 # Build outputs
 app/build/
 app/release/
+
+# Custom ignored folders
+arduino/CleanBanarDevice/
+firebase/

@@ -103,6 +103,43 @@
             android:orientation="horizontal"
             android:baselineAligned="false">
             
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="12dp"
+                android:hint="Tinggi Tong (cm)">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etDetailTinggiTong"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:layout_marginBottom="12dp"
+                android:hint="Batas Penuh (cm)">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etDetailBatasPenuh"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:baselineAligned="false">
+            
             <!-- Organik -->
             <LinearLayout
                 android:layout_width="0dp"
@@ -124,7 +161,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:hint="Trig">
+                    android:hint="Trig Dalam">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etDetailTrigOrg"
                         android:layout_width="match_parent"
@@ -136,9 +173,48 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Echo">
+                    android:layout_marginBottom="8dp"
+                    android:hint="Echo Dalam">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etDetailEchoOrg"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:hint="Trig Luar">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etDetailTrigLuarOrg"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:hint="Echo Luar">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etDetailEchoLuarOrg"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Servo Pin">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etDetailServoOrg"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="number" />
@@ -166,7 +242,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:hint="Trig">
+                    android:hint="Trig Dalam">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etDetailTrigNonOrg"
                         android:layout_width="match_parent"
@@ -178,9 +254,48 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Echo">
+                    android:layout_marginBottom="8dp"
+                    android:hint="Echo Dalam">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etDetailEchoNonOrg"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:hint="Trig Luar">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etDetailTrigLuarNonOrg"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:hint="Echo Luar">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etDetailEchoLuarNonOrg"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Servo Pin">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etDetailServoNonOrg"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="number" />
@@ -193,7 +308,7 @@
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Update PIN"
+            android:text="Update Konfigurasi"
             android:textColor="#10B981"
             app:strokeColor="#10B981"
             android:layout_marginTop="8dp" />

@@ -1,14 +1,22 @@
 package com.example.cleanbanar.core.data
 
 data class PinConfig(
-    val trigOrganik: Int = 12,
-    val echoOrganik: Int = 13,
-    val trigNonOrganik: Int = 14,
-    val echoNonOrganik: Int = 15
+    val trigOrganik: Int = 5,
+    val echoOrganik: Int = 18,
+    val trigNonOrganik: Int = 16,
+    val echoNonOrganik: Int = 17,
+    val trigLuarOrganik: Int = 22,
+    val echoLuarOrganik: Int = 23,
+    val trigLuarNonOrganik: Int = 19,
+    val echoLuarNonOrganik: Int = 21,
+    val servoOrganik: Int = 4,
+    val servoNonOrganik: Int = 15
 )
 
 data class DeviceConfig(
-    val pins: PinConfig = PinConfig()
+    val pins: PinConfig = PinConfig(),
+    val tinggiTong: Double = 50.0,
+    val batasPenuh: Double = 5.0
 )
 
 data class DeviceModel(

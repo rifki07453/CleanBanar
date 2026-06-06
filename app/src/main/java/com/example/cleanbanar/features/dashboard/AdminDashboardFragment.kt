@@ -138,8 +138,16 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         
         val etTrigOrg = view.findViewById<TextInputEditText>(R.id.etTrigOrg)
         val etEchoOrg = view.findViewById<TextInputEditText>(R.id.etEchoOrg)
+        val etTrigLuarOrg = view.findViewById<TextInputEditText>(R.id.etTrigLuarOrg)
+        val etEchoLuarOrg = view.findViewById<TextInputEditText>(R.id.etEchoLuarOrg)
+        val etServoOrg = view.findViewById<TextInputEditText>(R.id.etServoOrg)
         val etTrigNonOrg = view.findViewById<TextInputEditText>(R.id.etTrigNonOrg)
         val etEchoNonOrg = view.findViewById<TextInputEditText>(R.id.etEchoNonOrg)
+        val etTrigLuarNonOrg = view.findViewById<TextInputEditText>(R.id.etTrigLuarNonOrg)
+        val etEchoLuarNonOrg = view.findViewById<TextInputEditText>(R.id.etEchoLuarNonOrg)
+        val etServoNonOrg = view.findViewById<TextInputEditText>(R.id.etServoNonOrg)
+        val etTinggiTong = view.findViewById<TextInputEditText>(R.id.etTinggiTong)
+        val etBatasPenuh = view.findViewById<TextInputEditText>(R.id.etBatasPenuh)
 
         view.findViewById<MaterialButton>(R.id.btnCancel).setOnClickListener {
             dialog.dismiss()
@@ -155,13 +163,23 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
             }
 
             val pins = PinConfig(
-                trigOrganik = etTrigOrg.text.toString().toIntOrNull() ?: 12,
-                echoOrganik = etEchoOrg.text.toString().toIntOrNull() ?: 13,
-                trigNonOrganik = etTrigNonOrg.text.toString().toIntOrNull() ?: 14,
-                echoNonOrganik = etEchoNonOrg.text.toString().toIntOrNull() ?: 15
+                trigOrganik = etTrigOrg.text.toString().toIntOrNull() ?: 5,
+                echoOrganik = etEchoOrg.text.toString().toIntOrNull() ?: 18,
+                trigNonOrganik = etTrigNonOrg.text.toString().toIntOrNull() ?: 16,
+                echoNonOrganik = etEchoNonOrg.text.toString().toIntOrNull() ?: 17,
+                trigLuarOrganik = etTrigLuarOrg.text.toString().toIntOrNull() ?: 22,
+                echoLuarOrganik = etEchoLuarOrg.text.toString().toIntOrNull() ?: 23,
+                trigLuarNonOrganik = etTrigLuarNonOrg.text.toString().toIntOrNull() ?: 19,
+                echoLuarNonOrganik = etEchoLuarNonOrg.text.toString().toIntOrNull() ?: 21,
+                servoOrganik = etServoOrg.text.toString().toIntOrNull() ?: 4,
+                servoNonOrganik = etServoNonOrg.text.toString().toIntOrNull() ?: 15
             )
+            
+            val tinggi = etTinggiTong.text.toString().toDoubleOrNull() ?: 50.0
+            val batas = etBatasPenuh.text.toString().toDoubleOrNull() ?: 5.0
 
             FirebaseManager.addDevice(id, nama, pins)
+            FirebaseManager.updateDeviceConfig(id, tinggi, batas)
             Toast.makeText(requireContext(), "Perangkat ditambahkan", Toast.LENGTH_SHORT).show()
             dialog.dismiss()
             showDeviceListBottomSheet()
@@ -190,23 +208,49 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
 
         val etDetailTrigOrg = view.findViewById<TextInputEditText>(R.id.etDetailTrigOrg)
         val etDetailEchoOrg = view.findViewById<TextInputEditText>(R.id.etDetailEchoOrg)
+        val etDetailTrigLuarOrg = view.findViewById<TextInputEditText>(R.id.etDetailTrigLuarOrg)
+        val etDetailEchoLuarOrg = view.findViewById<TextInputEditText>(R.id.etDetailEchoLuarOrg)
+        val etDetailServoOrg = view.findViewById<TextInputEditText>(R.id.etDetailServoOrg)
         val etDetailTrigNonOrg = view.findViewById<TextInputEditText>(R.id.etDetailTrigNonOrg)
         val etDetailEchoNonOrg = view.findViewById<TextInputEditText>(R.id.etDetailEchoNonOrg)
+        val etDetailTrigLuarNonOrg = view.findViewById<TextInputEditText>(R.id.etDetailTrigLuarNonOrg)
+        val etDetailEchoLuarNonOrg = view.findViewById<TextInputEditText>(R.id.etDetailEchoLuarNonOrg)
+        val etDetailServoNonOrg = view.findViewById<TextInputEditText>(R.id.etDetailServoNonOrg)
+        val etDetailTinggiTong = view.findViewById<TextInputEditText>(R.id.etDetailTinggiTong)
+        val etDetailBatasPenuh = view.findViewById<TextInputEditText>(R.id.etDetailBatasPenuh)
 
         etDetailTrigOrg.setText(device.config.pins.trigOrganik.toString())
         etDetailEchoOrg.setText(device.config.pins.echoOrganik.toString())
+        etDetailTrigLuarOrg.setText(device.config.pins.trigLuarOrganik.toString())
+        etDetailEchoLuarOrg.setText(device.config.pins.echoLuarOrganik.toString())
+        etDetailServoOrg.setText(device.config.pins.servoOrganik.toString())
         etDetailTrigNonOrg.setText(device.config.pins.trigNonOrganik.toString())
         etDetailEchoNonOrg.setText(device.config.pins.echoNonOrganik.toString())
+        etDetailTrigLuarNonOrg.setText(device.config.pins.trigLuarNonOrganik.toString())
+        etDetailEchoLuarNonOrg.setText(device.config.pins.echoLuarNonOrganik.toString())
+        etDetailServoNonOrg.setText(device.config.pins.servoNonOrganik.toString())
+        etDetailTinggiTong.setText(device.config.tinggiTong.toString())
+        etDetailBatasPenuh.setText(device.config.batasPenuh.toString())
 
         view.findViewById<MaterialButton>(R.id.btnUpdatePins).setOnClickListener {
             val pins = PinConfig(
-                trigOrganik = etDetailTrigOrg.text.toString().toIntOrNull() ?: 12,
-                echoOrganik = etDetailEchoOrg.text.toString().toIntOrNull() ?: 13,
-                trigNonOrganik = etDetailTrigNonOrg.text.toString().toIntOrNull() ?: 14,
-                echoNonOrganik = etDetailEchoNonOrg.text.toString().toIntOrNull() ?: 15
+                trigOrganik = etDetailTrigOrg.text.toString().toIntOrNull() ?: 5,
+                echoOrganik = etDetailEchoOrg.text.toString().toIntOrNull() ?: 18,
+                trigNonOrganik = etDetailTrigNonOrg.text.toString().toIntOrNull() ?: 16,
+                echoNonOrganik = etDetailEchoNonOrg.text.toString().toIntOrNull() ?: 17,
+                trigLuarOrganik = etDetailTrigLuarOrg.text.toString().toIntOrNull() ?: 22,
+                echoLuarOrganik = etDetailEchoLuarOrg.text.toString().toIntOrNull() ?: 23,
+                trigLuarNonOrganik = etDetailTrigLuarNonOrg.text.toString().toIntOrNull() ?: 19,
+                echoLuarNonOrganik = etDetailEchoLuarNonOrg.text.toString().toIntOrNull() ?: 21,
+                servoOrganik = etDetailServoOrg.text.toString().toIntOrNull() ?: 4,
+                servoNonOrganik = etDetailServoNonOrg.text.toString().toIntOrNull() ?: 15
             )
+            val tinggi = etDetailTinggiTong.text.toString().toDoubleOrNull() ?: 50.0
+            val batas = etDetailBatasPenuh.text.toString().toDoubleOrNull() ?: 5.0
+            
             FirebaseManager.updateDevicePins(device.id, pins)
-            Toast.makeText(requireContext(), "PIN berhasil diperbarui", Toast.LENGTH_SHORT).show()
+            FirebaseManager.updateDeviceConfig(device.id, tinggi, batas)
+            Toast.makeText(requireContext(), "Konfigurasi berhasil diperbarui", Toast.LENGTH_SHORT).show()
         }
 
         btnDeleteDevice.setOnClickListener {
