@@ -65,6 +65,13 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
     override fun setupViews() {
         authManager = AuthManager(requireContext())
         binding.tvSystemName.text = "Sistem Terpusat"
+        
+        binding.fabScanQr.setOnClickListener {
+            // Default target is null because the flow starts by scanning
+            selectedBinToVerify = null
+            startQRScan()
+        }
+        
         rebuildCards()
     }
 
@@ -138,9 +145,9 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
 
     private fun rebuildCards() {
         binding.cardsContainer.removeAllViews()
-        val sortedBins = binDataMap.values.sortedByDescending { it.fillPercentage }
- 
-        if (sortedBins.isEmpty()) {
+        val devicesMap = binDataMap.values.groupBy { it.deviceId }
+        
+        if (devicesMap.isEmpty()) {
             val tv = TextView(requireContext()).apply {
                 text = "Belum ada perangkat yang terdaftar."
                 setTextColor(resources.getColor(R.color.gray_500, null))
@@ -149,37 +156,25 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
             binding.cardsContainer.addView(tv)
             return
         }
+
+        val sortedDevices = devicesMap.entries.sortedByDescending { entry ->
+            entry.value.maxOfOrNull { it.fillPercentage } ?: 0
+        }
  
-        for (bin in sortedBins) {
-            val card = buildBinCard(bin)
+        for ((deviceId, bins) in sortedDevices) {
+            val deviceName = bins.firstOrNull()?.deviceName ?: deviceId
+            val card = buildDeviceCard(deviceId, deviceName, bins)
             binding.cardsContainer.addView(card)
         }
     }
 
-    private fun buildBinCard(bin: BinData): MaterialCardView {
-        val isOrganik = bin.type == "organik"
-        val label = if (isOrganik) "Organik" else "Non-Organik"
-        val percent = bin.fillPercentage
-
-        val (badgeText, badgeDrawable, badgeTextColor, progressDrawableRes) = when {
-            percent >= 95 -> Quadruple("PENUH", R.drawable.badge_red_bg, R.color.red_500, R.drawable.progress_bar_red)
-            percent >= 80 -> Quadruple("HAMPIR PENUH", R.drawable.badge_amber_bg, R.color.amber_600, R.drawable.progress_bar_amber)
-            else -> Quadruple("TERSEDIA", R.drawable.badge_green_bg, R.color.emerald_600, R.drawable.progress_bar_green)
-        }
-
-        val statusText = when {
-            percent >= 95 -> "Segera dikosongkan!"
-            percent >= 80 -> "Perlu segera dikosongkan"
-            percent >= 50 -> "Perkiraan penuh dlm 1 hari"
-            else -> "Perkiraan penuh dlm 2 hari"
-        }
-
+    private fun buildDeviceCard(deviceId: String, deviceName: String, bins: List<BinData>): MaterialCardView {
         val cardView = MaterialCardView(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply { bottomMargin = 20.dpToPx() }
-            radius = 20f.dpToPxF()
+            ).apply { bottomMargin = 16.dpToPx() }
+            radius = 16f.dpToPxF()
             cardElevation = 0f.dpToPxF()
             strokeWidth = 1.dpToPx()
             strokeColor = 0x1A000000 
@@ -188,112 +183,64 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
 
         val innerLayout = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(24.dpToPx(), 24.dpToPx(), 24.dpToPx(), 24.dpToPx())
+            setPadding(16.dpToPx(), 16.dpToPx(), 16.dpToPx(), 16.dpToPx())
         }
 
-        val topRow = RelativeLayout(requireContext()).apply {
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply { bottomMargin = 24.dpToPx() }
-        }
-
-        val iconBgColor = if (isOrganik) android.graphics.Color.parseColor("#ECFDF5")
-                          else android.graphics.Color.parseColor("#EFF6FF")
-        val iconSrc = R.drawable.ic_trash_modern
-        val iconColor = if (isOrganik) android.graphics.Color.parseColor("#16A34A")
-                        else android.graphics.Color.parseColor("#2563EB")
-
-        val iconCircleBg = android.graphics.drawable.GradientDrawable().apply {
-            shape = android.graphics.drawable.GradientDrawable.OVAL
-            setColor(iconBgColor)
-        }
-
-        val icon = ImageView(requireContext()).apply {
-            id = View.generateViewId()
-            layoutParams = RelativeLayout.LayoutParams(48.dpToPx(), 48.dpToPx()).apply {
-                addRule(RelativeLayout.CENTER_VERTICAL)
-            }
-            background = iconCircleBg
-            setImageResource(iconSrc)
-            setColorFilter(iconColor)
-            scaleType = ImageView.ScaleType.CENTER_INSIDE
-            setPadding(12.dpToPx(), 12.dpToPx(), 12.dpToPx(), 12.dpToPx())
-        }
-
-        val titleCol = LinearLayout(requireContext()).apply {
-            orientation = LinearLayout.VERTICAL
-            layoutParams = RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.WRAP_CONTENT,
-                RelativeLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                addRule(RelativeLayout.END_OF, icon.id)
-                addRule(RelativeLayout.CENTER_VERTICAL)
-                marginStart = 16.dpToPx()
-            }
-        }
-
-        val tvTitle = TextView(requireContext()).apply {
-            text = "$label (${bin.deviceName})"
+        val tvDeviceName = TextView(requireContext()).apply {
+            text = deviceName
             setTypeface(typeface, Typeface.BOLD)
             textSize = 14f
             setTextColor(resources.getColor(R.color.gray_900, null))
+            setPadding(0, 0, 0, 12.dpToPx())
+        }
+        innerLayout.addView(tvDeviceName)
+
+        val orgBin = bins.find { it.type == "organik" }
+        val nonOrgBin = bins.find { it.type == "nonOrganik" }
+
+        if (orgBin != null) innerLayout.addView(buildCompactBinRow(orgBin))
+        if (nonOrgBin != null) innerLayout.addView(buildCompactBinRow(nonOrgBin))
+
+        cardView.addView(innerLayout)
+        return cardView
+    }
+
+    private fun buildCompactBinRow(bin: BinData): View {
+        val isOrganik = bin.type == "organik"
+        val label = if (isOrganik) "Organik" else "Non-Organik"
+        val percent = bin.fillPercentage
+
+        val (badgeText, badgeDrawable, badgeTextColor, progressDrawableRes) = when {
+            percent >= 95 -> Quadruple("PENUH", R.drawable.badge_red_bg, R.color.red_500, R.drawable.progress_bar_red)
+            percent >= 80 -> Quadruple("HAMPIR", R.drawable.badge_amber_bg, R.color.amber_600, R.drawable.progress_bar_amber)
+            else -> Quadruple("AMAN", R.drawable.badge_green_bg, R.color.emerald_600, R.drawable.progress_bar_green)
         }
 
-        val tvUpdate = TextView(requireContext()).apply {
-            text = formatLastUpdate(bin.lastUpdate)
-            textSize = 9f
-            setTextColor(resources.getColor(R.color.gray_400, null))
-        }
-
-        titleCol.addView(tvTitle)
-        titleCol.addView(tvUpdate)
-
-        val tvBadge = TextView(requireContext()).apply {
-            text = badgeText
-            textSize = 8f
-            setTypeface(typeface, Typeface.BOLD)
-            setTextColor(resources.getColor(badgeTextColor, null))
-            setBackgroundResource(badgeDrawable)
-            setPadding(12.dpToPx(), 6.dpToPx(), 12.dpToPx(), 6.dpToPx())
-            isAllCaps = true
-            layoutParams = RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.WRAP_CONTENT,
-                RelativeLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                addRule(RelativeLayout.ALIGN_PARENT_END)
-                addRule(RelativeLayout.CENTER_VERTICAL)
-            }
-        }
-
-        topRow.addView(icon)
-        topRow.addView(titleCol)
-        topRow.addView(tvBadge)
-
-        val capacityRow = RelativeLayout(requireContext()).apply {
+        val row = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.VERTICAL
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             ).apply { bottomMargin = 8.dpToPx() }
         }
 
-        val tvCapLabel = TextView(requireContext()).apply {
-            text = "Tingkat Kapasitas"
-            textSize = 11f
-            setTextColor(resources.getColor(R.color.gray_500, null))
-            layoutParams = RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.WRAP_CONTENT,
-                RelativeLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
-                bottomMargin = 2.dpToPx()
-            }
+        val topLayout = RelativeLayout(requireContext()).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        val tvLabel = TextView(requireContext()).apply {
+            text = label
+            textSize = 12f
+            setTextColor(resources.getColor(R.color.gray_700, null))
         }
 
         val tvPercent = TextView(requireContext()).apply {
             text = "$percent%"
             setTypeface(typeface, Typeface.BOLD)
-            textSize = 18f
+            textSize = 12f
             setTextColor(resources.getColor(R.color.gray_900, null))
             layoutParams = RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
@@ -303,8 +250,8 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
             }
         }
 
-        capacityRow.addView(tvCapLabel)
-        capacityRow.addView(tvPercent)
+        topLayout.addView(tvLabel)
+        topLayout.addView(tvPercent)
 
         val actualProgressDrawableRes = if (isOrganik) {
             R.drawable.progress_bar_green
@@ -315,91 +262,21 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         val progressBar = ProgressBar(requireContext(), null, android.R.attr.progressBarStyleHorizontal).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                8.dpToPx()
-            ).apply { bottomMargin = 8.dpToPx() }
+                6.dpToPx()
+            ).apply { 
+                topMargin = 4.dpToPx() 
+                bottomMargin = 4.dpToPx()
+            }
             max = 100
             progress = percent
             progressDrawable = resources.getDrawable(actualProgressDrawableRes, null)
             scaleY = 1.0f 
         }
 
-        val statusRow = RelativeLayout(requireContext()).apply {
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply { bottomMargin = 20.dpToPx() }
-        }
+        row.addView(topLayout)
+        row.addView(progressBar)
 
-        val tvEstimate = TextView(requireContext()).apply {
-            text = statusText
-            textSize = 8f
-            setTextColor(resources.getColor(R.color.gray_400, null))
-            layoutParams = RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.WRAP_CONTENT,
-                RelativeLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                addRule(RelativeLayout.ALIGN_PARENT_END)
-            }
-        }
-
-        statusRow.addView(tvEstimate)
-
-        val diffEmptied = System.currentTimeMillis() - bin.lastEmptied
-        val daysSinceEmptied = diffEmptied / 86_400_000L
-
-        val tvWarning = TextView(requireContext()).apply {
-            textSize = 8f
-            setTextColor(resources.getColor(R.color.red_500, null))
-            layoutParams = RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.WRAP_CONTENT,
-                RelativeLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                addRule(RelativeLayout.ALIGN_PARENT_START)
-            }
-            visibility = View.GONE
-        }
-
-        if (bin.lastEmptied > 0L) {
-            if (isOrganik && daysSinceEmptied >= 3) {
-                tvWarning.text = "⚠️ Mulai membusuk (>$daysSinceEmptied hari)"
-                tvWarning.visibility = View.VISIBLE
-            } else if (!isOrganik && daysSinceEmptied >= 7) {
-                tvWarning.text = "⚠️ Sudah menumpuk (>$daysSinceEmptied hari)"
-                tvWarning.visibility = View.VISIBLE
-            }
-        }
-        
-        statusRow.addView(tvWarning)
-
-        val btnEmpty = MaterialButton(requireContext()).apply {
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                42.dpToPx()
-            )
-            text = "Pindai QR Baksampah"
-            val txtColor = if (isOrganik) R.color.emerald_600 else R.color.blue_600
-            val bgColor = if (isOrganik) R.color.green_50 else R.color.blue_50
-            
-            setTextColor(resources.getColor(txtColor, null))
-            setTypeface(typeface, Typeface.BOLD)
-            setBackgroundColor(resources.getColor(bgColor, null))
-            textSize = 11f
-            elevation = 0f
-            cornerRadius = 10.dpToPx()
-
-            setOnClickListener {
-                showVerificationOptions(bin)
-            }
-        }
-
-        innerLayout.addView(topRow)
-        innerLayout.addView(capacityRow)
-        innerLayout.addView(progressBar)
-        innerLayout.addView(statusRow)
-        innerLayout.addView(btnEmpty)
-        cardView.addView(innerLayout)
-
-        return cardView
+        return row
     }
 
     // ==========================================
@@ -423,12 +300,19 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
     }
 
     private fun startQRScan() {
+        val promptText = if (selectedBinToVerify != null) {
+            "Arahkan kamera ke QR Code di baksampah ${selectedBinToVerify?.deviceName}"
+        } else {
+            "Pindai QR Perangkat"
+        }
+
         val options = ScanOptions().apply {
             setDesiredBarcodeFormats(ScanOptions.QR_CODE)
-            setPrompt("Arahkan kamera ke QR Code di baksampah ${selectedBinToVerify?.deviceName}")
+            setPrompt(promptText)
             setCameraId(0) 
             setBeepEnabled(true)
             setBarcodeImageEnabled(false)
+            setCaptureActivity(com.example.cleanbanar.core.ui.PortraitCaptureActivity::class.java)
             setOrientationLocked(true)
         }
         barcodeLauncher.launch(options)
@@ -466,15 +350,31 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
     }
 
     private fun verifyAndProceed(code: String) {
-        val target = selectedBinToVerify ?: return
-        if (code.equals(target.deviceId, ignoreCase = true)) {
-            showConfirmationDialog(target)
+        if (selectedBinToVerify == null) {
+            // General scan mode from FAB
+            // Try to find the device that matches the scanned code
+            val matchingOrgBin = binDataMap.values.find { it.deviceId.equals(code, ignoreCase = true) && it.type == "organik" }
+            if (matchingOrgBin != null) {
+                showConfirmationDialog(matchingOrgBin)
+            } else {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Perangkat Tidak Ditemukan")
+                    .setMessage("QR Code/ID ($code) tidak cocok dengan perangkat manapun di database.")
+                    .setPositiveButton("Tutup", null)
+                    .show()
+            }
         } else {
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Verifikasi Gagal")
-                .setMessage("QR Code/ID yang dimasukkan ($code) tidak cocok dengan tempat sampah ini (${target.deviceName} / ${target.deviceId}).")
-                .setPositiveButton("Tutup", null)
-                .show()
+            // Contextual scan from old logic (just in case they use manual ID)
+            val target = selectedBinToVerify ?: return
+            if (code.equals(target.deviceId, ignoreCase = true)) {
+                showConfirmationDialog(target)
+            } else {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Verifikasi Gagal")
+                    .setMessage("QR Code/ID yang dimasukkan ($code) tidak cocok dengan tempat sampah ini (${target.deviceName} / ${target.deviceId}).")
+                    .setPositiveButton("Tutup", null)
+                    .show()
+            }
         }
     }
 
