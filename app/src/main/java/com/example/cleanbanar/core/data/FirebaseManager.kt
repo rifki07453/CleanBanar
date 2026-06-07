@@ -61,12 +61,12 @@ object FirebaseManager {
         val safeBinType = sanitize(binType)
         val safeUserName = sanitize(userName)
         val safeUserId = sanitize(userId)
-        val binLabel = if (safeBinType == "organik") "Organik" else "Non-Organik"
         updateBinStatus(deviceId, safeBinType, 0, "Normal")
         rootRef?.child("devices")?.child(deviceId)?.child("bins")?.child(safeBinType)?.child("terakhirDikosongkan")?.setValue(System.currentTimeMillis())
         addHistoryEntry("pengosongan", safeBinType, safeUserId, safeUserName)
-        addNotification("$binLabel Dikosongkan", "Sampah $binLabel pada perangkat $deviceId telah dikosongkan oleh $safeUserName.", "success")
         incrementEmptyCount(safeBinType)
+        // Catatan: notifikasi "Selesai Dikosongkan" kini ditangani oleh
+        // BinObserver.triggerSelesaiNotification() berdasarkan pengaturan notifikasi pengguna
     }
 
     /** Sanitasi input agar aman ditulis sebagai Firebase path key */
@@ -458,6 +458,28 @@ object FirebaseManager {
         }
         ref.addValueEventListener(listener)
         return listener
+    }
+
+    fun getNotificationSettings(userId: String, callback: (NotificationSettings) -> Unit) {
+        val ref = rootRef?.child("users")?.child(userId)?.child("pengaturan_notifikasi")
+        if (ref == null) {
+            callback(NotificationSettings())
+            return
+        }
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                callback(NotificationSettings(
+                    hampirPenuh = snapshot.child("hampir_penuh").getValue(Boolean::class.java) ?: true,
+                    penuh = snapshot.child("penuh").getValue(Boolean::class.java) ?: true,
+                    selesai = snapshot.child("selesai").getValue(Boolean::class.java) ?: true,
+                    sistem = snapshot.child("sistem").getValue(Boolean::class.java) ?: true
+                ))
+            }
+            override fun onCancelled(error: DatabaseError) {
+                Log.e(TAG, "getNotificationSettings error: ${error.message} (code=${error.code})")
+                callback(NotificationSettings())
+            }
+        })
     }
 
     fun removeBinListener(deviceId: String, binType: String, listener: ValueEventListener) { rootRef?.child("devices")?.child(deviceId)?.child("bins")?.child(binType)?.removeEventListener(listener) }

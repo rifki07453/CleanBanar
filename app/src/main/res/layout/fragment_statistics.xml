@@ -290,33 +290,11 @@
                         android:textSize="12sp"
                         android:textColor="@color/gray_900" />
 
-                    <com.google.android.material.button.MaterialButtonToggleGroup
-                        android:id="@+id/toggleGroupChartMode"
+                    <Spinner
+                        android:id="@+id/spinnerChartMode"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        app:singleSelection="true"
-                        app:checkedButton="@id/btnModeCapacity">
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnModeCapacity"
-                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="32dp"
-                            android:text="Kapasitas"
-                            android:textSize="9sp"
-                            android:insetTop="0dp"
-                            android:insetBottom="0dp"
-                            android:paddingHorizontal="8dp" />
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnModeEmptyCount"
-                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="32dp"
-                            android:text="Pengosongan"
-                            android:textSize="9sp"
-                            android:insetTop="0dp"
-                            android:insetBottom="0dp"
-                            android:paddingHorizontal="8dp" />
-                    </com.google.android.material.button.MaterialButtonToggleGroup>
+                        android:spinnerMode="dropdown" />
                 </LinearLayout>
 
                 <!-- Chart & Y-Axis Area -->

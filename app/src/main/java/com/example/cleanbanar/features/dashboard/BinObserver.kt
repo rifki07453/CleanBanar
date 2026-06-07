@@ -20,7 +20,7 @@ object BinObserver {
     private var settingsListener: ValueEventListener? = null
 
     private var isRunning = false
-    private var currentSettings = FirebaseManager.NotificationSettings()
+    var currentSettings = FirebaseManager.NotificationSettings()
     private var currentUserId: String = ""
 
     private var appContext: android.content.Context? = null
@@ -149,6 +149,8 @@ object BinObserver {
     }
 
     private fun handleStaleWaste(deviceId: String, binType: String, terakhirDikosongkan: Long, maxDays: Int) {
+        // Cek toggle Notifikasi Sistem
+        if (!currentSettings.sistem) return
         if (terakhirDikosongkan == 0L || appContext == null) return
         
         val diff = System.currentTimeMillis() - terakhirDikosongkan
@@ -174,5 +176,18 @@ object BinObserver {
                 prefs.edit().putLong(lastNotifKey, System.currentTimeMillis()).apply()
             }
         }
+    }
+
+    /**
+     * Dipanggil setelah pengosongan bak sampah berhasil.
+     * Menambahkan notifikasi ke Firebase dan push notification
+     * hanya jika toggle "Selesai Dikosongkan" diaktifkan.
+     */
+    fun triggerSelesaiNotification(context: android.content.Context, binLabel: String, deviceId: String, userName: String) {
+        if (!currentSettings.selesai) return
+        val judul = "$binLabel Dikosongkan"
+        val pesan = "Sampah $binLabel pada perangkat $deviceId telah dikosongkan oleh $userName."
+        FirebaseManager.addNotification(judul, pesan, "success")
+        com.example.cleanbanar.core.utils.NotificationHelper.showNotification(context, judul, pesan)
     }
 }

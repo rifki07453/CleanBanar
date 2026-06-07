@@ -53,10 +53,15 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
     override fun observeData() {
         usersListener = FirebaseManager.listenUsers { users ->
             binding.staffListContainer.removeAllViews()
-            if (users.isEmpty()) {
+            // Hanya tampilkan akun dengan peran "Petugas", kecualikan Admin/Administrator
+            val petugasList = users.filter { user ->
+                val peran = (user["peran"] as? String ?: "").trim()
+                peran.equals("Petugas", ignoreCase = true)
+            }
+            if (petugasList.isEmpty()) {
                 addEmptyState()
             } else {
-                for (user in users) {
+                for (user in petugasList) {
                     addStaffCard(
                         userId = user["id"] as? String ?: "",
                         name = user["nama"] as? String ?: "",

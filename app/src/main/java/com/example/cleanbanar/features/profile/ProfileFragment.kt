@@ -203,6 +203,8 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
     @Suppress("DEPRECATION")
     private fun showNotificationSettingsDialog() {
         val userId = authManager.getUserId()
+        if (userId.isEmpty()) return
+
         val layout = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(24.dpToPx(), 8.dpToPx(), 24.dpToPx(), 8.dpToPx())
@@ -242,8 +244,8 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         layout.addView(rowSelesai)
         layout.addView(rowSistem)
 
-        // Load state dari Firebase
-        FirebaseManager.listenNotificationSettings(userId) { settings ->
+        // Load state dari Firebase sekali saja (bukan persistent listener) untuk menghindari leak
+        FirebaseManager.getNotificationSettings(userId) { settings ->
             if (isAdded) {
                 swHampir.isChecked = settings.hampirPenuh
                 swPenuh.isChecked = settings.penuh

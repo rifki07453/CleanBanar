@@ -57,12 +57,18 @@ class StatisticsFragment : BaseFragment<FragmentStatisticsBinding>() {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
-        // Setup Toggle Group for Chart Mode
-        binding.toggleGroupChartMode.addOnButtonCheckedListener { _, checkedId, isChecked ->
-            if (isChecked) {
-                isCapacityMode = checkedId == R.id.btnModeCapacity
+        // Setup Spinner for Chart Mode
+        val chartModes = arrayOf("Kapasitas", "Pengosongan")
+        val chartModeAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, chartModes).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
+        binding.spinnerChartMode.adapter = chartModeAdapter
+        binding.spinnerChartMode.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                isCapacityMode = position == 0
                 updateUI()
             }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
     }
 

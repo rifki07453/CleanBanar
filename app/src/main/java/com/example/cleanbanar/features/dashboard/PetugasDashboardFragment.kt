@@ -437,13 +437,16 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
     }
 
     private fun executeEmptying(deviceId: String, emptyOrg: Boolean, emptyNonOrg: Boolean) {
+        val ctx = requireContext()
         if (emptyOrg) {
             FirebaseManager.emptyBin(deviceId, "organik", authManager.getUserId(), authManager.getUserName())
+            BinObserver.triggerSelesaiNotification(ctx, "Organik", deviceId, authManager.getUserName())
         }
         if (emptyNonOrg) {
             FirebaseManager.emptyBin(deviceId, "nonOrganik", authManager.getUserId(), authManager.getUserName())
+            BinObserver.triggerSelesaiNotification(ctx, "Non-Organik", deviceId, authManager.getUserName())
         }
-        Toast.makeText(requireContext(), "Berhasil dikosongkan", Toast.LENGTH_SHORT).show()
+        Toast.makeText(ctx, "Berhasil dikosongkan", Toast.LENGTH_SHORT).show()
     }
 
     private fun updateOverallStatus() {
