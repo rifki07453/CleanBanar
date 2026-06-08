@@ -14,16 +14,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- Back Button with modern glassmorphism design -->
+        <!-- Back Button with clean transparent design -->
         <ImageButton
             android:id="@+id/btn_back"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginStart="20dp"
             android:layout_marginTop="24dp"
-            android:background="@drawable/bg_circle_glass"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="Kembali"
-            android:elevation="6dp"
             android:src="@drawable/ic_arrow_back"
             app:tint="@color/white"
             app:layout_constraintStart_toStartOf="parent"
