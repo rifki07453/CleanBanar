@@ -314,7 +314,10 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
                             val configStr = "SET_WIFI:$ssid,$pass\n"
                             if (bluetoothHelper.sendData(configStr)) {
                                 Toast.makeText(context, "Konfigurasi terkirim!", Toast.LENGTH_LONG).show()
-                                bluetoothHelper.close()
+                                // Beri jeda sedikit agar ESP32 sempat membaca seluruh data sebelum koneksi ditutup
+                                android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                                    bluetoothHelper.close()
+                                }, 1500)
                             } else {
                                 Toast.makeText(context, "Gagal mengirim data", Toast.LENGTH_SHORT).show()
                             }
