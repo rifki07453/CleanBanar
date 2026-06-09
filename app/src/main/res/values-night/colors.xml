@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Semantic Colors for Dark Mode -->
+    <color name="bg_main">#121212</color>
+    <color name="bg_card">#1E1E1E</color>
+    <color name="text_primary">#F9FAFB</color>
+    <color name="text_secondary">#D1D5DB</color>
+    <color name="text_tertiary">#9CA3AF</color>
+    
+    <!-- Adjust existing palettes for Dark Mode readability if necessary -->
+    <color name="gray_timeline">#374151</color>
+    <color name="badge_green_bg">#065F46</color>
+    <color name="badge_green_text">#D1FAE5</color>
+    <color name="badge_red_bg">#7F1D1D</color>
+    <color name="badge_red_text">#FEE2E2</color>
+    <color name="badge_blue_bg">#1E3A8A</color>
+    <color name="badge_blue_text">#DBEAFE</color>
+</resources>

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F9FAFB"
+    android:background="@color/bg_main"
     tools:context=".features.dashboard.AdminDashboardFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -130,7 +130,7 @@
                     app:cardCornerRadius="24dp"
                     app:cardElevation="2dp"
                     app:strokeWidth="0dp"
-                    app:cardBackgroundColor="@color/white"
+                    app:cardBackgroundColor="@color/bg_card"
                     android:clickable="true"
                     android:focusable="true"
                     android:foreground="?android:attr/selectableItemBackground">
@@ -158,7 +158,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Manajemen\nPetugas"
-                            android:textColor="#111827"
+                            android:textColor="@color/text_primary"
                             android:textSize="14sp"
                             android:textStyle="bold"
                             android:textAlignment="center" />
@@ -167,7 +167,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Tambah/hapus akun"
-                            android:textColor="#9CA3AF"
+                            android:textColor="@color/text_tertiary"
                             android:textSize="10sp"
                             android:textAlignment="center"
                             android:layout_marginTop="4dp" />
@@ -184,7 +184,7 @@
                     app:cardCornerRadius="24dp"
                     app:cardElevation="2dp"
                     app:strokeWidth="0dp"
-                    app:cardBackgroundColor="@color/white"
+                    app:cardBackgroundColor="@color/bg_card"
                     android:clickable="true"
                     android:focusable="true"
                     android:foreground="?android:attr/selectableItemBackground">
@@ -213,7 +213,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Manajemen\nPerangkat"
-                            android:textColor="#111827"
+                            android:textColor="@color/text_primary"
                             android:textSize="14sp"
                             android:textStyle="bold"
                             android:textAlignment="center" />
@@ -257,7 +257,7 @@
                 app:cardCornerRadius="24dp"
                 app:cardElevation="2dp"
                 app:strokeWidth="0dp"
-                app:cardBackgroundColor="@color/white">
+                app:cardBackgroundColor="@color/bg_card">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -269,7 +269,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Statistik Pengosongan (7 Hari)"
-                        android:textColor="#111827"
+                        android:textColor="@color/text_primary"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="12dp" />
@@ -291,7 +291,7 @@
                 app:cardCornerRadius="24dp"
                 app:cardElevation="1dp"
                 app:strokeWidth="0dp"
-                app:cardBackgroundColor="@color/white">
+                app:cardBackgroundColor="@color/bg_card">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -309,7 +309,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Aktivitas Terbaru"
-                            android:textColor="#111827"
+                            android:textColor="@color/text_primary"
                             android:textSize="14sp"
                             android:textStyle="bold"
                             android:layout_centerVertical="true" />
@@ -355,15 +355,16 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical" />
 
-                    <!-- Empty State Lottie -->
-                    <com.airbnb.lottie.LottieAnimationView
+                    <!-- Empty State Vector -->
+                    <ImageView
                         android:id="@+id/lottieEmptyState"
-                        android:layout_width="150dp"
-                        android:layout_height="150dp"
+                        android:layout_width="120dp"
+                        android:layout_height="120dp"
                         android:layout_gravity="center"
-                        android:visibility="gone"
-                        app:lottie_autoPlay="true"
-                        app:lottie_loop="true" />
+                        android:src="@drawable/ic_trash_modern"
+                        android:alpha="0.25"
+                        app:tint="@color/text_tertiary"
+                        android:visibility="gone" />
 
                     <TextView
                         android:id="@+id/tvEmptyStateText"
@@ -371,7 +372,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:text="Belum ada aktivitas"
-                        android:textColor="#9CA3AF"
+                        android:textColor="@color/text_tertiary"
                         android:textSize="12sp"
                         android:visibility="gone"
                         android:layout_marginTop="8dp" />

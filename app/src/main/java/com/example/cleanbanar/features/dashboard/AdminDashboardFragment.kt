@@ -79,19 +79,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
             exportHistoryToPdf()
         }
 
-        setupLottie()
         setupChart()
-    }
-
-    private fun setupLottie() {
-        binding.lottieEmptyState.setFailureListener { error ->
-            android.util.Log.e("AdminDashboard", "Lottie Error: ${error.message}")
-        }
-        try {
-            binding.lottieEmptyState.setAnimationFromUrl("https://lottie.host/8c13b2ce-0a6e-4bd4-a312-32a514d7a71f/y4Uj5XUXXZ.json")
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
     }
 
     private fun setupChart() {

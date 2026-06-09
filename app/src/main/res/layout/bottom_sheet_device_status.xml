@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/bg_rounded_light_blue"
-    android:backgroundTint="@color/white"
+    android:backgroundTint="@color/bg_card"
     android:orientation="vertical"
     android:padding="24dp">
 
@@ -49,7 +49,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Status Koneksi Alat"
-                android:textColor="#6B7280"
+                android:textColor="@color/text_secondary"
                 android:textSize="12sp" />
 
             <TextView
@@ -75,7 +75,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="INFORMASI PERANGKAT"
-        android:textColor="#9CA3AF"
+        android:textColor="@color/text_tertiary"
         android:textSize="10sp"
         android:textStyle="bold"
         android:layout_marginBottom="12dp" />
@@ -98,7 +98,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Terhubung via WiFi"
-            android:textColor="#111827"
+            android:textColor="@color/text_primary"
             android:textSize="14sp"
             android:textStyle="bold" />
     </LinearLayout>
@@ -121,7 +121,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Baru saja"
-            android:textColor="#111827"
+            android:textColor="@color/text_primary"
             android:textSize="14sp"
             android:textStyle="bold" />
     </LinearLayout>
@@ -137,7 +137,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="GANTI MODE KONEKSI"
-        android:textColor="#9CA3AF"
+        android:textColor="@color/text_tertiary"
         android:textSize="10sp"
         android:textStyle="bold"
         android:layout_marginTop="16dp"
@@ -195,7 +195,7 @@
             app:cardElevation="0dp"
             app:strokeWidth="1dp"
             app:strokeColor="#E5E7EB"
-            app:cardBackgroundColor="@color/white"
+            app:cardBackgroundColor="@color/bg_card"
             android:clickable="true"
             android:focusable="true">
             <LinearLayout
@@ -207,12 +207,12 @@
                     android:layout_width="16dp"
                     android:layout_height="16dp"
                     android:src="@drawable/ic_bluetooth_status"
-                    app:tint="#6B7280" />
+                    app:tint="@color/text_secondary" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Via Bluetooth"
-                    android:textColor="#6B7280"
+                    android:textColor="@color/text_secondary"
                     android:textStyle="bold"
                     android:textSize="14sp"
                     android:layout_marginStart="8dp" />
@@ -225,7 +225,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="PENGATURAN WIFI (PROVISIONING)"
-        android:textColor="#9CA3AF"
+        android:textColor="@color/text_tertiary"
         android:textSize="10sp"
         android:textStyle="bold"
         android:layout_marginTop="24dp"

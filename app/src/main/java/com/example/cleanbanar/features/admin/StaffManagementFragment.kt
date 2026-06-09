@@ -59,8 +59,9 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
                 peran.equals("Petugas", ignoreCase = true)
             }
             if (petugasList.isEmpty()) {
-                addEmptyState()
+                binding.emptyState.visibility = android.view.View.VISIBLE
             } else {
+                binding.emptyState.visibility = android.view.View.GONE
                 for (user in petugasList) {
                     addStaffCard(
                         userId = user["id"] as? String ?: "",
@@ -203,18 +204,7 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
     }
 
     private fun addEmptyState() {
-        val tv = TextView(requireContext()).apply {
-            text = "Belum ada akun petugas terdaftar"
-            setTextColor(resources.getColor(R.color.gray_400, null))
-            textSize = 13f
-            gravity = Gravity.CENTER
-            setPadding(0, 40.dp, 0, 24.dp)
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-        }
-        binding.staffListContainer.addView(tv)
+        // Obsolete: using XML empty state instead
     }
 
     override fun onDestroyView() {

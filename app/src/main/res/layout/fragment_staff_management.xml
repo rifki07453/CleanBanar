@@ -32,7 +32,7 @@
             android:textStyle="bold"
             android:textSize="20sp"
             android:layout_marginStart="16dp"
-            android:textColor="#111827" />
+            android:textColor="@color/text_primary" />
     </LinearLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -54,7 +54,7 @@
                 app:cardCornerRadius="24dp"
                 app:cardElevation="2dp"
                 app:strokeWidth="0dp"
-                app:cardBackgroundColor="@color/white">
+                app:cardBackgroundColor="@color/bg_card">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -68,7 +68,7 @@
                         android:text="Tambah Petugas Baru"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        android:textColor="#111827"
+                        android:textColor="@color/text_primary"
                         android:layout_marginBottom="16dp"/>
 
                     <EditText
@@ -80,7 +80,7 @@
                         android:inputType="textPersonName"
                         android:paddingHorizontal="16dp"
                         android:textSize="14sp"
-                        android:textColorHint="#9CA3AF"
+                        android:textColorHint="@color/text_tertiary"
                         android:layout_marginBottom="12dp" />
 
                     <EditText
@@ -92,7 +92,7 @@
                         android:inputType="textEmailAddress"
                         android:paddingHorizontal="16dp"
                         android:textSize="14sp"
-                        android:textColorHint="#9CA3AF"
+                        android:textColorHint="@color/text_tertiary"
                         android:layout_marginBottom="12dp" />
 
                     <EditText
@@ -104,7 +104,7 @@
                         android:inputType="phone"
                         android:paddingHorizontal="16dp"
                         android:textSize="14sp"
-                        android:textColorHint="#9CA3AF"
+                        android:textColorHint="@color/text_tertiary"
                         android:layout_marginBottom="12dp" />
 
                     <com.google.android.material.textfield.TextInputLayout
@@ -112,7 +112,7 @@
                         android:layout_height="wrap_content"
                         app:hintEnabled="false"
                         app:endIconMode="password_toggle"
-                        app:endIconTint="#9CA3AF"
+                        app:endIconTint="@color/text_tertiary"
                         app:boxBackgroundMode="none"
                         android:layout_marginBottom="16dp">
 
@@ -125,7 +125,7 @@
                             android:inputType="textPassword"
                             android:paddingHorizontal="16dp"
                             android:textSize="14sp"
-                            android:textColorHint="#9CA3AF" />
+                            android:textColorHint="@color/text_tertiary" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Using #059669 for Green instead of Indigo to match Admin preview style -->
@@ -150,7 +150,7 @@
                 android:text="DAFTAR PETUGAS LAPANGAN"
                 android:textStyle="bold"
                 android:textSize="10sp"
-                android:textColor="#6B7280"
+                android:textColor="@color/text_secondary"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="32dp"
                 android:layout_marginBottom="16dp" />
@@ -161,6 +161,32 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
+
+            <!-- Empty State -->
+            <LinearLayout
+                android:id="@+id/emptyState"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="32dp"
+                android:visibility="gone">
+                
+                <ImageView
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:src="@drawable/ic_profile"
+                    android:alpha="0.25"
+                    app:tint="@color/text_tertiary" />
+                    
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Belum ada petugas terdaftar"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp"
+                    android:layout_marginTop="16dp" />
+            </LinearLayout>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
