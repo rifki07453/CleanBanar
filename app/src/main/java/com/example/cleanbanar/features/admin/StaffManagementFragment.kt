@@ -121,7 +121,7 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
             radius = 20f.dpF
             cardElevation = 0f.dpF
             strokeWidth = 1.dp
-            strokeColor = android.graphics.Color.parseColor("#F9FAFB")
+            strokeColor = androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.bg_main)
             setCardBackgroundColor(resources.getColor(R.color.white, null))
         }
 
@@ -134,7 +134,7 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
         val initial = if (name.isNotEmpty()) name.first().uppercase() else "P"
         val avatarBg = FrameLayout(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(48.dp, 48.dp)
-            background = getCircleDrawable(android.graphics.Color.parseColor("#EEF2FF"))
+            background = getCircleDrawable(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.blue_50))
         }
         val avatarTv = TextView(requireContext()).apply {
             layoutParams = FrameLayout.LayoutParams(
@@ -143,7 +143,7 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
                 Gravity.CENTER
             )
             text = initial
-            setTextColor(android.graphics.Color.parseColor("#4F46E5"))
+            setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.blue_600))
             textSize = 18f
             setTypeface(typeface, android.graphics.Typeface.BOLD)
         }
@@ -156,13 +156,13 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
         }
         val tvName = TextView(requireContext()).apply {
             text = name
-            setTextColor(android.graphics.Color.parseColor("#374151"))
+            setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_primary))
             textSize = 15f
             setTypeface(typeface, android.graphics.Typeface.BOLD)
         }
         val tvEmail = TextView(requireContext()).apply {
             text = email
-            setTextColor(android.graphics.Color.parseColor("#9CA3AF"))
+            setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_tertiary))
             textSize = 12f
             setPadding(0, 4.dp, 0, 0)
         }
@@ -175,7 +175,7 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
                 LinearLayout.LayoutParams.WRAP_CONTENT
             ).apply { gravity = Gravity.CENTER_VERTICAL }
             setImageResource(android.R.drawable.ic_menu_delete)
-            imageTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#EF4444"))
+            imageTintList = android.content.res.ColorStateList.valueOf(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.red_500))
             setPadding(8.dp, 8.dp, 8.dp, 8.dp)
             background = getRoundedRectDrawable(android.graphics.Color.TRANSPARENT, 8f.dpF)
             setOnClickListener { showDeleteDialog(userId, name) }

@@ -93,21 +93,21 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
                 axisMinimum = 0f
                 granularity = 1f
                 setDrawGridLines(true)
-                gridColor = Color.parseColor("#E5E7EB")
-                textColor = Color.parseColor("#6B7280")
+                gridColor = androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.bg_main)
+                textColor = androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_secondary)
             }
 
             xAxis.apply {
                 position = XAxis.XAxisPosition.BOTTOM
                 setDrawGridLines(false)
                 granularity = 1f
-                textColor = Color.parseColor("#6B7280")
+                textColor = androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_secondary)
             }
 
-            legend.textColor = Color.parseColor("#374151")
+            legend.textColor = androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_primary)
             legend.textSize = 12f
             setNoDataText("Memuat data statistik...")
-            setNoDataTextColor(Color.parseColor("#9CA3AF"))
+            setNoDataTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_tertiary))
         }
     }
 
@@ -120,12 +120,12 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
             
             if (isOnline) {
                 binding.tvDeviceStatusOverview.text = "ONLINE"
-                binding.tvDeviceStatusOverview.setTextColor(android.graphics.Color.parseColor("#16A34A"))
+                binding.tvDeviceStatusOverview.setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.green_600))
                 binding.dotStatus.setBackgroundResource(R.drawable.dot_timeline_green)
                 (binding.dotStatus.parent as android.widget.LinearLayout).setBackgroundResource(R.drawable.bg_badge_green)
             } else {
                 binding.tvDeviceStatusOverview.text = "OFFLINE"
-                binding.tvDeviceStatusOverview.setTextColor(android.graphics.Color.parseColor("#DC2626"))
+                binding.tvDeviceStatusOverview.setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.red_600))
                 binding.dotStatus.setBackgroundResource(R.drawable.dot_timeline_red)
                 (binding.dotStatus.parent as android.widget.LinearLayout).setBackgroundResource(R.drawable.badge_red_bg)
             }
@@ -191,13 +191,13 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         }
 
         val setOrganik = BarDataSet(entriesOrganik, "Organik")
-        setOrganik.color = Color.parseColor("#10B981")
-        setOrganik.valueTextColor = Color.parseColor("#374151")
+        setOrganik.color = androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.primary)
+        setOrganik.valueTextColor = androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_primary)
         setOrganik.valueTextSize = 10f
 
         val setNonOrganik = BarDataSet(entriesNonOrganik, "Non-Organik")
-        setNonOrganik.color = Color.parseColor("#F59E0B")
-        setNonOrganik.valueTextColor = Color.parseColor("#374151")
+        setNonOrganik.color = androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.amber_500)
+        setNonOrganik.valueTextColor = androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_primary)
         setNonOrganik.valueTextSize = 10f
 
         val data = BarData(setOrganik, setNonOrganik)
@@ -330,10 +330,10 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
 
         if (device.statusKoneksi == "ONLINE") {
             tvConnectionStatus.text = "ONLINE"
-            tvConnectionStatus.setTextColor(android.graphics.Color.parseColor("#16A34A"))
+            tvConnectionStatus.setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.green_600))
         } else {
             tvConnectionStatus.text = "OFFLINE"
-            tvConnectionStatus.setTextColor(android.graphics.Color.parseColor("#DC2626"))
+            tvConnectionStatus.setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.red_600))
         }
 
         val etDetailTrigOrg = view.findViewById<TextInputEditText>(R.id.etDetailTrigOrg)
@@ -507,14 +507,14 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
 
         val tvTitle = android.widget.TextView(context).apply {
             text = title
-            setTextColor(android.graphics.Color.parseColor("#111827"))
+            setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_primary))
             setTypeface(null, android.graphics.Typeface.BOLD)
             textSize = 12f
         }
 
         val tvMsg = android.widget.TextView(context).apply {
             text = message
-            setTextColor(android.graphics.Color.parseColor("#6B7280"))
+            setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_secondary))
             textSize = 10f
             layoutParams = android.widget.LinearLayout.LayoutParams(
                 android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
@@ -528,7 +528,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
 
         val tvTime = android.widget.TextView(context).apply {
             text = formatLastUpdate(timestamp)
-            setTextColor(android.graphics.Color.parseColor("#9CA3AF"))
+            setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_tertiary))
             textSize = 9f
             layoutParams = android.widget.LinearLayout.LayoutParams(
                 android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,

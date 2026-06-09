@@ -35,12 +35,12 @@ class DeviceAdapter(
             val isOnline = device.statusKoneksi == "ONLINE"
             if (isOnline) {
                 binding.tvDeviceStatus.text = "ONLINE"
-                binding.tvDeviceStatus.setTextColor(android.graphics.Color.parseColor("#059669"))
+                binding.tvDeviceStatus.setTextColor(androidx.core.content.ContextCompat.getColor(itemView.context, com.example.cleanbanar.R.color.primary))
                 binding.dotStatus.setBackgroundResource(com.example.cleanbanar.R.drawable.dot_timeline_green)
                 (binding.dotStatus.parent as android.widget.LinearLayout).setBackgroundResource(com.example.cleanbanar.R.drawable.bg_badge_green)
             } else {
                 binding.tvDeviceStatus.text = "OFFLINE"
-                binding.tvDeviceStatus.setTextColor(android.graphics.Color.parseColor("#DC2626"))
+                binding.tvDeviceStatus.setTextColor(androidx.core.content.ContextCompat.getColor(itemView.context, com.example.cleanbanar.R.color.red_600))
                 binding.dotStatus.setBackgroundResource(com.example.cleanbanar.R.drawable.dot_timeline_red)
                 (binding.dotStatus.parent as android.widget.LinearLayout).setBackgroundResource(com.example.cleanbanar.R.drawable.badge_red_bg)
             }

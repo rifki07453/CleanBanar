@@ -50,7 +50,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Konfigurasi Sensor"
-        android:textColor="#4B5563"
+        android:textColor="@color/text_secondary"
         android:textSize="14sp"
         android:textStyle="bold"
         android:layout_marginTop="8dp"
@@ -99,7 +99,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Konfigurasi PIN (Default)"
-        android:textColor="#4B5563"
+        android:textColor="@color/text_secondary"
         android:textSize="14sp"
         android:textStyle="bold"
         android:layout_marginTop="8dp"
@@ -297,7 +297,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Batal"
-            android:textColor="#4B5563"
+            android:textColor="@color/text_secondary"
             app:strokeColor="#D1D5DB"
             android:layout_marginEnd="8dp" />
             

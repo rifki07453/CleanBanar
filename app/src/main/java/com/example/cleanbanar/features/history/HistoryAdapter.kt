@@ -48,7 +48,7 @@ class HistoryAdapter(private var items: List<Map<String, Any>> = emptyList()) :
             "dikosongkan", "emptied" -> {
                 holder.binding.tvStatusBadge.text = "DIKOSONGKAN"
                 holder.binding.tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_green)
-                holder.binding.tvStatusBadge.setTextColor(android.graphics.Color.parseColor("#059669"))
+                holder.binding.tvStatusBadge.setTextColor(androidx.core.content.ContextCompat.getColor(holder.itemView.context, com.example.cleanbanar.R.color.primary))
                 holder.binding.timelineDot.setBackgroundResource(R.drawable.dot_timeline_green)
                 
                 holder.binding.tvDetails.text = "Petugas: $petugas\nKapasitas akhir: $capacity%"
@@ -56,7 +56,7 @@ class HistoryAdapter(private var items: List<Map<String, Any>> = emptyList()) :
             "dikosongkan_blue" -> {
                 holder.binding.tvStatusBadge.text = "DIKOSONGKAN"
                 holder.binding.tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_blue)
-                holder.binding.tvStatusBadge.setTextColor(android.graphics.Color.parseColor("#2563EB"))
+                holder.binding.tvStatusBadge.setTextColor(androidx.core.content.ContextCompat.getColor(holder.itemView.context, com.example.cleanbanar.R.color.blue_600))
                 holder.binding.timelineDot.setBackgroundResource(R.drawable.dot_timeline_blue)
                 
                 holder.binding.tvDetails.text = "Petugas: $petugas\nKapasitas akhir: $capacity%"
@@ -64,7 +64,7 @@ class HistoryAdapter(private var items: List<Map<String, Any>> = emptyList()) :
             "penuh", "alert" -> {
                 holder.binding.tvStatusBadge.text = "PENUH (100%)"
                 holder.binding.tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_red)
-                holder.binding.tvStatusBadge.setTextColor(android.graphics.Color.parseColor("#DC2626"))
+                holder.binding.tvStatusBadge.setTextColor(androidx.core.content.ContextCompat.getColor(holder.itemView.context, com.example.cleanbanar.R.color.red_600))
                 holder.binding.timelineDot.setBackgroundResource(R.drawable.dot_timeline_red)
                 
                 holder.binding.tvDetails.text = "Notifikasi terkirim otomatis untuk pengangkutan segera."
@@ -72,7 +72,7 @@ class HistoryAdapter(private var items: List<Map<String, Any>> = emptyList()) :
             else -> {
                 holder.binding.tvStatusBadge.text = "HAMPIR PENUH"
                 holder.binding.tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_blue)
-                holder.binding.tvStatusBadge.setTextColor(android.graphics.Color.parseColor("#2563EB"))
+                holder.binding.tvStatusBadge.setTextColor(androidx.core.content.ContextCompat.getColor(holder.itemView.context, com.example.cleanbanar.R.color.blue_600))
                 holder.binding.timelineDot.setBackgroundResource(R.drawable.dot_timeline_blue)
                 
                 holder.binding.tvDetails.text = "Kapasitas saat ini: $capacity%"

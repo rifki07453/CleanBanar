@@ -83,10 +83,10 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
             
             val isNonOrganik = title.lowercase().contains("non")
             val strokeCol = when (type) {
-                "danger" -> android.graphics.Color.parseColor("#FCA5A5")
-                "warning" -> android.graphics.Color.parseColor("#FDE047")
-                "success" -> if (isNonOrganik) android.graphics.Color.parseColor("#93C5FD") else android.graphics.Color.parseColor("#6EE7B7")
-                else -> android.graphics.Color.parseColor("#F3F4F6")
+                "danger" -> androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.red_500)
+                "warning" -> androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.amber_500)
+                "success" -> if (isNonOrganik) androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.blue_600) else androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.emerald_500)
+                else -> androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.bg_main)
             }
             setStrokeColor(strokeCol)
             strokeWidth = 1.dpToPx()
@@ -103,12 +103,12 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
             "warning" -> Triple(R.drawable.ic_trash_modern, "#FEFCE8", resources.getColor(R.color.amber_600, null))
             "success" -> {
                 if (isNonOrganik) {
-                    Triple(R.drawable.ic_trash_modern, "#EFF6FF", android.graphics.Color.parseColor("#2563EB"))
+                    Triple(R.drawable.ic_trash_modern, "#EFF6FF", androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.blue_600))
                 } else {
-                    Triple(R.drawable.ic_trash_modern, "#ECFDF5", android.graphics.Color.parseColor("#16A34A"))
+                    Triple(R.drawable.ic_trash_modern, "#ECFDF5", androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.green_600))
                 }
             }
-            else -> Triple(R.drawable.ic_trash_modern, "#F9FAFB", android.graphics.Color.parseColor("#6B7280"))
+            else -> Triple(R.drawable.ic_trash_modern, "#F9FAFB", androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_secondary))
         }
 
         val iconFrame = android.widget.FrameLayout(requireContext()).apply {

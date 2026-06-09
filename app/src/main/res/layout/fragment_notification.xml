@@ -26,14 +26,14 @@
                 android:text="Notifikasi"
                 android:textStyle="bold"
                 android:textSize="24sp"
-                android:textColor="@color/gray_900" />
+                android:textColor="@color/text_primary" />
             <TextView
                 android:id="@+id/tvNotifSubtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Peringatan status tong sampah"
                 android:textSize="13sp"
-                android:textColor="@color/gray_500"
+                android:textColor="@color/text_secondary"
                 android:layout_marginTop="4dp" />
         </LinearLayout>
 
@@ -83,7 +83,7 @@
                 android:text="Gagal memuat data\nPeriksa koneksi Anda"
                 android:gravity="center"
                 android:visibility="gone"
-                android:textColor="@color/gray_500" />
+                android:textColor="@color/text_secondary" />
         </FrameLayout>
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>

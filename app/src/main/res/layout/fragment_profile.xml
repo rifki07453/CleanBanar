@@ -167,7 +167,7 @@
                             android:layout_weight="1"
                             android:layout_marginStart="16dp"
                             android:text="Edit Profil"
-                            android:textColor="#374151"
+                            android:textColor="@color/text_primary"
                             android:textSize="14sp"
                             android:textStyle="bold" />
                             
@@ -204,7 +204,7 @@
                             android:layout_weight="1"
                             android:layout_marginStart="16dp"
                             android:text="Pengaturan Notifikasi"
-                            android:textColor="#374151"
+                            android:textColor="@color/text_primary"
                             android:textSize="14sp"
                             android:textStyle="bold" />
                             
@@ -241,7 +241,7 @@
                             android:layout_weight="1"
                             android:layout_marginStart="16dp"
                             android:text="Keamanan &amp; Password"
-                            android:textColor="#374151"
+                            android:textColor="@color/text_primary"
                             android:textSize="14sp"
                             android:textStyle="bold" />
                             

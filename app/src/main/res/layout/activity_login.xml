@@ -34,13 +34,13 @@
             android:text="CleanBanar"
             android:textStyle="bold"
             android:textSize="32sp"
-            android:textColor="@color/gray_900" />
+            android:textColor="@color/text_primary" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Smart Bin Monitoring System"
-            android:textColor="@color/gray_500"
+            android:textColor="@color/text_secondary"
             android:textStyle="bold"
             android:layout_marginTop="8dp" />
     </LinearLayout>
@@ -70,7 +70,7 @@
                 android:text="Masuk ke Akun Anda"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:textColor="@color/gray_800"
+                android:textColor="@color/text_primary"
                 android:layout_marginBottom="24dp" />
 
             <TextView
@@ -79,7 +79,7 @@
                 android:text="EMAIL"
                 android:textSize="12sp"
                 android:textStyle="bold"
-                android:textColor="@color/gray_500"
+                android:textColor="@color/text_secondary"
                 android:layout_marginBottom="8dp" />
 
             <EditText
@@ -91,7 +91,7 @@
                 android:hint="nama@email.com"
                 android:paddingStart="20dp"
                 android:paddingEnd="16dp"
-                android:textColorHint="@color/gray_400"
+                android:textColorHint="@color/text_tertiary"
                 android:layout_marginBottom="16dp"
                 android:autofillHints="emailAddress" />
 
@@ -101,7 +101,7 @@
                 android:text="PASSWORD"
                 android:textSize="12sp"
                 android:textStyle="bold"
-                android:textColor="@color/gray_500"
+                android:textColor="@color/text_secondary"
                 android:layout_marginBottom="8dp" />
 
             <com.google.android.material.textfield.TextInputLayout
@@ -109,7 +109,7 @@
                 android:layout_height="wrap_content"
                 app:hintEnabled="false"
                 app:endIconMode="password_toggle"
-                app:endIconTint="@color/gray_400"
+                app:endIconTint="@color/text_tertiary"
                 app:boxBackgroundMode="none"
                 android:layout_marginBottom="12dp">
 
@@ -122,7 +122,7 @@
                     android:hint="••••••••"
                     android:paddingStart="20dp"
                     android:paddingEnd="16dp"
-                    android:textColorHint="@color/gray_400"
+                    android:textColorHint="@color/text_tertiary"
                     android:autofillHints="password" />
             </com.google.android.material.textfield.TextInputLayout>
 

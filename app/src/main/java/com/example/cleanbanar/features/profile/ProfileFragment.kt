@@ -149,7 +149,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         val labelNama = TextView(requireContext()).apply {
             text = "Nama Lengkap"
             textSize = 12f
-            setTextColor(android.graphics.Color.parseColor("#6B7280"))
+            setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_secondary))
             setPadding(0, 0, 0, 4.dpToPx())
         }
         val etNama = EditText(requireContext()).apply {
@@ -157,7 +157,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             textSize = 14f
             background = resources.getDrawable(R.drawable.edit_text_bg, null)
             setPadding(16.dpToPx(), 0, 16.dpToPx(), 0)
-            setTextColor(android.graphics.Color.parseColor("#111827"))
+            setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_primary))
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 50.dpToPx()
@@ -167,7 +167,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         val labelEmail = TextView(requireContext()).apply {
             text = "Email"
             textSize = 12f
-            setTextColor(android.graphics.Color.parseColor("#6B7280"))
+            setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_secondary))
             setPadding(0, 0, 0, 4.dpToPx())
         }
         val etEmail = EditText(requireContext()).apply {
@@ -176,7 +176,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             inputType = android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
             background = resources.getDrawable(R.drawable.edit_text_bg, null)
             setPadding(16.dpToPx(), 0, 16.dpToPx(), 0)
-            setTextColor(android.graphics.Color.parseColor("#111827"))
+            setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_primary))
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 50.dpToPx()
@@ -186,7 +186,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         val labelPhone = TextView(requireContext()).apply {
             text = "Nomor WhatsApp (Opsional)"
             textSize = 12f
-            setTextColor(android.graphics.Color.parseColor("#6B7280"))
+            setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_secondary))
             setPadding(0, 0, 0, 4.dpToPx())
         }
         val etPhone = EditText(requireContext()).apply {
@@ -195,7 +195,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             inputType = android.text.InputType.TYPE_CLASS_PHONE
             background = resources.getDrawable(R.drawable.edit_text_bg, null)
             setPadding(16.dpToPx(), 0, 16.dpToPx(), 0)
-            setTextColor(android.graphics.Color.parseColor("#111827"))
+            setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_primary))
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 50.dpToPx()
@@ -280,12 +280,12 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             val tv = TextView(requireContext()).apply {
                 text = label
                 textSize = 14f
-                setTextColor(android.graphics.Color.parseColor("#374151"))
+                setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_primary))
                 layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
             }
             val sw = Switch(requireContext()).apply {
                 isChecked = true
-                thumbTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#16A34A"))
+                thumbTintList = android.content.res.ColorStateList.valueOf(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.green_600))
             }
             row.addView(tv)
             row.addView(sw)
@@ -341,7 +341,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         val labelCurrent = TextView(requireContext()).apply {
             text = "Password Saat Ini"
             textSize = 12f
-            setTextColor(android.graphics.Color.parseColor("#6B7280"))
+            setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_secondary))
             setPadding(0, 0, 0, 4.dpToPx())
         }
         val etCurrent = EditText(requireContext()).apply {
@@ -357,7 +357,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         val labelNew = TextView(requireContext()).apply {
             text = "Password Baru"
             textSize = 12f
-            setTextColor(android.graphics.Color.parseColor("#6B7280"))
+            setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_secondary))
             setPadding(0, 0, 0, 4.dpToPx())
         }
         val etNew = EditText(requireContext()).apply {
@@ -373,7 +373,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         val labelConfirm = TextView(requireContext()).apply {
             text = "Konfirmasi Password Baru"
             textSize = 12f
-            setTextColor(android.graphics.Color.parseColor("#6B7280"))
+            setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_secondary))
             setPadding(0, 0, 0, 4.dpToPx())
         }
         val etConfirm = EditText(requireContext()).apply {
