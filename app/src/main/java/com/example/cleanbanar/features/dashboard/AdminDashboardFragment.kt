@@ -21,6 +21,8 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.database.ValueEventListener
+import com.google.zxing.BarcodeFormat
+import com.journeyapps.barcodescanner.BarcodeEncoder
 
 class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
     
@@ -196,8 +198,20 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         val tvDetailDeviceName = view.findViewById<android.widget.TextView>(R.id.tvDetailDeviceName)
         val tvConnectionStatus = view.findViewById<android.widget.TextView>(R.id.tvConnectionStatus)
         val btnDeleteDevice = view.findViewById<android.widget.ImageView>(R.id.btnDeleteDevice)
+        val ivDeviceQrCode = view.findViewById<android.widget.ImageView>(R.id.ivDeviceQrCode)
+        val tvDeviceId = view.findViewById<android.widget.TextView>(R.id.tvDeviceId)
         
         tvDetailDeviceName.text = device.nama
+        tvDeviceId.text = "ID: ${device.id}"
+
+        try {
+            val barcodeEncoder = BarcodeEncoder()
+            val bitmap = barcodeEncoder.encodeBitmap(device.id, BarcodeFormat.QR_CODE, 400, 400)
+            ivDeviceQrCode.setImageBitmap(bitmap)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
         if (device.statusKoneksi == "ONLINE") {
             tvConnectionStatus.text = "ONLINE"
             tvConnectionStatus.setTextColor(android.graphics.Color.parseColor("#16A34A"))

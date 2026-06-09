@@ -87,6 +87,45 @@
             android:background="#F3F4F6"
             android:layout_marginBottom="24dp" />
 
+        <!-- QR Code Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:layout_marginBottom="24dp">
+            
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="QR CODE PERANGKAT"
+                android:textColor="#9CA3AF"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp" />
+
+            <ImageView
+                android:id="@+id/ivDeviceQrCode"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:scaleType="fitCenter" />
+                
+            <TextView
+                android:id="@+id/tvDeviceId"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#6B7280"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#F3F4F6"
+            android:layout_marginBottom="24dp" />
+
         <!-- Edit PIN Section -->
         <TextView
             android:layout_width="wrap_content"
