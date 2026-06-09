@@ -18,10 +18,20 @@ import com.example.cleanbanar.databinding.FragmentProfileBinding
 import com.example.cleanbanar.features.auth.LoginActivity
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
+import androidx.activity.result.contract.ActivityResultContracts
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CircleCrop
+import android.net.Uri
 
 class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
 
     private lateinit var authManager: AuthManager
+
+    private val pickMedia = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        if (uri != null) {
+            uploadAndSetProfilePicture(uri)
+        }
+    }
 
     override fun inflateBinding(inflater: LayoutInflater, container: ViewGroup?): FragmentProfileBinding {
         return FragmentProfileBinding.inflate(inflater, container, false)
@@ -43,6 +53,24 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             binding.tvProfilePhone.visibility = View.VISIBLE
         } else {
             binding.tvProfilePhone.visibility = View.GONE
+        }
+
+        // Load foto profil (jika ada)
+        val photoUrl = authManager.getUserPhotoUrl()
+        if (photoUrl.isNotEmpty()) {
+            Glide.with(this)
+                .load(photoUrl)
+                .transform(CircleCrop())
+                .placeholder(R.drawable.ic_profile)
+                .into(binding.ivUserAvatar)
+        }
+
+        // Klik pada Edit Photo (atau flAvatarContainer)
+        binding.flEditPhoto.setOnClickListener {
+            pickMedia.launch("image/*")
+        }
+        binding.flAvatarContainer.setOnClickListener {
+            pickMedia.launch("image/*")
         }
 
         // Edit Profil — dinamis & tersimpan ke Firebase
@@ -75,6 +103,36 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                 e.printStackTrace()
             }
         }
+    }
+
+    private fun uploadAndSetProfilePicture(uri: Uri) {
+        val userId = authManager.getUserId()
+        if (userId.isEmpty()) return
+
+        Toast.makeText(requireContext(), "Mengunggah foto...", Toast.LENGTH_SHORT).show()
+
+        FirebaseManager.uploadProfilePicture(userId, uri,
+            onSuccess = { photoUrl ->
+                // Update cache lokal
+                authManager.updatePhotoUrl(photoUrl)
+
+                if (isAdded) {
+                    // Update tampilan dengan Glide
+                    Glide.with(this)
+                        .load(photoUrl)
+                        .transform(CircleCrop())
+                        .placeholder(R.drawable.ic_profile)
+                        .into(binding.ivUserAvatar)
+
+                    Toast.makeText(requireContext(), "Foto profil berhasil diperbarui", Toast.LENGTH_SHORT).show()
+                }
+            },
+            onFailure = { e ->
+                if (isAdded) {
+                    Toast.makeText(requireContext(), "Gagal mengunggah foto: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        )
     }
 
     override fun observeData() {}

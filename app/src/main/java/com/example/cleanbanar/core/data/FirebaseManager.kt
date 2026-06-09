@@ -1,11 +1,13 @@
 package com.example.cleanbanar.core.data
 
 import android.util.Log
+import android.net.Uri
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.storage.FirebaseStorage
 
 /**
  * Pengelola Firebase Realtime Database untuk CleanBanar.
@@ -250,7 +252,8 @@ object FirebaseManager {
                         "nama" to (child.child("nama").getValue(String::class.java) ?: ""),
                         "email" to (child.child("email").getValue(String::class.java) ?: ""),
                         "peran" to (child.child("peran").getValue(String::class.java) ?: ""),
-                        "nomorHp" to (child.child("nomorHp").getValue(String::class.java) ?: "")
+                        "nomorHp" to (child.child("nomorHp").getValue(String::class.java) ?: ""),
+                        "photoUrl" to (child.child("photoUrl").getValue(String::class.java) ?: "")
                     ))
                 }
                 callback(users)
@@ -265,7 +268,7 @@ object FirebaseManager {
 
     fun addUser(nama: String, email: String, peran: String, nomorHp: String = "", onSuccess: () -> Unit = {}, onFailure: (String) -> Unit = {}) {
         val ref = rootRef?.child("users")?.push() ?: run { onFailure("Firebase error"); return }
-        ref.setValue(mapOf("nama" to nama, "email" to email, "peran" to peran, "nomorHp" to nomorHp))
+        ref.setValue(mapOf("nama" to nama, "email" to email, "peran" to peran, "nomorHp" to nomorHp, "photoUrl" to ""))
             .addOnSuccessListener { onSuccess() }
             .addOnFailureListener { onFailure(it.message ?: "Error") }
     }
@@ -296,7 +299,7 @@ object FirebaseManager {
             onComplete()
             return
         }
-        ref.setValue(mapOf("nama" to nama, "email" to email, "peran" to peran, "nomorHp" to nomorHp))
+        ref.setValue(mapOf("nama" to nama, "email" to email, "peran" to peran, "nomorHp" to nomorHp, "photoUrl" to ""))
             .addOnCompleteListener { onComplete() }
     }
 
@@ -324,7 +327,11 @@ object FirebaseManager {
         }
         ref.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                callback(snapshot.child("nama").getValue(String::class.java) ?: "", snapshot.child("peran").getValue(String::class.java) ?: "", snapshot.child("nomorHp").getValue(String::class.java) ?: "")
+                callback(
+                    snapshot.child("nama").getValue(String::class.java) ?: "",
+                    snapshot.child("peran").getValue(String::class.java) ?: "",
+                    snapshot.child("nomorHp").getValue(String::class.java) ?: ""
+                )
             }
             override fun onCancelled(error: DatabaseError) { callback("", "", "") }
         })
@@ -343,6 +350,32 @@ object FirebaseManager {
             }
             override fun onCancelled(error: DatabaseError) { callback("") }
         })
+    }
+
+    // ==========================================
+    // Foto Profil (Firebase Storage)
+    // ==========================================
+    fun uploadProfilePicture(userId: String, imageUri: Uri, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
+        val storageRef = FirebaseStorage.getInstance().reference.child("profile_pictures/$userId.jpg")
+        
+        storageRef.putFile(imageUri)
+            .addOnSuccessListener {
+                storageRef.downloadUrl.addOnSuccessListener { uri ->
+                    val photoUrl = uri.toString()
+                    updateUserPhotoUrl(userId, photoUrl)
+                    onSuccess(photoUrl)
+                }.addOnFailureListener { e ->
+                    onFailure(e)
+                }
+            }
+            .addOnFailureListener { e ->
+                onFailure(e)
+            }
+    }
+
+    fun updateUserPhotoUrl(userId: String, photoUrl: String) {
+        val ref = rootRef?.child("users")?.child(userId) ?: return
+        ref.child("photoUrl").setValue(photoUrl)
     }
 
     // ==========================================
