@@ -363,8 +363,7 @@
                         android:layout_gravity="center"
                         android:visibility="gone"
                         app:lottie_autoPlay="true"
-                        app:lottie_loop="true"
-                        app:lottie_url="https://lottie.host/8c13b2ce-0a6e-4bd4-a312-32a514d7a71f/y4Uj5XUXXZ.json" />
+                        app:lottie_loop="true" />
 
                     <TextView
                         android:id="@+id/tvEmptyStateText"
