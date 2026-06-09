@@ -78,5 +78,9 @@ dependencies {
 
     // QR Code Scanning
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+
+    // Chart & Animation
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation("com.airbnb.android:lottie:6.4.0")
 }
 
