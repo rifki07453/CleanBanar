@@ -1,15 +1,12 @@
 package com.example.cleanbanar.features.dashboard
 
 import android.content.Intent
-import android.graphics.Color
-import android.graphics.pdf.PdfDocument
-import android.net.Uri
-import android.os.Environment
+
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
+
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import android.Manifest
@@ -30,8 +27,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.database.ValueEventListener
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.google.zxing.BarcodeFormat
-import java.io.File
-import java.io.FileOutputStream
+
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -67,13 +63,6 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
             showDeviceListBottomSheet()
         }
 
-        binding.tvLihatSemua.setOnClickListener {
-            // TODO: Navigasi ke fragment history penuh (opsional)
-        }
-
-        binding.btnExportPdf.setOnClickListener {
-            exportHistoryToPdf()
-        }
 
     }
 
@@ -489,121 +478,4 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         super.onDestroyView()
     }
 
-    // ==========================================
-    // Ekspor PDF (Laporan Aktivitas)
-    // ==========================================
-    private fun exportHistoryToPdf() {
-        if (lastKnownHistory.isEmpty()) {
-            Toast.makeText(requireContext(), "Tidak ada data riwayat untuk diekspor", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        Toast.makeText(requireContext(), "Menyiapkan PDF...", Toast.LENGTH_SHORT).show()
-
-        Thread {
-            try {
-                val pdfDocument = PdfDocument()
-                val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create() // A4 Size
-                val page = pdfDocument.startPage(pageInfo)
-                val canvas = page.canvas
-
-                val titlePaint = android.graphics.Paint().apply {
-                    color = Color.BLACK
-                    textSize = 20f
-                    typeface = android.graphics.Typeface.create(android.graphics.Typeface.DEFAULT, android.graphics.Typeface.BOLD)
-                }
-
-                val textPaint = android.graphics.Paint().apply {
-                    color = Color.BLACK
-                    textSize = 12f
-                }
-
-                val borderPaint = android.graphics.Paint().apply {
-                    color = Color.BLACK
-                    style = android.graphics.Paint.Style.STROKE
-                    strokeWidth = 1f
-                }
-
-                var yPosition = 50f
-                canvas.drawText("Laporan Aktivitas CleanBanar", 50f, yPosition, titlePaint)
-                
-                yPosition += 30f
-                val sdf = SimpleDateFormat("dd MMMM yyyy HH:mm", Locale.getDefault())
-                canvas.drawText("Dicetak pada: ${sdf.format(Date())}", 50f, yPosition, textPaint)
-                
-                yPosition += 50f
-                
-                // Draw Table Header
-                val colWaktu = 50f
-                val colPetugas = 200f
-                val colAksi = 350f
-                val colTipe = 450f
-
-                canvas.drawText("Waktu", colWaktu, yPosition, titlePaint)
-                canvas.drawText("Judul", colPetugas, yPosition, titlePaint)
-                canvas.drawText("Pesan", colAksi, yPosition, titlePaint)
-                
-                yPosition += 10f
-                canvas.drawLine(50f, yPosition, 545f, yPosition, borderPaint)
-                yPosition += 20f
-
-                val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
-
-                // Draw Table Content (Max 20 for one page simplicity)
-                for (item in lastKnownHistory.take(20)) {
-                    val waktu = item["waktu"] as? Long ?: 0L
-                    val judul = item["judul"] as? String ?: "-"
-                    val pesan = item["pesan"] as? String ?: "-"
-
-                    canvas.drawText(dateFormat.format(Date(waktu)), colWaktu, yPosition, textPaint)
-                    canvas.drawText(if (judul.length > 20) judul.substring(0, 20) + "..." else judul, colPetugas, yPosition, textPaint)
-                    canvas.drawText(if (pesan.length > 20) pesan.substring(0, 20) + "..." else pesan, colAksi, yPosition, textPaint)
-
-                    yPosition += 25f
-
-                    // Jika penuh, hentikan
-                    if (yPosition > 800f) {
-                        canvas.drawText("... dan seterusnya", 50f, yPosition, textPaint)
-                        break
-                    }
-                }
-
-                pdfDocument.finishPage(page)
-
-                val fileName = "Laporan_Aktivitas_CleanBanar_${System.currentTimeMillis()}.pdf"
-                
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                    val resolver = requireContext().contentResolver
-                    val contentValues = android.content.ContentValues().apply {
-                        put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-                        put(android.provider.MediaStore.MediaColumns.MIME_TYPE, "application/pdf")
-                        put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
-                    }
-
-                    val uri = resolver.insert(android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
-                    if (uri != null) {
-                        resolver.openOutputStream(uri)?.use { outputStream ->
-                            pdfDocument.writeTo(outputStream)
-                        }
-                    }
-                } else {
-                    val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                    val file = File(dir, fileName)
-                    pdfDocument.writeTo(FileOutputStream(file))
-                }
-
-                pdfDocument.close()
-
-                activity?.runOnUiThread {
-                    Toast.makeText(requireContext(), "PDF berhasil disimpan di folder Download", Toast.LENGTH_LONG).show()
-                }
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-                activity?.runOnUiThread {
-                    Toast.makeText(requireContext(), "Gagal membuat PDF: ${e.message}", Toast.LENGTH_LONG).show()
-                }
-            }
-        }.start()
-    }
 }
