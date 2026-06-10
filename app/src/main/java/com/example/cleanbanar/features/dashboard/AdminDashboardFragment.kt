@@ -23,11 +23,7 @@ import com.example.cleanbanar.core.ui.BaseFragment
 import com.example.cleanbanar.core.utils.BluetoothHelper
 import com.example.cleanbanar.databinding.FragmentAdminDashboardBinding
 import com.example.cleanbanar.features.admin.StaffManagementFragment
-import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.data.BarData
-import com.github.mikephil.charting.data.BarDataSet
-import com.github.mikephil.charting.data.BarEntry
-import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
@@ -47,7 +43,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
     
     private var devicesListener: ValueEventListener? = null
     private var notifListener: ValueEventListener? = null
-    private var statsListener: ValueEventListener? = null
+
     
     private var cachedDevices = listOf<DeviceModel>()
     private var lastKnownHistory: List<Map<String, Any>> = emptyList()
@@ -79,37 +75,9 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
             exportHistoryToPdf()
         }
 
-        setupChart()
     }
 
-    private fun setupChart() {
-        binding.barChartStatistik.apply {
-            description.isEnabled = false
-            setDrawGridBackground(false)
-            setDrawBorders(false)
-            axisRight.isEnabled = false
-            
-            axisLeft.apply {
-                axisMinimum = 0f
-                granularity = 1f
-                setDrawGridLines(true)
-                gridColor = androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.bg_main)
-                textColor = androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_secondary)
-            }
 
-            xAxis.apply {
-                position = XAxis.XAxisPosition.BOTTOM
-                setDrawGridLines(false)
-                granularity = 1f
-                textColor = androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_secondary)
-            }
-
-            legend.textColor = androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_primary)
-            legend.textSize = 12f
-            setNoDataText("Memuat data statistik...")
-            setNoDataTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_tertiary))
-        }
-    }
 
     override fun observeData() {
         devicesListener = FirebaseManager.listenDevices { devices ->
@@ -131,11 +99,6 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
             }
         }
 
-        statsListener = FirebaseManager.listenDailyStats { stats ->
-            if (isAdded && isVisible) {
-                updateChart(stats)
-            }
-        }
 
         notifListener = FirebaseManager.listenNotifications { notifList ->
             if (!isAdded) return@listenNotifications
@@ -160,61 +123,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         }
     }
 
-    private fun updateChart(stats: List<Map<String, Any>>) {
-        if (stats.isEmpty()) {
-            binding.barChartStatistik.clear()
-            return
-        }
 
-        val recentStats = stats.takeLast(7)
-        val entriesOrganik = mutableListOf<BarEntry>()
-        val entriesNonOrganik = mutableListOf<BarEntry>()
-        val labels = mutableListOf<String>()
-
-        val sdfInput = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        val sdfOutput = SimpleDateFormat("dd/MM", Locale.getDefault())
-
-        recentStats.forEachIndexed { index, stat ->
-            val tglStr = stat["tanggal"] as? String ?: ""
-            val label = try {
-                val date = sdfInput.parse(tglStr)
-                if (date != null) sdfOutput.format(date) else tglStr
-            } catch (e: Exception) { tglStr }
-
-            labels.add(label)
-
-            val orgCount = (stat["organikEmptyCount"] as? Number)?.toFloat() ?: 0f
-            val nonOrgCount = (stat["nonOrganikEmptyCount"] as? Number)?.toFloat() ?: 0f
-
-            entriesOrganik.add(BarEntry(index.toFloat(), orgCount))
-            entriesNonOrganik.add(BarEntry(index.toFloat(), nonOrgCount))
-        }
-
-        val setOrganik = BarDataSet(entriesOrganik, "Organik")
-        setOrganik.color = androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.primary)
-        setOrganik.valueTextColor = androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_primary)
-        setOrganik.valueTextSize = 10f
-
-        val setNonOrganik = BarDataSet(entriesNonOrganik, "Non-Organik")
-        setNonOrganik.color = androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.amber_500)
-        setNonOrganik.valueTextColor = androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_primary)
-        setNonOrganik.valueTextSize = 10f
-
-        val data = BarData(setOrganik, setNonOrganik)
-        data.barWidth = 0.35f
-
-        binding.barChartStatistik.xAxis.valueFormatter = IndexAxisValueFormatter(labels)
-        binding.barChartStatistik.data = data
-        
-        val groupSpace = 0.2f
-        val barSpace = 0.05f
-        binding.barChartStatistik.groupBars(-0.5f, groupSpace, barSpace)
-        binding.barChartStatistik.xAxis.axisMinimum = -0.5f
-        binding.barChartStatistik.xAxis.axisMaximum = labels.size - 0.5f
-
-        binding.barChartStatistik.animateY(1000)
-        binding.barChartStatistik.invalidate()
-    }
 
     private fun showDeviceListBottomSheet() {
         val bottomSheetDialog = BottomSheetDialog(requireContext())
