@@ -118,6 +118,17 @@
                 android:textSize="@dimen/text_12"
                 android:textStyle="bold"
                 android:layout_marginTop="@dimen/margin_8" />
+                
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPrintQr"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cetak / Simpan PDF"
+                android:textColor="#3B82F6"
+                app:icon="@drawable/ic_scan_qr"
+                app:iconTint="#3B82F6"
+                android:layout_marginTop="@dimen/margin_12" />
         </LinearLayout>
 
         <View

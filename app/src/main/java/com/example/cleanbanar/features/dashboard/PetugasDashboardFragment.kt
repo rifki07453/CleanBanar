@@ -68,8 +68,7 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         
         binding.fabScanQr.setOnClickListener {
             // Default target is null because the flow starts by scanning
-            selectedBinToVerify = null
-            startQRScan()
+            showVerificationOptions(null)
         }
         
         rebuildCards()
@@ -202,6 +201,15 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
         if (nonOrgBin != null) innerLayout.addView(buildCompactBinRow(nonOrgBin))
 
         cardView.addView(innerLayout)
+        
+        cardView.setOnClickListener {
+            // Gunakan salah satu bin (organik/non-organik) sebagai referensi untuk menampilkan dialog
+            val referenceBin = orgBin ?: nonOrgBin
+            if (referenceBin != null) {
+                showConfirmationDialog(referenceBin)
+            }
+        }
+        
         return cardView
     }
 
@@ -283,12 +291,12 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
     // QR Code Verification Flow logic
     // ==========================================
 
-    private fun showVerificationOptions(bin: BinData) {
+    private fun showVerificationOptions(bin: BinData?) {
         selectedBinToVerify = bin
         
         val options = arrayOf("Pindai QR Code (Kamera)", "Ketik ID Manual")
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Verifikasi Kehadiran")
+            .setTitle(if (bin != null) "Verifikasi Kehadiran" else "Pilih Metode Verifikasi")
             .setItems(options) { dialog, which ->
                 when (which) {
                     0 -> startQRScan()
@@ -301,9 +309,9 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
 
     private fun startQRScan() {
         val promptText = if (selectedBinToVerify != null) {
-            "Arahkan kamera ke QR Code di baksampah ${selectedBinToVerify?.deviceName}"
+            "Arahkan kamera ke QR Code di baksampah ${selectedBinToVerify?.deviceName}\n(Tekan tombol Kembali di HP jika ingin ketik ID Manual)"
         } else {
-            "Pindai QR Perangkat"
+            "Pindai QR Perangkat\n(Tekan tombol Kembali di HP jika ingin ketik ID Manual)"
         }
 
         val options = ScanOptions().apply {
@@ -319,22 +327,22 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
     }
 
     private fun showManualIdInputDialog() {
-        val target = selectedBinToVerify ?: return
-        
         val inputLayout = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(24.dpToPx(), 16.dpToPx(), 24.dpToPx(), 16.dpToPx())
         }
 
         val etInput = TextInputEditText(requireContext()).apply {
-            hint = "Contoh: ${target.deviceId}"
+            hint = selectedBinToVerify?.let { "Contoh: ${it.deviceId}" } ?: "Contoh: DEV-001"
             maxLines = 1
         }
         inputLayout.addView(etInput)
 
+        val message = selectedBinToVerify?.let { "Silakan ketik ID perangkat untuk ${it.deviceName}:" } ?: "Silakan ketik ID perangkat secara manual:"
+
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Masukkan ID Perangkat")
-            .setMessage("Silakan ketik ID perangkat untuk ${target.deviceName}:")
+            .setMessage(message)
             .setView(inputLayout)
             .setPositiveButton("Verifikasi") { dialog, _ ->
                 val typedId = etInput.text.toString().trim()

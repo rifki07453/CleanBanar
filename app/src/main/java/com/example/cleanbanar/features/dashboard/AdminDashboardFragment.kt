@@ -11,6 +11,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import androidx.print.PrintHelper
 import com.example.cleanbanar.R
 import com.example.cleanbanar.core.data.AuthManager
 import com.example.cleanbanar.core.data.DeviceModel
@@ -214,16 +219,24 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         val btnDeleteDevice = view.findViewById<android.widget.ImageView>(R.id.btnDeleteDevice)
         val ivDeviceQrCode = view.findViewById<android.widget.ImageView>(R.id.ivDeviceQrCode)
         val tvDeviceId = view.findViewById<android.widget.TextView>(R.id.tvDeviceId)
+        val btnPrintQr = view.findViewById<MaterialButton>(R.id.btnPrintQr)
         
         tvDetailDeviceName.text = device.nama
         tvDeviceId.text = "ID: ${device.id}"
 
+        var generatedBitmap: Bitmap? = null
         try {
             val barcodeEncoder = BarcodeEncoder()
-            val bitmap = barcodeEncoder.encodeBitmap(device.id, BarcodeFormat.QR_CODE, 400, 400)
-            ivDeviceQrCode.setImageBitmap(bitmap)
+            generatedBitmap = barcodeEncoder.encodeBitmap(device.id, BarcodeFormat.QR_CODE, 400, 400)
+            ivDeviceQrCode.setImageBitmap(generatedBitmap)
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+
+        btnPrintQr.setOnClickListener {
+            generatedBitmap?.let { bmp ->
+                printQrCode(device, bmp)
+            } ?: Toast.makeText(requireContext(), "QR Code belum tersedia", Toast.LENGTH_SHORT).show()
         }
 
         if (device.statusKoneksi == "ONLINE") {
@@ -357,6 +370,48 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
             }
             .setNegativeButton("Batal", null)
             .show()
+    }
+
+    private fun printQrCode(device: DeviceModel, qrBitmap: Bitmap) {
+        val printHelper = PrintHelper(requireContext())
+        printHelper.scaleMode = PrintHelper.SCALE_MODE_FIT
+        
+        val width = 600
+        val height = 800
+        val printBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(printBitmap)
+        canvas.drawColor(Color.WHITE)
+        
+        val paint = Paint().apply {
+            color = Color.BLACK
+            textAlign = Paint.Align.CENTER
+            isAntiAlias = true
+        }
+        
+        paint.textSize = 40f
+        paint.isFakeBoldText = true
+        canvas.drawText("CleanBanar", width / 2f, 120f, paint)
+        
+        paint.textSize = 28f
+        paint.isFakeBoldText = false
+        canvas.drawText(device.nama, width / 2f, 180f, paint)
+        
+        val qrSize = 400
+        val scaledQr = Bitmap.createScaledBitmap(qrBitmap, qrSize, qrSize, false)
+        canvas.drawBitmap(scaledQr, (width - qrSize) / 2f, 220f, null)
+        
+        paint.textSize = 24f
+        paint.color = Color.DKGRAY
+        paint.isFakeBoldText = true
+        canvas.drawText("ID: ${device.id}", width / 2f, 660f, paint)
+        
+        paint.textSize = 22f
+        paint.color = Color.BLACK
+        paint.isFakeBoldText = false
+        canvas.drawText("Pindai QR ini di aplikasi untuk", width / 2f, 720f, paint)
+        canvas.drawText("memeriksa status tempat sampah", width / 2f, 755f, paint)
+        
+        printHelper.printBitmap("QR Code - ${device.nama}", printBitmap)
     }
 
     private fun addActivityItem(title: String, message: String, timestamp: Long, type: String) {
