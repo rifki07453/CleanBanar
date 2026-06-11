@@ -9,17 +9,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingBottom="24dp">
+        android:paddingBottom="@dimen/margin_24">
 
         <!-- Header -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingStart="24dp"
-            android:paddingEnd="24dp"
-            android:paddingTop="56dp"
-            android:paddingBottom="24dp"
+            android:paddingStart="@dimen/margin_24"
+            android:paddingEnd="@dimen/margin_24"
+            android:paddingTop="@dimen/margin_56"
+            android:paddingBottom="@dimen/margin_24"
             android:gravity="center_vertical">
             
             <TextView
@@ -29,7 +29,7 @@
                 android:layout_weight="1"
                 android:text="Statistik"
                 android:textStyle="bold"
-                android:textSize="24sp"
+                android:textSize="@dimen/text_24"
                 android:textColor="@color/text_primary" />
                 
         </LinearLayout>
@@ -37,9 +37,9 @@
         <!-- Divider -->
         <View
             android:layout_width="match_parent"
-            android:layout_height="1dp"
+            android:layout_height="@dimen/margin_1"
             android:background="#f1f3f5"
-            android:layout_marginBottom="24dp" />
+            android:layout_marginBottom="@dimen/margin_24" />
 
         <!-- Rata-rata Kapasitas Hari Ini -->
         <TextView
@@ -47,68 +47,68 @@
             android:layout_height="wrap_content"
             android:text="RATA-RATA KAPASITAS HARI INI"
             android:textStyle="bold"
-            android:textSize="11sp"
+            android:textSize="@dimen/text_11"
             android:textColor="@color/text_secondary"
             android:textAlignment="center"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="@dimen/margin_16" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingHorizontal="16dp"
-            android:layout_marginBottom="16dp">
+            android:paddingHorizontal="@dimen/margin_16"
+            android:layout_marginBottom="@dimen/margin_16">
 
             <!-- Organik Box -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginEnd="8dp"
-                app:cardCornerRadius="16dp"
+                android:layout_marginEnd="@dimen/margin_8"
+                app:cardCornerRadius="@dimen/margin_16"
                 app:cardElevation="0dp"
                 app:cardBackgroundColor="@color/green_600">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="@dimen/margin_20">
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="ORGANIK"
-                        android:textSize="10sp"
+                        android:textSize="@dimen/text_10"
                         android:textStyle="bold"
                         android:textColor="@color/white" />
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginTop="8dp">
+                        android:layout_marginTop="@dimen/margin_8">
                         <TextView
                             android:id="@+id/tvOrganikAvg"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="79"
-                            android:textSize="32sp"
+                            android:textSize="@dimen/text_32"
                             android:textStyle="bold"
                             android:textColor="@color/white" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="%"
-                            android:textSize="14sp"
+                            android:textSize="@dimen/text_14"
                             android:textColor="#B2FCDB"
-                            android:layout_marginStart="4dp" />
+                            android:layout_marginStart="@dimen/margin_4" />
                     </LinearLayout>
                     <TextView
                         android:id="@+id/tvOrganikTrend"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Turun 2%"
-                        android:textSize="10sp"
+                        android:textSize="@dimen/text_10"
                         android:textColor="#B2FCDB"
-                        android:layout_marginTop="8dp" />
+                        android:layout_marginTop="@dimen/margin_8" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -117,51 +117,51 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                app:cardCornerRadius="16dp"
+                android:layout_marginStart="@dimen/margin_8"
+                app:cardCornerRadius="@dimen/margin_16"
                 app:cardElevation="0dp"
                 app:cardBackgroundColor="@color/blue_500">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="@dimen/margin_20">
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="NON-ORG"
-                        android:textSize="10sp"
+                        android:textSize="@dimen/text_10"
                         android:textStyle="bold"
                         android:textColor="@color/white" />
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginTop="8dp">
+                        android:layout_marginTop="@dimen/margin_8">
                         <TextView
                             android:id="@+id/tvNonOrganikAvg"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="63"
-                            android:textSize="32sp"
+                            android:textSize="@dimen/text_32"
                             android:textStyle="bold"
                             android:textColor="@color/white" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="%"
-                            android:textSize="14sp"
+                            android:textSize="@dimen/text_14"
                             android:textColor="#BFDBFE"
-                            android:layout_marginStart="4dp" />
+                            android:layout_marginStart="@dimen/margin_4" />
                     </LinearLayout>
                     <TextView
                         android:id="@+id/tvNonOrganikTrend"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Naik 37%"
-                        android:textSize="10sp"
+                        android:textSize="@dimen/text_10"
                         android:textColor="#BFDBFE"
-                        android:layout_marginTop="8dp" />
+                        android:layout_marginTop="@dimen/margin_8" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -171,18 +171,18 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginBottom="24dp"
-            app:cardCornerRadius="20dp"
+            android:layout_marginHorizontal="@dimen/margin_16"
+            android:layout_marginBottom="@dimen/margin_24"
+            app:cardCornerRadius="@dimen/margin_20"
             app:cardElevation="0dp"
             app:strokeColor="#f1f3f5"
-            app:strokeWidth="1dp"
+            app:strokeWidth="@dimen/margin_1"
             app:cardBackgroundColor="@color/bg_card">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:padding="24dp"
+                android:padding="@dimen/margin_24"
                 android:baselineAligned="false">
                 
                 <!-- RATA-RATA MINGGUAN -->
@@ -195,7 +195,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="RATA-RATA\nMINGGUAN"
-                        android:textSize="10sp"
+                        android:textSize="@dimen/text_10"
                         android:textStyle="bold"
                         android:textColor="@color/text_secondary" />
                     <TextView
@@ -204,17 +204,17 @@
                         android:layout_height="wrap_content"
                         android:text="39.8%"
                         android:textStyle="bold"
-                        android:textSize="22sp"
+                        android:textSize="@dimen/text_22"
                         android:textColor="@color/text_primary"
-                        android:layout_marginTop="12dp" />
+                        android:layout_marginTop="@dimen/margin_12" />
                 </LinearLayout>
 
                 <!-- Separator Line -->
                 <View
-                    android:layout_width="1dp"
+                    android:layout_width="@dimen/margin_1"
                     android:layout_height="match_parent"
                     android:background="#f1f3f5"
-                    android:layout_marginHorizontal="16dp" />
+                    android:layout_marginHorizontal="@dimen/margin_16" />
 
                 <!-- TOTAL PENUH (MINGGU INI) -->
                 <LinearLayout
@@ -226,7 +226,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="TOTAL PENUH (MINGGU INI)"
-                        android:textSize="10sp"
+                        android:textSize="@dimen/text_10"
                         android:textStyle="bold"
                         android:textColor="@color/text_secondary" />
                     <LinearLayout
@@ -234,22 +234,22 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="end|bottom"
-                        android:layout_marginTop="12dp">
+                        android:layout_marginTop="@dimen/margin_12">
                         <TextView
                             android:id="@+id/tvTotalPenuh"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="4"
                             android:textStyle="bold"
-                            android:textSize="24sp"
+                            android:textSize="@dimen/text_24"
                             android:textColor="@color/red_500" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text=" kali"
-                            android:textSize="12sp"
+                            android:textSize="@dimen/text_12"
                             android:textColor="@color/text_secondary"
-                            android:layout_marginBottom="4dp" />
+                            android:layout_marginBottom="@dimen/margin_4" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -260,17 +260,17 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            app:cardCornerRadius="20dp"
+            android:layout_marginHorizontal="@dimen/margin_16"
+            app:cardCornerRadius="@dimen/margin_20"
             app:cardElevation="0dp"
             app:strokeColor="#f1f3f5"
-            app:strokeWidth="1dp"
+            app:strokeWidth="@dimen/margin_1"
             app:cardBackgroundColor="@color/bg_card">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="@dimen/margin_20">
 
                 <!-- Header Grafik dengan Toggle Mode -->
                 <LinearLayout
@@ -278,7 +278,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
+                    android:layout_marginBottom="@dimen/margin_16">
                     
                     <TextView
                         android:id="@+id/tvChartTitle"
@@ -287,7 +287,7 @@
                         android:layout_weight="1"
                         android:text="Grafik Kapasitas"
                         android:textStyle="bold"
-                        android:textSize="12sp"
+                        android:textSize="@dimen/text_12"
                         android:textColor="@color/text_primary" />
 
                     <Spinner
@@ -306,17 +306,17 @@
                     <!-- Sumbu Y -->
                     <LinearLayout
                         android:id="@+id/yAxisContainer"
-                        android:layout_width="28dp"
-                        android:layout_height="140dp"
+                        android:layout_width="@dimen/margin_28"
+                        android:layout_height="@dimen/margin_140"
                         android:orientation="vertical"
                         android:gravity="end"
-                        android:paddingEnd="6dp" />
+                        android:paddingEnd="@dimen/margin_6" />
 
                     <!-- Chart Container -->
                     <LinearLayout
                         android:id="@+id/chartContainer"
                         android:layout_width="match_parent"
-                        android:layout_height="140dp"
+                        android:layout_height="@dimen/margin_140"
                         android:orientation="horizontal"
                         android:gravity="bottom"
                         android:baselineAligned="false" />
@@ -328,10 +328,10 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center"
-                    android:layout_marginTop="16dp">
+                    android:layout_marginTop="@dimen/margin_16">
                     <View
-                        android:layout_width="8dp"
-                        android:layout_height="8dp"
+                        android:layout_width="@dimen/margin_8"
+                        android:layout_height="@dimen/margin_8"
                         android:background="@drawable/ic_bg_circle_green"
                         android:layout_gravity="center_vertical" />
                     <TextView
@@ -339,11 +339,11 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text=" Organik (%)   "
-                        android:textSize="11sp"
+                        android:textSize="@dimen/text_11"
                         android:textColor="@color/text_primary" />
                     <View
-                        android:layout_width="8dp"
-                        android:layout_height="8dp"
+                        android:layout_width="@dimen/margin_8"
+                        android:layout_height="@dimen/margin_8"
                         android:background="@drawable/ic_bg_circle_blue"
                         android:layout_gravity="center_vertical" />
                     <TextView
@@ -351,7 +351,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text=" Non-Organik (%)"
-                        android:textSize="11sp"
+                        android:textSize="@dimen/text_11"
                         android:textColor="@color/text_primary" />
                 </LinearLayout>
 
@@ -362,18 +362,18 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="20dp"
-            app:cardCornerRadius="20dp"
+            android:layout_marginHorizontal="@dimen/margin_16"
+            android:layout_marginTop="@dimen/margin_20"
+            app:cardCornerRadius="@dimen/margin_20"
             app:cardElevation="0dp"
             app:strokeColor="#f1f3f5"
-            app:strokeWidth="1dp"
+            app:strokeWidth="@dimen/margin_1"
             app:cardBackgroundColor="@color/bg_card">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="@dimen/margin_20">
 
                 <!-- Header Perbandingan -->
                 <LinearLayout
@@ -381,7 +381,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
+                    android:layout_marginBottom="@dimen/margin_16">
                     
                     <TextView
                         android:layout_width="0dp"
@@ -389,7 +389,7 @@
                         android:layout_weight="1"
                         android:text="Tren &amp; Perbandingan"
                         android:textStyle="bold"
-                        android:textSize="12sp"
+                        android:textSize="@dimen/text_12"
                         android:textColor="@color/text_primary" />
 
                     <!-- Spinner Period -->
@@ -417,7 +417,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="ORGANIK"
-                            android:textSize="10sp"
+                            android:textSize="@dimen/text_10"
                             android:textStyle="bold"
                             android:textColor="@color/text_secondary" />
                         
@@ -426,27 +426,27 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0"
-                            android:textSize="20sp"
+                            android:textSize="@dimen/text_20"
                             android:textStyle="bold"
                             android:textColor="@color/text_primary"
-                            android:layout_marginTop="8dp" />
+                            android:layout_marginTop="@dimen/margin_8" />
                         
                         <TextView
                             android:id="@+id/tvCompareOrganikTrend"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Tidak ada data pembanding"
-                            android:textSize="10sp"
+                            android:textSize="@dimen/text_10"
                             android:textColor="@color/text_tertiary"
-                            android:layout_marginTop="4dp" />
+                            android:layout_marginTop="@dimen/margin_4" />
                     </LinearLayout>
 
                     <!-- Separator Line -->
                     <View
-                        android:layout_width="1dp"
+                        android:layout_width="@dimen/margin_1"
                         android:layout_height="match_parent"
                         android:background="#f1f3f5"
-                        android:layout_marginHorizontal="16dp" />
+                        android:layout_marginHorizontal="@dimen/margin_16" />
 
                     <!-- Non-Organik Compare -->
                     <LinearLayout
@@ -458,7 +458,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="NON-ORGANIK"
-                            android:textSize="10sp"
+                            android:textSize="@dimen/text_10"
                             android:textStyle="bold"
                             android:textColor="@color/text_secondary" />
                         
@@ -467,19 +467,19 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0"
-                            android:textSize="20sp"
+                            android:textSize="@dimen/text_20"
                             android:textStyle="bold"
                             android:textColor="@color/text_primary"
-                            android:layout_marginTop="8dp" />
+                            android:layout_marginTop="@dimen/margin_8" />
                         
                         <TextView
                             android:id="@+id/tvCompareNonOrganikTrend"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Tidak ada data pembanding"
-                            android:textSize="10sp"
+                            android:textSize="@dimen/text_10"
                             android:textColor="@color/text_tertiary"
-                            android:layout_marginTop="4dp" />
+                            android:layout_marginTop="@dimen/margin_4" />
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>

@@ -12,11 +12,11 @@
         android:layout_height="wrap_content"
         android:text="Riwayat TPA"
         android:textColor="@color/text_primary" 
-        android:textSize="24sp"
+        android:textSize="@dimen/text_24"
         android:textStyle="bold"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="56dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginStart="@dimen/margin_24"
+        android:layout_marginTop="@dimen/margin_56"
+        android:layout_marginBottom="@dimen/margin_16"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -24,9 +24,9 @@
     <View
         android:id="@+id/dividerTop"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
+        android:layout_height="@dimen/margin_1"
         android:background="@color/bg_main"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="@dimen/margin_16"
         app:layout_constraintTop_toBottomOf="@id/tvHistoryTitle" />
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout 
@@ -41,8 +41,8 @@
             android:id="@+id/rvHistory"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingTop="16dp"
-            android:paddingBottom="24dp"
+            android:paddingTop="@dimen/margin_16"
+            android:paddingBottom="@dimen/margin_24"
             android:clipToPadding="false"
             tools:listitem="@layout/item_history_timeline" />
 
@@ -57,14 +57,14 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center"
-        android:padding="32dp"
+        android:padding="@dimen/margin_32"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/dividerTop"
         app:layout_constraintBottom_toBottomOf="parent">
         
         <ImageView
-            android:layout_width="140dp"
-            android:layout_height="140dp"
+            android:layout_width="@dimen/margin_140"
+            android:layout_height="@dimen/margin_140"
             android:src="@drawable/ic_trash_modern"
             android:alpha="0.25"
             app:tint="@color/text_tertiary" />
@@ -74,11 +74,11 @@
             android:layout_height="wrap_content"
             android:text="Belum ada aktivitas hari ini.\nTempat sampah masih aman!"
             android:textColor="@color/text_secondary"
-            android:textSize="15sp"
+            android:textSize="@dimen/text_15"
             android:textStyle="bold"
             android:textAlignment="center"
-            android:lineSpacingExtra="4dp"
-            android:layout_marginTop="20dp" />
+            android:lineSpacingExtra="@dimen/margin_4"
+            android:layout_marginTop="@dimen/margin_20" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

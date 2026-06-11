@@ -10,9 +10,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingHorizontal="24dp"
-        android:paddingTop="56dp"
-        android:paddingBottom="16dp"
+        android:paddingHorizontal="@dimen/margin_24"
+        android:paddingTop="@dimen/margin_56"
+        android:paddingBottom="@dimen/margin_16"
         android:gravity="center_vertical">
 
         <LinearLayout
@@ -25,16 +25,16 @@
                 android:layout_height="wrap_content"
                 android:text="Notifikasi"
                 android:textStyle="bold"
-                android:textSize="24sp"
+                android:textSize="@dimen/text_24"
                 android:textColor="@color/text_primary" />
             <TextView
                 android:id="@+id/tvNotifSubtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Peringatan status tong sampah"
-                android:textSize="13sp"
+                android:textSize="@dimen/text_13"
                 android:textColor="@color/text_secondary"
-                android:layout_marginTop="4dp" />
+                android:layout_marginTop="@dimen/margin_4" />
         </LinearLayout>
 
         <TextView
@@ -42,11 +42,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Hapus Semua"
-            android:textSize="13sp"
+            android:textSize="@dimen/text_13"
             android:textStyle="bold"
             android:textColor="@color/red_500"
-            android:paddingVertical="8dp"
-            android:paddingStart="16dp"
+            android:paddingVertical="@dimen/margin_8"
+            android:paddingStart="@dimen/margin_16"
             android:visibility="gone" />
     </LinearLayout>
 
@@ -64,22 +64,22 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingHorizontal="16dp"
-                android:paddingBottom="24dp" />
+                android:paddingHorizontal="@dimen/margin_16"
+                android:paddingBottom="@dimen/margin_24" />
                 
             <ProgressBar
                 android:id="@+id/progressBar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginTop="50dp"/>
+                android:layout_marginTop="@dimen/margin_50"/>
                 
             <TextView
                 android:id="@+id/tvError"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginTop="50dp"
+                android:layout_marginTop="@dimen/margin_50"
                 android:text="Gagal memuat data\nPeriksa koneksi Anda"
                 android:gravity="center"
                 android:visibility="gone"

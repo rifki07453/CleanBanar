@@ -9,22 +9,22 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:padding="@dimen/margin_24">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Tambah Perangkat Baru"
         android:textColor="@color/text_primary"
-        android:textSize="18sp"
+        android:textSize="@dimen/text_18"
         android:textStyle="bold"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="@dimen/margin_16" />
 
     <com.google.android.material.textfield.TextInputLayout
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
+        android:layout_marginBottom="@dimen/margin_12"
         android:hint="ID Perangkat (ex: device_01)">
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etDeviceId"
@@ -37,7 +37,7 @@
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
+        android:layout_marginBottom="@dimen/margin_12"
         android:hint="Lokasi/Nama Perangkat (ex: Gedung A)">
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etDeviceName"
@@ -51,10 +51,10 @@
         android:layout_height="wrap_content"
         android:text="Konfigurasi Sensor"
         android:textColor="@color/text_secondary"
-        android:textSize="14sp"
+        android:textSize="@dimen/text_14"
         android:textStyle="bold"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp" />
+        android:layout_marginTop="@dimen/margin_8"
+        android:layout_marginBottom="@dimen/margin_8" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -67,8 +67,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="12dp"
+            android:layout_marginEnd="@dimen/margin_8"
+            android:layout_marginBottom="@dimen/margin_12"
             android:hint="Tinggi Tong (cm)">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etTinggiTong"
@@ -83,8 +83,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginStart="8dp"
-            android:layout_marginBottom="12dp"
+            android:layout_marginStart="@dimen/margin_8"
+            android:layout_marginBottom="@dimen/margin_12"
             android:hint="Batas Penuh (cm)">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etBatasPenuh"
@@ -100,10 +100,10 @@
         android:layout_height="wrap_content"
         android:text="Konfigurasi PIN (Default)"
         android:textColor="@color/text_secondary"
-        android:textSize="14sp"
+        android:textSize="@dimen/text_14"
         android:textStyle="bold"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp" />
+        android:layout_marginTop="@dimen/margin_8"
+        android:layout_marginBottom="@dimen/margin_8" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -117,21 +117,21 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:layout_marginEnd="8dp">
+            android:layout_marginEnd="@dimen/margin_8">
             
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Organik"
-                android:textSize="12sp"
+                android:textSize="@dimen/text_12"
                 android:textColor="#16A34A"
-                android:layout_marginBottom="4dp" />
+                android:layout_marginBottom="@dimen/margin_4" />
                 
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
+                android:layout_marginBottom="@dimen/margin_8"
                 android:hint="Sensor Penuh (Trig)">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etTrigOrg"
@@ -145,7 +145,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
+                android:layout_marginBottom="@dimen/margin_8"
                 android:hint="Sensor Penuh (Echo)">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etEchoOrg"
@@ -159,7 +159,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
+                android:layout_marginBottom="@dimen/margin_8"
                 android:hint="Sensor Tangan (Trig)">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etTrigLuarOrg"
@@ -173,7 +173,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
+                android:layout_marginBottom="@dimen/margin_8"
                 android:hint="Sensor Tangan (Echo)">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etEchoLuarOrg"
@@ -203,21 +203,21 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:layout_marginStart="8dp">
+            android:layout_marginStart="@dimen/margin_8">
             
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Non-Organik"
-                android:textSize="12sp"
+                android:textSize="@dimen/text_12"
                 android:textColor="#2563EB"
-                android:layout_marginBottom="4dp" />
+                android:layout_marginBottom="@dimen/margin_4" />
                 
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
+                android:layout_marginBottom="@dimen/margin_8"
                 android:hint="Sensor Penuh (Trig)">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etTrigNonOrg"
@@ -231,7 +231,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
+                android:layout_marginBottom="@dimen/margin_8"
                 android:hint="Sensor Penuh (Echo)">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etEchoNonOrg"
@@ -245,7 +245,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
+                android:layout_marginBottom="@dimen/margin_8"
                 android:hint="Sensor Tangan (Trig)">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etTrigLuarNonOrg"
@@ -259,7 +259,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
+                android:layout_marginBottom="@dimen/margin_8"
                 android:hint="Sensor Tangan (Echo)">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etEchoLuarNonOrg"
@@ -288,7 +288,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="24dp">
+        android:layout_marginTop="@dimen/margin_24">
         
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnCancel"
@@ -299,7 +299,7 @@
             android:text="Batal"
             android:textColor="@color/text_secondary"
             app:strokeColor="#D1D5DB"
-            android:layout_marginEnd="8dp" />
+            android:layout_marginEnd="@dimen/margin_8" />
             
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSave"
@@ -309,7 +309,7 @@
             android:text="Simpan"
             android:textColor="@color/white"
             app:backgroundTint="#10B981"
-            android:layout_marginStart="8dp" />
+            android:layout_marginStart="@dimen/margin_8" />
     </LinearLayout>
 </LinearLayout>
 </androidx.core.widget.NestedScrollView>

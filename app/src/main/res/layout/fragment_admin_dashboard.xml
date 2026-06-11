@@ -10,13 +10,13 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="24dp">
+        android:paddingBottom="@dimen/margin_24">
 
         <!-- Header Gradient Block -->
         <FrameLayout
             android:id="@+id/headerBlock"
             android:layout_width="match_parent"
-            android:layout_height="250dp"
+            android:layout_height="@dimen/margin_250"
             android:background="@drawable/bg_petugas_header"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -26,10 +26,10 @@
             android:layout_height="wrap_content"
             android:text="OVERVIEW SISTEM"
             android:textColor="#A7F3D0" 
-            android:textSize="10sp"
+            android:textSize="@dimen/text_10"
             android:textStyle="bold"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="56dp"
+            android:layout_marginStart="@dimen/margin_24"
+            android:layout_marginTop="@dimen/margin_56"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -39,17 +39,17 @@
             android:layout_height="wrap_content"
             android:text="Admin Panel"
             android:textColor="@color/white"
-            android:textSize="24sp"
+            android:textSize="@dimen/text_24"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="@id/tvOverviewTitle"
             app:layout_constraintTop_toBottomOf="@id/tvOverviewTitle" />
 
         <!-- Logo top right transparent -->
         <FrameLayout
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_marginTop="48dp"
-            android:layout_marginEnd="24dp"
+            android:layout_width="@dimen/margin_60"
+            android:layout_height="@dimen/margin_60"
+            android:layout_marginTop="@dimen/margin_48"
+            android:layout_marginEnd="@dimen/margin_24"
             android:background="@drawable/bg_rounded_light_green_glass"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -58,7 +58,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:src="@drawable/logo"
-                android:padding="8dp" />
+                android:padding="@dimen/margin_8" />
         </FrameLayout>
 
         <!-- Total Petugas -->
@@ -68,8 +68,8 @@
             android:layout_height="wrap_content"
             android:text="Total Petugas Aktif"
             android:textColor="#D1FAE5"
-            android:textSize="12sp"
-            android:layout_marginTop="24dp"
+            android:textSize="@dimen/text_12"
+            android:layout_marginTop="@dimen/margin_24"
             app:layout_constraintStart_toStartOf="@id/tvOverviewTitle"
             app:layout_constraintTop_toBottomOf="@id/tvAdminTitle" />
 
@@ -87,7 +87,7 @@
                 android:layout_height="wrap_content"
                 android:text="1"
                 android:textColor="@color/white"
-                android:textSize="36sp"
+                android:textSize="@dimen/text_36"
                 android:textStyle="bold" />
 
             <TextView
@@ -95,8 +95,8 @@
                 android:layout_height="wrap_content"
                 android:text=" orang"
                 android:textColor="@color/white"
-                android:textSize="14sp"
-                android:layout_marginStart="4dp" />
+                android:textSize="@dimen/text_14"
+                android:layout_marginStart="@dimen/margin_4" />
         </LinearLayout>
 
         <!-- Content Container (Overlap Header) -->
@@ -105,9 +105,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginTop="-40dp"
+            android:layout_marginTop="@dimen/margin_minus_40"
             android:clipToPadding="false"
-            android:paddingBottom="24dp"
+            android:paddingBottom="@dimen/margin_24"
             app:layout_constraintTop_toBottomOf="@id/headerBlock">
 
             <!-- Row 1: 2 Cards (Manajemen Petugas & Status Perangkat) -->
@@ -115,20 +115,20 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:paddingHorizontal="20dp"
+                android:paddingHorizontal="@dimen/margin_20"
                 android:weightSum="2"
                 android:clipToPadding="false"
-                android:paddingBottom="8dp">
+                android:paddingBottom="@dimen/margin_8">
 
                 <!-- Card 1: Manajemen Petugas -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardManajemenPetugas"
                     android:layout_width="0dp"
-                    android:layout_height="160dp"
+                    android:layout_height="@dimen/margin_160"
                     android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
-                    app:cardCornerRadius="24dp"
-                    app:cardElevation="2dp"
+                    android:layout_marginEnd="@dimen/margin_8"
+                    app:cardCornerRadius="@dimen/margin_24"
+                    app:cardElevation="@dimen/margin_2"
                     app:strokeWidth="0dp"
                     app:cardBackgroundColor="@color/bg_card"
                     android:clickable="true"
@@ -140,18 +140,18 @@
                         android:layout_height="match_parent"
                         android:orientation="vertical"
                         android:gravity="center"
-                        android:padding="16dp">
+                        android:padding="@dimen/margin_16">
 
                         <FrameLayout
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
+                            android:layout_width="@dimen/margin_48"
+                            android:layout_height="@dimen/margin_48"
                             android:background="@drawable/bg_rounded_light_blue"
-                            android:layout_marginBottom="12dp">
+                            android:layout_marginBottom="@dimen/margin_12">
                             <ImageView
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:src="@drawable/ic_users_group_modern"
-                                android:padding="12dp" />
+                                android:padding="@dimen/margin_12" />
                         </FrameLayout>
 
                         <TextView
@@ -159,7 +159,7 @@
                             android:layout_height="wrap_content"
                             android:text="Manajemen\nPetugas"
                             android:textColor="@color/text_primary"
-                            android:textSize="14sp"
+                            android:textSize="@dimen/text_14"
                             android:textStyle="bold"
                             android:textAlignment="center" />
 
@@ -168,9 +168,9 @@
                             android:layout_height="wrap_content"
                             android:text="Tambah/hapus akun"
                             android:textColor="@color/text_tertiary"
-                            android:textSize="10sp"
+                            android:textSize="@dimen/text_10"
                             android:textAlignment="center"
-                            android:layout_marginTop="4dp" />
+                            android:layout_marginTop="@dimen/margin_4" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -178,11 +178,11 @@
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardStatusPerangkat"
                     android:layout_width="0dp"
-                    android:layout_height="160dp"
+                    android:layout_height="@dimen/margin_160"
                     android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    app:cardCornerRadius="24dp"
-                    app:cardElevation="2dp"
+                    android:layout_marginStart="@dimen/margin_8"
+                    app:cardCornerRadius="@dimen/margin_24"
+                    app:cardElevation="@dimen/margin_2"
                     app:strokeWidth="0dp"
                     app:cardBackgroundColor="@color/bg_card"
                     android:clickable="true"
@@ -194,19 +194,19 @@
                         android:layout_height="match_parent"
                         android:orientation="vertical"
                         android:gravity="center"
-                        android:padding="16dp">
+                        android:padding="@dimen/margin_16">
 
                         <FrameLayout
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
+                            android:layout_width="@dimen/margin_48"
+                            android:layout_height="@dimen/margin_48"
                             android:background="@drawable/bg_rounded_light_blue"
                             android:backgroundTint="#ECFDF5"
-                            android:layout_marginBottom="12dp">
+                            android:layout_marginBottom="@dimen/margin_12">
                             <ImageView
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:src="@drawable/ic_iot_device_modern"
-                                android:padding="12dp" />
+                                android:padding="@dimen/margin_12" />
                         </FrameLayout>
 
                         <TextView
@@ -214,7 +214,7 @@
                             android:layout_height="wrap_content"
                             android:text="Manajemen\nPerangkat"
                             android:textColor="@color/text_primary"
-                            android:textSize="14sp"
+                            android:textSize="@dimen/text_14"
                             android:textStyle="bold"
                             android:textAlignment="center" />
 
@@ -224,15 +224,15 @@
                             android:orientation="horizontal"
                             android:background="@drawable/bg_badge_green"
                             android:gravity="center_vertical"
-                            android:paddingHorizontal="8dp"
-                            android:paddingVertical="4dp"
-                            android:layout_marginTop="6dp">
+                            android:paddingHorizontal="@dimen/margin_8"
+                            android:paddingVertical="@dimen/margin_4"
+                            android:layout_marginTop="@dimen/margin_6">
                             
                             <View
                                 android:id="@+id/dotStatus"
-                                android:layout_width="6dp"
-                                android:layout_height="6dp"
-                                android:layout_marginEnd="4dp"
+                                android:layout_width="@dimen/margin_6"
+                                android:layout_height="@dimen/margin_6"
+                                android:layout_marginEnd="@dimen/margin_4"
                                 android:background="@drawable/dot_timeline_green" />
                                 
                             <TextView
@@ -241,7 +241,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="ONLINE"
                                 android:textColor="#059669"
-                                android:textSize="9sp"
+                                android:textSize="@dimen/text_9"
                                 android:textStyle="bold" />
                         </LinearLayout>
                     </LinearLayout>
@@ -253,10 +253,10 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="16dp"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="1dp"
+                android:layout_marginHorizontal="@dimen/margin_20"
+                android:layout_marginTop="@dimen/margin_16"
+                app:cardCornerRadius="@dimen/margin_24"
+                app:cardElevation="@dimen/margin_1"
                 app:strokeWidth="0dp"
                 app:cardBackgroundColor="@color/bg_card">
 
@@ -264,20 +264,20 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="@dimen/margin_20">
 
                     <!-- Header List -->
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="16dp">
+                        android:layout_marginBottom="@dimen/margin_16">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Aktivitas Terbaru"
                             android:textColor="@color/text_primary"
-                            android:textSize="14sp"
+                            android:textSize="@dimen/text_14"
                             android:textStyle="bold"
                             android:layout_centerVertical="true" />
 
@@ -294,8 +294,8 @@
                     <!-- Empty State Vector -->
                     <ImageView
                         android:id="@+id/lottieEmptyState"
-                        android:layout_width="120dp"
-                        android:layout_height="120dp"
+                        android:layout_width="@dimen/margin_120"
+                        android:layout_height="@dimen/margin_120"
                         android:layout_gravity="center"
                         android:src="@drawable/ic_trash_modern"
                         android:alpha="0.25"
@@ -309,9 +309,9 @@
                         android:layout_gravity="center"
                         android:text="Belum ada aktivitas"
                         android:textColor="@color/text_tertiary"
-                        android:textSize="12sp"
+                        android:textSize="@dimen/text_12"
                         android:visibility="gone"
-                        android:layout_marginTop="8dp" />
+                        android:layout_marginTop="@dimen/margin_8" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

@@ -3,36 +3,36 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
+    android:layout_marginBottom="@dimen/margin_12"
     app:cardBackgroundColor="@color/bg_card"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="1dp"
+    app:cardCornerRadius="@dimen/margin_16"
+    app:cardElevation="@dimen/margin_1"
     app:strokeColor="#E5E7EB"
-    app:strokeWidth="1dp">
+    app:strokeWidth="@dimen/margin_1">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:padding="@dimen/margin_16">
 
         <FrameLayout
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/margin_48"
+            android:layout_height="@dimen/margin_48"
             android:background="@drawable/bg_rounded_light_blue"
             android:backgroundTint="#F3F4F6">
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="12dp"
+                android:padding="@dimen/margin_12"
                 android:src="@drawable/ic_iot_device_modern" />
         </FrameLayout>
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="@dimen/margin_16"
             android:layout_weight="1"
             android:orientation="vertical">
 
@@ -42,17 +42,17 @@
                 android:layout_height="wrap_content"
                 android:text="Nama Perangkat"
                 android:textColor="@color/text_primary"
-                android:textSize="14sp"
+                android:textSize="@dimen/text_14"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tvDeviceId"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
+                android:layout_marginTop="@dimen/margin_2"
                 android:text="ID: device_xyz"
                 android:textColor="@color/text_secondary"
-                android:textSize="12sp" />
+                android:textSize="@dimen/text_12" />
         </LinearLayout>
 
         <LinearLayout
@@ -61,14 +61,14 @@
             android:background="@drawable/bg_badge_green"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="4dp">
+            android:paddingHorizontal="@dimen/margin_8"
+            android:paddingVertical="@dimen/margin_4">
 
             <View
                 android:id="@+id/dotStatus"
-                android:layout_width="6dp"
-                android:layout_height="6dp"
-                android:layout_marginEnd="4dp"
+                android:layout_width="@dimen/margin_6"
+                android:layout_height="@dimen/margin_6"
+                android:layout_marginEnd="@dimen/margin_4"
                 android:background="@drawable/dot_timeline_green" />
 
             <TextView
@@ -77,7 +77,7 @@
                 android:layout_height="wrap_content"
                 android:text="ONLINE"
                 android:textColor="#059669"
-                android:textSize="9sp"
+                android:textSize="@dimen/text_9"
                 android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>

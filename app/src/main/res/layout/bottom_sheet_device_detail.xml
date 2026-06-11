@@ -10,14 +10,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:padding="@dimen/margin_24">
 
         <!-- Drag Handle -->
         <View
-            android:layout_width="40dp"
-            android:layout_height="4dp"
+            android:layout_width="@dimen/margin_40"
+            android:layout_height="@dimen/margin_4"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="24dp"
+            android:layout_marginBottom="@dimen/margin_24"
             android:background="#E5E7EB" />
 
         <!-- Header Section -->
@@ -26,19 +26,19 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginBottom="24dp">
+            android:layout_marginBottom="@dimen/margin_24">
 
             <FrameLayout
                 android:id="@+id/flConnectionIconBg"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
+                android:layout_width="@dimen/margin_56"
+                android:layout_height="@dimen/margin_56"
                 android:background="@drawable/bg_circle_glass"
                 android:backgroundTint="#D1FAE5">
                 <ImageView
                     android:id="@+id/ivConnectionIcon"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:padding="14dp"
+                    android:padding="@dimen/margin_14"
                     android:src="@drawable/ic_wifi_status" />
             </FrameLayout>
 
@@ -47,7 +47,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:layout_marginStart="16dp">
+                android:layout_marginStart="@dimen/margin_16">
 
                 <TextView
                     android:id="@+id/tvDetailDeviceName"
@@ -55,7 +55,7 @@
                     android:layout_height="wrap_content"
                     android:text="Nama Perangkat"
                     android:textColor="@color/text_primary"
-                    android:textSize="18sp"
+                    android:textSize="@dimen/text_18"
                     android:textStyle="bold" />
 
                 <TextView
@@ -64,18 +64,18 @@
                     android:layout_height="wrap_content"
                     android:text="ONLINE (WiFi)"
                     android:textColor="#059669"
-                    android:textSize="12sp"
+                    android:textSize="@dimen/text_12"
                     android:textStyle="bold"
-                    android:layout_marginTop="2dp" />
+                    android:layout_marginTop="@dimen/margin_2" />
             </LinearLayout>
             
             <ImageView
                 android:id="@+id/btnDeleteDevice"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="@dimen/margin_32"
+                android:layout_height="@dimen/margin_32"
                 android:src="@drawable/ic_trash_modern"
                 app:tint="#DC2626"
-                android:padding="4dp"
+                android:padding="@dimen/margin_4"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
                 android:focusable="true"/>
@@ -83,9 +83,9 @@
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="1dp"
+            android:layout_height="@dimen/margin_1"
             android:background="#F3F4F6"
-            android:layout_marginBottom="24dp" />
+            android:layout_marginBottom="@dimen/margin_24" />
 
         <!-- QR Code Section -->
         <LinearLayout
@@ -93,21 +93,21 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="vertical"
-            android:layout_marginBottom="24dp">
+            android:layout_marginBottom="@dimen/margin_24">
             
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="QR CODE PERANGKAT"
                 android:textColor="@color/text_tertiary"
-                android:textSize="10sp"
+                android:textSize="@dimen/text_10"
                 android:textStyle="bold"
-                android:layout_marginBottom="12dp" />
+                android:layout_marginBottom="@dimen/margin_12" />
 
             <ImageView
                 android:id="@+id/ivDeviceQrCode"
-                android:layout_width="150dp"
-                android:layout_height="150dp"
+                android:layout_width="@dimen/margin_150"
+                android:layout_height="@dimen/margin_150"
                 android:scaleType="fitCenter" />
                 
             <TextView
@@ -115,16 +115,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/text_secondary"
-                android:textSize="12sp"
+                android:textSize="@dimen/text_12"
                 android:textStyle="bold"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="@dimen/margin_8" />
         </LinearLayout>
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="1dp"
+            android:layout_height="@dimen/margin_1"
             android:background="#F3F4F6"
-            android:layout_marginBottom="24dp" />
+            android:layout_marginBottom="@dimen/margin_24" />
 
         <!-- Edit PIN Section -->
         <TextView
@@ -132,9 +132,9 @@
             android:layout_height="wrap_content"
             android:text="KONFIGURASI PIN SENSOR (DINAMIS)"
             android:textColor="@color/text_tertiary"
-            android:textSize="10sp"
+            android:textSize="@dimen/text_10"
             android:textStyle="bold"
-            android:layout_marginBottom="12dp" />
+            android:layout_marginBottom="@dimen/margin_12" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -147,8 +147,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginEnd="8dp"
-                android:layout_marginBottom="12dp"
+                android:layout_marginEnd="@dimen/margin_8"
+                android:layout_marginBottom="@dimen/margin_12"
                 android:hint="Tinggi Tong (cm)">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etDetailTinggiTong"
@@ -162,8 +162,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                android:layout_marginBottom="12dp"
+                android:layout_marginStart="@dimen/margin_8"
+                android:layout_marginBottom="@dimen/margin_12"
                 android:hint="Batas Penuh (cm)">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etDetailBatasPenuh"
@@ -185,21 +185,21 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:layout_marginEnd="8dp">
+                android:layout_marginEnd="@dimen/margin_8">
                 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Organik"
-                    android:textSize="12sp"
+                    android:textSize="@dimen/text_12"
                     android:textColor="#16A34A"
-                    android:layout_marginBottom="4dp" />
+                    android:layout_marginBottom="@dimen/margin_4" />
                     
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginBottom="@dimen/margin_8"
                     android:hint="Sensor Penuh (Trig)">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etDetailTrigOrg"
@@ -212,7 +212,7 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginBottom="@dimen/margin_8"
                     android:hint="Sensor Penuh (Echo)">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etDetailEchoOrg"
@@ -225,7 +225,7 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginBottom="@dimen/margin_8"
                     android:hint="Sensor Tangan (Trig)">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etDetailTrigLuarOrg"
@@ -238,7 +238,7 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginBottom="@dimen/margin_8"
                     android:hint="Sensor Tangan (Echo)">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etDetailEchoLuarOrg"
@@ -266,21 +266,21 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:layout_marginStart="8dp">
+                android:layout_marginStart="@dimen/margin_8">
                 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Non-Organik"
-                    android:textSize="12sp"
+                    android:textSize="@dimen/text_12"
                     android:textColor="#2563EB"
-                    android:layout_marginBottom="4dp" />
+                    android:layout_marginBottom="@dimen/margin_4" />
                     
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginBottom="@dimen/margin_8"
                     android:hint="Sensor Penuh (Trig)">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etDetailTrigNonOrg"
@@ -293,7 +293,7 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginBottom="@dimen/margin_8"
                     android:hint="Sensor Penuh (Echo)">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etDetailEchoNonOrg"
@@ -306,7 +306,7 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginBottom="@dimen/margin_8"
                     android:hint="Sensor Tangan (Trig)">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etDetailTrigLuarNonOrg"
@@ -319,7 +319,7 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginBottom="@dimen/margin_8"
                     android:hint="Sensor Tangan (Echo)">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etDetailEchoLuarNonOrg"
@@ -350,13 +350,13 @@
             android:text="Update Konfigurasi"
             android:textColor="#10B981"
             app:strokeColor="#10B981"
-            android:layout_marginTop="8dp" />
+            android:layout_marginTop="@dimen/margin_8" />
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="1dp"
+            android:layout_height="@dimen/margin_1"
             android:background="#F3F4F6"
-            android:layout_marginVertical="24dp" />
+            android:layout_marginVertical="@dimen/margin_24" />
 
         <!-- Provisioning Section -->
         <TextView
@@ -364,20 +364,20 @@
             android:layout_height="wrap_content"
             android:text="WIFI PROVISIONING (BLUETOOTH)"
             android:textColor="@color/text_tertiary"
-            android:textSize="10sp"
+            android:textSize="@dimen/text_10"
             android:textStyle="bold"
-            android:layout_marginBottom="12dp" />
+            android:layout_marginBottom="@dimen/margin_12" />
 
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Nama WiFi (SSID)"
-            app:boxCornerRadiusBottomEnd="12dp"
-            app:boxCornerRadiusBottomStart="12dp"
-            app:boxCornerRadiusTopEnd="12dp"
-            app:boxCornerRadiusTopStart="12dp"
-            android:layout_marginBottom="12dp">
+            app:boxCornerRadiusBottomEnd="@dimen/margin_12"
+            app:boxCornerRadiusBottomStart="@dimen/margin_12"
+            app:boxCornerRadiusTopEnd="@dimen/margin_12"
+            app:boxCornerRadiusTopStart="@dimen/margin_12"
+            android:layout_marginBottom="@dimen/margin_12">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etSsid"
                 android:layout_width="match_parent"
@@ -390,11 +390,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Sandi WiFi"
-            app:boxCornerRadiusBottomEnd="12dp"
-            app:boxCornerRadiusBottomStart="12dp"
-            app:boxCornerRadiusTopEnd="12dp"
-            app:boxCornerRadiusTopStart="12dp"
-            android:layout_marginBottom="16dp"
+            app:boxCornerRadiusBottomEnd="@dimen/margin_12"
+            app:boxCornerRadiusBottomStart="@dimen/margin_12"
+            app:boxCornerRadiusTopEnd="@dimen/margin_12"
+            app:boxCornerRadiusTopStart="@dimen/margin_12"
+            android:layout_marginBottom="@dimen/margin_16"
             app:passwordToggleEnabled="true">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etPassword"
@@ -406,11 +406,11 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSendConfig"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="@dimen/margin_56"
             android:text="Kirim via Bluetooth"
             android:textAllCaps="false"
             android:textStyle="bold"
-            app:cornerRadius="12dp"
+            app:cornerRadius="@dimen/margin_12"
             app:backgroundTint="#3B82F6" />
 
     </LinearLayout>

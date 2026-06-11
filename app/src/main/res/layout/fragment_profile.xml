@@ -10,7 +10,7 @@
     <FrameLayout
         android:id="@+id/headerBlockProfile"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="@dimen/margin_200"
         android:background="@drawable/header_gradient_bg"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -22,14 +22,14 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="32dp"
+        android:layout_marginStart="@dimen/margin_32"
         app:layout_constraintTop_toTopOf="@id/headerBlockProfile"
         app:layout_constraintBottom_toBottomOf="@id/headerBlockProfile"
         app:layout_constraintVertical_bias="0.4"> <!-- Slightly above center due to rounded corners -->
 
         <RelativeLayout
-            android:layout_width="64dp"
-            android:layout_height="64dp">
+            android:layout_width="@dimen/margin_64"
+            android:layout_height="@dimen/margin_64">
             
             <!-- Avatar Background: glassmorphism style (white 20% alpha) -->
             <FrameLayout
@@ -37,7 +37,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/bg_circle_glass"
-                android:padding="2dp">
+                android:padding="@dimen/margin_2">
                 
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/ivUserAvatar"
@@ -45,7 +45,7 @@
                     android:layout_height="match_parent"
                     android:src="@drawable/ic_profile"
                     app:tint="@color/white"
-                    android:padding="12dp"
+                    android:padding="@dimen/margin_12"
                     android:scaleType="centerCrop"
                     app:shapeAppearanceOverlay="@style/CircleImageView" />
             </FrameLayout>
@@ -53,13 +53,13 @@
             <!-- Edit Icon Badge -->
             <FrameLayout
                 android:id="@+id/flEditPhoto"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="@dimen/margin_20"
+                android:layout_height="@dimen/margin_20"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentEnd="true"
                 android:background="@drawable/bg_circle_white"
-                android:padding="3dp"
-                android:elevation="2dp"
+                android:padding="@dimen/margin_3"
+                android:elevation="@dimen/margin_2"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?android:attr/selectableItemBackgroundBorderless">
@@ -75,7 +75,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginStart="16dp">
+            android:layout_marginStart="@dimen/margin_16">
 
             <TextView
                 android:id="@+id/tvProfileName"
@@ -84,7 +84,7 @@
                 android:text="Nama Pengguna"
                 android:textColor="@color/white"
                 android:textStyle="bold"
-                android:textSize="20sp" />
+                android:textSize="@dimen/text_20" />
 
             <TextView
                 android:id="@+id/tvProfileEmail"
@@ -92,7 +92,7 @@
                 android:layout_height="wrap_content"
                 android:text="email@contoh.com"
                 android:textColor="#A7F3D0" 
-                android:textSize="14sp" />
+                android:textSize="@dimen/text_14" />
 
             <TextView
                 android:id="@+id/tvProfilePhone"
@@ -100,8 +100,8 @@
                 android:layout_height="wrap_content"
                 android:text="08123456789"
                 android:textColor="#D1FAE5" 
-                android:textSize="12sp"
-                android:layout_marginTop="2dp"
+                android:textSize="@dimen/text_12"
+                android:layout_marginTop="@dimen/margin_2"
                 android:visibility="gone" />
             
         </LinearLayout>
@@ -113,9 +113,9 @@
         android:fillViewport="true"
         app:layout_constraintTop_toBottomOf="@id/headerBlockProfile"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginTop="-48dp"
+        android:layout_marginTop="@dimen/margin_minus_48"
         android:clipToPadding="false"
-        android:paddingBottom="24dp">
+        android:paddingBottom="@dimen/margin_24">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -128,10 +128,10 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="24dp"
-                app:cardCornerRadius="24dp"
+                android:layout_marginHorizontal="@dimen/margin_24"
+                app:cardCornerRadius="@dimen/margin_24"
                 app:cardElevation="0dp"
-                app:strokeWidth="1dp"
+                app:strokeWidth="@dimen/margin_1"
                 app:strokeColor="#f1f3f5"
                 app:cardBackgroundColor="@color/bg_card">
 
@@ -139,7 +139,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingVertical="8dp">
+                    android:paddingVertical="@dimen/margin_8">
 
                     <!-- Menu Item: Edit Profil -->
                     <LinearLayout
@@ -147,35 +147,35 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:paddingHorizontal="16dp"
-                        android:paddingVertical="12dp"
+                        android:paddingHorizontal="@dimen/margin_16"
+                        android:paddingVertical="@dimen/margin_12"
                         android:gravity="center_vertical"
                         android:clickable="true"
                         android:focusable="true">
 
                         <ImageView
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
+                            android:layout_width="@dimen/margin_40"
+                            android:layout_height="@dimen/margin_40"
                             android:background="@drawable/bg_rounded_light_blue"
                             android:src="@android:drawable/ic_menu_edit"
                             app:tint="#3B82F6"
-                            android:padding="8dp" />
+                            android:padding="@dimen/margin_8" />
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginStart="16dp"
+                            android:layout_marginStart="@dimen/margin_16"
                             android:text="Edit Profil"
                             android:textColor="@color/text_primary"
-                            android:textSize="14sp"
+                            android:textSize="@dimen/text_14"
                             android:textStyle="bold" />
                             
                     </LinearLayout>
 
                     <View
                         android:layout_width="match_parent"
-                        android:layout_height="1dp"
+                        android:layout_height="@dimen/margin_1"
                         android:background="#F3F4F6" />
 
                     <!-- Menu Item: Pengaturan Notifikasi -->
@@ -184,35 +184,35 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:paddingHorizontal="16dp"
-                        android:paddingVertical="12dp"
+                        android:paddingHorizontal="@dimen/margin_16"
+                        android:paddingVertical="@dimen/margin_12"
                         android:gravity="center_vertical"
                         android:clickable="true"
                         android:focusable="true">
 
                         <ImageView
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
+                            android:layout_width="@dimen/margin_40"
+                            android:layout_height="@dimen/margin_40"
                             android:background="@drawable/bg_rounded_light_purple"
                             android:src="@android:drawable/ic_popup_reminder"
                             app:tint="#8B5CF6"
-                            android:padding="8dp" />
+                            android:padding="@dimen/margin_8" />
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginStart="16dp"
+                            android:layout_marginStart="@dimen/margin_16"
                             android:text="Pengaturan Notifikasi"
                             android:textColor="@color/text_primary"
-                            android:textSize="14sp"
+                            android:textSize="@dimen/text_14"
                             android:textStyle="bold" />
                             
                     </LinearLayout>
 
                     <View
                         android:layout_width="match_parent"
-                        android:layout_height="1dp"
+                        android:layout_height="@dimen/margin_1"
                         android:background="#F3F4F6" />
 
                     <!-- Menu Item: Keamanan & Password -->
@@ -221,28 +221,28 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:paddingHorizontal="16dp"
-                        android:paddingVertical="12dp"
+                        android:paddingHorizontal="@dimen/margin_16"
+                        android:paddingVertical="@dimen/margin_12"
                         android:gravity="center_vertical"
                         android:clickable="true"
                         android:focusable="true">
 
                         <ImageView
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
+                            android:layout_width="@dimen/margin_40"
+                            android:layout_height="@dimen/margin_40"
                             android:background="@drawable/bg_rounded_light_orange"
                             android:src="@android:drawable/ic_lock_idle_lock"
                             app:tint="#F97316"
-                            android:padding="8dp" />
+                            android:padding="@dimen/margin_8" />
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginStart="16dp"
+                            android:layout_marginStart="@dimen/margin_16"
                             android:text="Keamanan &amp; Password"
                             android:textColor="@color/text_primary"
-                            android:textSize="14sp"
+                            android:textSize="@dimen/text_14"
                             android:textStyle="bold" />
                             
                     </LinearLayout>
@@ -254,12 +254,12 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="24dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="24dp"
+                android:layout_marginHorizontal="@dimen/margin_24"
+                android:layout_marginTop="@dimen/margin_16"
+                android:layout_marginBottom="@dimen/margin_16"
+                app:cardCornerRadius="@dimen/margin_24"
                 app:cardElevation="0dp"
-                app:strokeWidth="1dp"
+                app:strokeWidth="@dimen/margin_1"
                 app:strokeColor="#f1f3f5"
                 app:cardBackgroundColor="@color/bg_card">
 
@@ -269,28 +269,28 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingHorizontal="16dp"
-                    android:paddingVertical="12dp"
+                    android:paddingHorizontal="@dimen/margin_16"
+                    android:paddingVertical="@dimen/margin_12"
                     android:gravity="center_vertical"
                     android:clickable="true"
                     android:focusable="true">
 
                     <ImageView
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        android:layout_width="@dimen/margin_40"
+                        android:layout_height="@dimen/margin_40"
                         android:background="@drawable/bg_rounded_light_red"
                         android:src="@drawable/ic_logout"
                         app:tint="#EF4444"
-                        android:padding="8dp" />
+                        android:padding="@dimen/margin_8" />
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginStart="16dp"
+                        android:layout_marginStart="@dimen/margin_16"
                         android:text="Keluar Akun"
                         android:textColor="#EF4444"
-                        android:textSize="14sp"
+                        android:textSize="@dimen/text_14"
                         android:textStyle="bold" />
                 </LinearLayout>
 

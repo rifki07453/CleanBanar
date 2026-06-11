@@ -4,25 +4,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingStart="16dp"
-    android:paddingEnd="16dp">
+    android:paddingStart="@dimen/margin_16"
+    android:paddingEnd="@dimen/margin_16">
 
     <!-- Timeline Column (Straight Gray Line) -->
     <View
         android:id="@+id/timelineLine"
-        android:layout_width="2dp"
+        android:layout_width="@dimen/margin_2"
         android:layout_height="0dp"
         android:background="#F3F4F6"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginStart="14dp" />
+        android:layout_marginStart="@dimen/margin_14" />
 
     <!-- Timeline Dot with White Ring Overlapping the Line -->
     <View
         android:id="@+id/timelineDot"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
+        android:layout_width="@dimen/margin_16"
+        android:layout_height="@dimen/margin_16"
         android:background="@drawable/dot_timeline_green"
         app:layout_constraintBottom_toBottomOf="@id/topGuideline"
         app:layout_constraintEnd_toEndOf="@id/timelineLine"
@@ -35,19 +35,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_begin="32dp" />
+        app:layout_constraintGuide_begin="@dimen/margin_32" />
 
     <!-- Timeline Card (Detail) -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/historyCard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="16dp"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="1dp"
-        app:strokeWidth="1dp"
+        android:layout_marginStart="@dimen/margin_24"
+        android:layout_marginTop="@dimen/margin_8"
+        android:layout_marginBottom="@dimen/margin_16"
+        app:cardCornerRadius="@dimen/margin_16"
+        app:cardElevation="@dimen/margin_1"
+        app:strokeWidth="@dimen/margin_1"
         app:strokeColor="#F3F4F6"
         app:cardBackgroundColor="@color/bg_card"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -59,7 +59,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="@dimen/margin_16">
 
             <!-- Row 1: Header Card (Badge & Time) -->
             <LinearLayout
@@ -73,11 +73,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@drawable/bg_badge_green"
-                    android:paddingHorizontal="10dp"
-                    android:paddingVertical="4dp"
+                    android:paddingHorizontal="@dimen/margin_10"
+                    android:paddingVertical="@dimen/margin_4"
                     android:text="DIKOSONGKAN"
                     android:textColor="#059669" 
-                    android:textSize="10sp"
+                    android:textSize="@dimen/text_10"
                     android:textStyle="bold" />
 
                 <!-- Flexible space between badge and time -->
@@ -92,7 +92,7 @@
                     android:layout_height="wrap_content"
                     android:text="09:12 AM"
                     android:textColor="@color/text_tertiary"
-                    android:textSize="11sp"
+                    android:textSize="@dimen/text_11"
                     android:typeface="monospace" />
             </LinearLayout>
 
@@ -101,10 +101,10 @@
                 android:id="@+id/tvTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="@dimen/margin_12"
                 android:text="Sampah Organik"
                 android:textColor="@color/text_primary"
-                android:textSize="14sp"
+                android:textSize="@dimen/text_14"
                 android:textStyle="bold" />
 
             <!-- Row 3: Deskripsi -->
@@ -112,19 +112,19 @@
                 android:id="@+id/tvDetails"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:lineSpacingExtra="2dp"
+                android:layout_marginTop="@dimen/margin_4"
+                android:lineSpacingExtra="@dimen/margin_2"
                 android:text="Notifikasi dikirim ke petugas kebersihan untuk pengangkutan."
                 android:textColor="@color/text_secondary"
-                android:textSize="12sp" />
+                android:textSize="@dimen/text_12" />
 
             <!-- Row 4: Footer Divider & Date -->
             <View
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
+                android:layout_height="@dimen/margin_1"
                 android:background="#F3F4F6"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="12dp" />
+                android:layout_marginTop="@dimen/margin_16"
+                android:layout_marginBottom="@dimen/margin_12" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -133,8 +133,8 @@
                 android:gravity="center_vertical">
 
                 <ImageView
-                    android:layout_width="14dp"
-                    android:layout_height="14dp"
+                    android:layout_width="@dimen/margin_14"
+                    android:layout_height="@dimen/margin_14"
                     android:src="@android:drawable/ic_menu_today"
                     app:tint="@color/text_tertiary" />
 
@@ -142,10 +142,10 @@
                     android:id="@+id/tvDate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
+                    android:layout_marginStart="@dimen/margin_6"
                     android:text="Hari ini, 24 Mart"
                     android:textColor="@color/text_tertiary"
-                    android:textSize="11sp" />
+                    android:textSize="@dimen/text_11" />
             </LinearLayout>
 
         </LinearLayout>

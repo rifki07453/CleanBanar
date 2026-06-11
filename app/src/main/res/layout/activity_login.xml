@@ -14,18 +14,18 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center"
-        android:paddingTop="48dp"
-        android:paddingBottom="48dp"
+        android:paddingTop="@dimen/margin_48"
+        android:paddingBottom="@dimen/margin_48"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <ImageView
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="@dimen/margin_100"
+            android:layout_height="@dimen/margin_100"
             android:src="@mipmap/ic_logo_cleanbanar"
             android:scaleType="fitCenter"
-            android:layout_marginBottom="24dp"
+            android:layout_marginBottom="@dimen/margin_24"
             android:contentDescription="Logo CleanBanar" />
 
         <TextView
@@ -33,7 +33,7 @@
             android:layout_height="wrap_content"
             android:text="CleanBanar"
             android:textStyle="bold"
-            android:textSize="32sp"
+            android:textSize="@dimen/text_32"
             android:textColor="@color/text_primary" />
 
         <TextView
@@ -42,7 +42,7 @@
             android:text="Smart Bin Monitoring System"
             android:textColor="@color/text_secondary"
             android:textStyle="bold"
-            android:layout_marginTop="8dp" />
+            android:layout_marginTop="@dimen/margin_8" />
     </LinearLayout>
 
     <!-- Bottom Card -->
@@ -53,56 +53,56 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:cardCornerRadius="40dp"
-        app:cardElevation="16dp"
+        app:cardCornerRadius="@dimen/margin_40"
+        app:cardElevation="@dimen/margin_16"
         app:cardBackgroundColor="@color/bg_card"
-        android:layout_marginBottom="-40dp">
+        android:layout_marginBottom="@dimen/margin_minus_40">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:padding="32dp">
+            android:padding="@dimen/margin_32">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Masuk ke Akun Anda"
-                android:textSize="20sp"
+                android:textSize="@dimen/text_20"
                 android:textStyle="bold"
                 android:textColor="@color/text_primary"
-                android:layout_marginBottom="24dp" />
+                android:layout_marginBottom="@dimen/margin_24" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="EMAIL"
-                android:textSize="12sp"
+                android:textSize="@dimen/text_12"
                 android:textStyle="bold"
                 android:textColor="@color/text_secondary"
-                android:layout_marginBottom="8dp" />
+                android:layout_marginBottom="@dimen/margin_8" />
 
             <EditText
                 android:id="@+id/etEmail"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="@dimen/margin_56"
                 android:inputType="textEmailAddress"
                 android:background="@drawable/edit_text_bg"
                 android:hint="nama@email.com"
-                android:paddingStart="20dp"
-                android:paddingEnd="16dp"
+                android:paddingStart="@dimen/margin_20"
+                android:paddingEnd="@dimen/margin_16"
                 android:textColorHint="@color/text_tertiary"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="@dimen/margin_16"
                 android:autofillHints="emailAddress" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="PASSWORD"
-                android:textSize="12sp"
+                android:textSize="@dimen/text_12"
                 android:textStyle="bold"
                 android:textColor="@color/text_secondary"
-                android:layout_marginBottom="8dp" />
+                android:layout_marginBottom="@dimen/margin_8" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
@@ -111,17 +111,17 @@
                 app:endIconMode="password_toggle"
                 app:endIconTint="@color/text_tertiary"
                 app:boxBackgroundMode="none"
-                android:layout_marginBottom="12dp">
+                android:layout_marginBottom="@dimen/margin_12">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etPassword"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
+                    android:layout_height="@dimen/margin_56"
                     android:inputType="textPassword"
                     android:background="@drawable/edit_text_bg"
                     android:hint="••••••••"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="16dp"
+                    android:paddingStart="@dimen/margin_20"
+                    android:paddingEnd="@dimen/margin_16"
                     android:textColorHint="@color/text_tertiary"
                     android:autofillHints="password" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -133,10 +133,10 @@
                 android:layout_gravity="end"
                 android:text="Lupa Password?"
                 android:textColor="@color/emerald_600"
-                android:textSize="12sp"
+                android:textSize="@dimen/text_12"
                 android:textStyle="bold"
-                android:layout_marginBottom="24dp"
-                android:padding="4dp"
+                android:layout_marginBottom="@dimen/margin_24"
+                android:padding="@dimen/margin_4"
                 android:clickable="true"
                 android:focusable="true" />
 
@@ -148,13 +148,13 @@
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:background="@drawable/bg_badge_red"
-                android:padding="12dp"
-                android:layout_marginBottom="24dp"
+                android:padding="@dimen/margin_12"
+                android:layout_marginBottom="@dimen/margin_24"
                 android:visibility="gone">
                 
                 <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="@dimen/margin_20"
+                    android:layout_height="@dimen/margin_20"
                     android:src="@android:drawable/ic_dialog_alert"
                     app:tint="#EF4444" />
                     
@@ -162,21 +162,21 @@
                     android:id="@+id/tvErrorMessage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="@dimen/margin_8"
                     android:text="Login gagal"
                     android:textColor="#EF4444"
-                    android:textSize="12sp"
+                    android:textSize="@dimen/text_12"
                     android:textStyle="bold" />
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnLogin"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="@dimen/margin_56"
                 android:text="Masuk Sekarang"
                 android:textColor="@color/white"
                 android:textStyle="bold"
-                app:cornerRadius="12dp"
+                app:cornerRadius="@dimen/margin_12"
                 app:backgroundTint="@color/emerald_600" />
 
         </LinearLayout>

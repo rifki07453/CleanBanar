@@ -6,13 +6,13 @@
     android:background="@drawable/bg_rounded_light_blue"
     android:backgroundTint="@color/bg_card"
     android:orientation="vertical"
-    android:padding="24dp">
+    android:padding="@dimen/margin_24">
 
     <View
-        android:layout_width="40dp"
-        android:layout_height="4dp"
+        android:layout_width="@dimen/margin_40"
+        android:layout_height="@dimen/margin_4"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="@dimen/margin_16"
         android:background="#E5E7EB" />
 
     <TextView
@@ -20,25 +20,25 @@
         android:layout_height="wrap_content"
         android:text="Manajemen Perangkat"
         android:textColor="@color/text_primary"
-        android:textSize="18sp"
+        android:textSize="@dimen/text_18"
         android:textStyle="bold"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="@dimen/margin_16" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvDevices"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:layout_marginBottom="16dp"
+        android:layout_height="@dimen/margin_300"
+        android:layout_marginBottom="@dimen/margin_16"
         android:clipToPadding="false"
-        android:paddingBottom="16dp" />
+        android:paddingBottom="@dimen/margin_16" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnAddDevice"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="@dimen/margin_56"
         android:text="+ Tambah Perangkat Baru"
         android:textColor="@color/white"
         app:backgroundTint="#10B981"
-        app:cornerRadius="12dp"
+        app:cornerRadius="@dimen/margin_12"
         app:elevation="0dp" />
 </LinearLayout>
