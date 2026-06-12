@@ -37,10 +37,10 @@ object FirebaseManager {
         val ref = rootRef?.child("devices")?.child(deviceId)?.child("bins")?.child(binType) ?: return null
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val persentase = snapshot.child("persentaseIsi").getValue(Int::class.java) ?: 0
+                val persentase = snapshot.child("persentaseIsi").getValue(Any::class.java)?.toString()?.toDoubleOrNull()?.toInt() ?: 0
                 val status = snapshot.child("status").getValue(String::class.java) ?: "Normal"
-                val terakhirUpdate = snapshot.child("terakhirUpdate").getValue(Long::class.java) ?: 0L
-                val terakhirDikosongkan = snapshot.child("terakhirDikosongkan").getValue(Long::class.java) ?: 0L
+                val terakhirUpdate = snapshot.child("terakhirUpdate").getValue(Any::class.java)?.toString()?.toDoubleOrNull()?.toLong() ?: 0L
+                val terakhirDikosongkan = snapshot.child("terakhirDikosongkan").getValue(Any::class.java)?.toString()?.toDoubleOrNull()?.toLong() ?: 0L
                 callback(persentase, status, terakhirUpdate, terakhirDikosongkan)
             }
             override fun onCancelled(error: DatabaseError) {
@@ -389,10 +389,10 @@ object FirebaseManager {
                 for (child in snapshot.children) {
                     stats.add(mapOf(
                         "tanggal" to (child.key ?: ""),
-                        "organik" to (child.child("organik").getValue(Int::class.java) ?: 0),
-                        "nonOrganik" to (child.child("nonOrganik").getValue(Int::class.java) ?: 0),
-                        "organikEmptyCount" to (child.child("organikEmptyCount").getValue(Int::class.java) ?: 0),
-                        "nonOrganikEmptyCount" to (child.child("nonOrganikEmptyCount").getValue(Int::class.java) ?: 0)
+                        "organik" to (child.child("organik").getValue(Any::class.java)?.toString()?.toDoubleOrNull()?.toInt() ?: 0),
+                        "nonOrganik" to (child.child("nonOrganik").getValue(Any::class.java)?.toString()?.toDoubleOrNull()?.toInt() ?: 0),
+                        "organikEmptyCount" to (child.child("organikEmptyCount").getValue(Any::class.java)?.toString()?.toDoubleOrNull()?.toInt() ?: 0),
+                        "nonOrganikEmptyCount" to (child.child("nonOrganikEmptyCount").getValue(Any::class.java)?.toString()?.toDoubleOrNull()?.toInt() ?: 0)
                     ))
                 }
                 callback(stats)
@@ -437,7 +437,7 @@ object FirebaseManager {
         
         ref.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val currentMax = snapshot.getValue(Int::class.java) ?: 0
+                val currentMax = snapshot.getValue(Any::class.java)?.toString()?.toDoubleOrNull()?.toInt() ?: 0
                 if (percentage > currentMax) {
                     ref.setValue(percentage)
                 }
@@ -452,7 +452,7 @@ object FirebaseManager {
         val ref = rootRef?.child("statistics")?.child("daily")?.child(dateKey)?.child(field) ?: return
         ref.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val currentCount = snapshot.getValue(Int::class.java) ?: 0
+                val currentCount = snapshot.getValue(Any::class.java)?.toString()?.toDoubleOrNull()?.toInt() ?: 0
                 ref.setValue(currentCount + 1)
             }
             override fun onCancelled(error: DatabaseError) {}

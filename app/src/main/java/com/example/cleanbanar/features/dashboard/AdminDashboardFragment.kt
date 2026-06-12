@@ -308,9 +308,14 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
                 .show()
         }
 
-        val etSsid = view.findViewById<TextInputEditText>(R.id.etSsid)
+        val etSsid = view.findViewById<com.google.android.material.textfield.MaterialAutoCompleteTextView>(R.id.etSsid)
         val etPassword = view.findViewById<TextInputEditText>(R.id.etPassword)
         val btnSendConfig = view.findViewById<MaterialButton>(R.id.btnSendConfig)
+        val btnScanWifiDevice = view.findViewById<MaterialButton>(R.id.btnScanWifiDevice)
+
+        btnScanWifiDevice.setOnClickListener {
+            checkBluetoothAndScan(etSsid)
+        }
 
         btnSendConfig.setOnClickListener {
             val ssid = etSsid.text.toString().trim()
@@ -363,6 +368,71 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
                                 Toast.makeText(context, "Gagal mengirim data", Toast.LENGTH_SHORT).show()
                             }
                         } else {
+                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+            .setNegativeButton("Batal", null)
+            .show()
+    }
+
+    @Suppress("DEPRECATION")
+    private fun checkBluetoothAndScan(etSsid: com.google.android.material.textfield.MaterialAutoCompleteTextView) {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.ACCESS_FINE_LOCATION), 1001)
+            return
+        }
+
+        val devices = bluetoothHelper.getPairedDevices()
+        if (devices.isEmpty()) {
+            Toast.makeText(context, "Tidak ada perangkat Bluetooth yang terpasang.", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        val deviceNames = devices.map { it.name ?: "Unknown (${it.address})" }.toTypedArray()
+
+        android.app.AlertDialog.Builder(requireContext())
+            .setTitle("Pilih Perangkat untuk Scan WiFi")
+            .setItems(deviceNames) { _, which ->
+                val selectedDevice = devices[which]
+                Toast.makeText(context, "Terhubung ke ${selectedDevice.name} untuk scan...", Toast.LENGTH_SHORT).show()
+                
+                bluetoothHelper.connect(selectedDevice) { success, message ->
+                    if (success) {
+                        if (bluetoothHelper.sendData("SCAN_WIFI\n")) {
+                            activity?.runOnUiThread {
+                                Toast.makeText(context, "Memindai WiFi di sekitar alat (± 5 detik)...", Toast.LENGTH_LONG).show()
+                            }
+                            
+                            // Membaca balasan dari ESP32 (proses ini nge-block thread, tapi sudah berada di background thread dari dalam connect)
+                            val response = bluetoothHelper.readStringUntilNewline(8000)
+                            
+                            activity?.runOnUiThread {
+                                bluetoothHelper.close()
+                                if (response != null && response.startsWith("WIFI_LIST:")) {
+                                    val wifiString = response.replace("WIFI_LIST:", "").trim()
+                                    if (wifiString.isNotEmpty()) {
+                                        val wifiList = wifiString.split(",")
+                                        val adapter = android.widget.ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, wifiList)
+                                        etSsid.setAdapter(adapter)
+                                        etSsid.showDropDown()
+                                        Toast.makeText(context, "Ditemukan ${wifiList.size} jaringan WiFi!", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        Toast.makeText(context, "Tidak ada WiFi yang ditemukan.", Toast.LENGTH_SHORT).show()
+                                    }
+                                } else {
+                                    Toast.makeText(context, "Gagal mendapatkan daftar WiFi atau Timeout.", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        } else {
+                            activity?.runOnUiThread {
+                                Toast.makeText(context, "Gagal mengirim perintah scan.", Toast.LENGTH_SHORT).show()
+                                bluetoothHelper.close()
+                            }
+                        }
+                    } else {
+                        activity?.runOnUiThread {
                             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                         }
                     }

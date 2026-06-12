@@ -105,6 +105,36 @@ class BluetoothHelper {
     }
 
     /**
+     * Membaca string dari inputStream sampai menemukan karakter newline (\n) atau timeout.
+     */
+    fun readStringUntilNewline(timeoutMillis: Long = 8000): String? {
+        val inputStream = bluetoothSocket?.inputStream ?: return null
+        val buffer = ByteArray(1024)
+        val stringBuilder = StringBuilder()
+        val startTime = System.currentTimeMillis()
+
+        try {
+            while (System.currentTimeMillis() - startTime < timeoutMillis) {
+                if (inputStream.available() > 0) {
+                    val bytes = inputStream.read(buffer)
+                    val chunk = String(buffer, 0, bytes)
+                    stringBuilder.append(chunk)
+                    
+                    if (stringBuilder.contains("\n")) {
+                        return stringBuilder.toString().trim()
+                    }
+                } else {
+                    Thread.sleep(50)
+                }
+            }
+            Log.w(TAG, "Timeout membaca data dari Bluetooth")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error saat membaca data: ${e.message}")
+        }
+        return null // Timeout atau error
+    }
+
+    /**
      * Menutup koneksi bluetooth dan stream data.
      */
     fun close() {
