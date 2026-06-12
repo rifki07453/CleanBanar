@@ -353,7 +353,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
                 bluetoothHelper.connect(selectedDevice) { success, message ->
                     activity?.runOnUiThread {
                         if (success) {
-                            val configStr = "SET_WIFI:$ssid,$pass\n"
+                            val configStr = "SET_WIFI:$ssid,$pass,$deviceId\n"
                             if (bluetoothHelper.sendData(configStr)) {
                                 Toast.makeText(context, "Konfigurasi terkirim!", Toast.LENGTH_LONG).show()
                                 android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
