@@ -308,14 +308,11 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
                 .show()
         }
 
-        val etSsid = view.findViewById<TextInputEditText>(R.id.etSsid)
+        val etSsid = view.findViewById<com.google.android.material.textfield.MaterialAutoCompleteTextView>(R.id.etSsid)
         val etPassword = view.findViewById<TextInputEditText>(R.id.etPassword)
         val btnSendConfig = view.findViewById<MaterialButton>(R.id.btnSendConfig)
-        val btnScanWifiDevice = view.findViewById<MaterialButton>(R.id.btnScanWifiDevice)
 
-        btnScanWifiDevice.setOnClickListener {
-            checkBluetoothAndScan(etSsid, device.id)
-        }
+        setupWifiDropdown(etSsid)
 
         btnSendConfig.setOnClickListener {
             val ssid = etSsid.text.toString().trim()
@@ -345,136 +342,69 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
             return
         }
 
-        val targetDevice = devices.find { it.name?.contains(deviceId, ignoreCase = true) == true || it.name?.contains("CleanBanar", ignoreCase = true) == true }
-            ?: devices.first() // Fallback ke device pertama jika tidak ketemu namanya
+        val deviceNames = devices.map { it.name ?: "Unknown (${it.address})" }.toTypedArray()
 
-        Toast.makeText(context, "Menghubungkan ke ${targetDevice.name}...", Toast.LENGTH_SHORT).show()
-        
-        bluetoothHelper.connect(targetDevice) { success, message ->
-            activity?.runOnUiThread {
-                if (success) {
-                    val configStr = "SET_WIFI:$ssid,$pass\n"
-                    if (bluetoothHelper.sendData(configStr)) {
-                        Toast.makeText(context, "Konfigurasi terkirim!", Toast.LENGTH_LONG).show()
-                        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                            bluetoothHelper.close()
-                        }, 1500)
-                    } else {
-                        Toast.makeText(context, "Gagal mengirim data", Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
-
-    @Suppress("DEPRECATION")
-    private fun checkBluetoothAndScan(etSsid: TextInputEditText, deviceId: String) {
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(arrayOf(Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.ACCESS_FINE_LOCATION), 1001)
-            return
-        }
-
-        val devices = bluetoothHelper.getPairedDevices()
-        if (devices.isEmpty()) {
-            Toast.makeText(context, "Tidak ada perangkat Bluetooth yang terpasang.", Toast.LENGTH_LONG).show()
-            return
-        }
-
-        val targetDevice = devices.find { it.name?.contains(deviceId, ignoreCase = true) == true || it.name?.contains("CleanBanar", ignoreCase = true) == true }
-            ?: devices.first()
-
-        Toast.makeText(context, "Terhubung ke ${targetDevice.name} untuk scan...", Toast.LENGTH_SHORT).show()
-        
-        bluetoothHelper.connect(targetDevice) { success, message ->
-            if (success) {
-                if (bluetoothHelper.sendData("SCAN_WIFI\n")) {
+        android.app.AlertDialog.Builder(requireContext())
+            .setTitle("Pilih Perangkat Bluetooth")
+            .setItems(deviceNames) { _, which ->
+                val selectedDevice = devices[which]
+                Toast.makeText(context, "Menghubungkan ke ${selectedDevice.name}...", Toast.LENGTH_SHORT).show()
+                
+                bluetoothHelper.connect(selectedDevice) { success, message ->
                     activity?.runOnUiThread {
-                        Toast.makeText(context, "Memindai WiFi di sekitar alat (± 5 detik)...", Toast.LENGTH_LONG).show()
-                    }
-                    
-                    val response = bluetoothHelper.readStringUntilNewline(8000)
-                    
-                    activity?.runOnUiThread {
-                        bluetoothHelper.close()
-                        if (response != null && response.startsWith("WIFI_LIST:")) {
-                            val wifiString = response.replace("WIFI_LIST:", "").trim()
-                            if (wifiString.isNotEmpty()) {
-                                val wifiList = wifiString.split(",").map { it.trim() }.filter { it.isNotEmpty() }.distinct()
-                                        
-                                val scrollView = android.widget.ScrollView(requireContext())
-                                val container = android.widget.LinearLayout(requireContext()).apply {
-                                    orientation = android.widget.LinearLayout.VERTICAL
-                                    setPadding(0, 16.dpToPx(), 0, 16.dpToPx())
-                                }
-                                scrollView.addView(container)
-
-                                val dialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
-                                    .setTitle("Jaringan yang tersedia")
-                                    .setView(scrollView)
-                                    .setNegativeButton("Tutup", null)
-                                    .create()
-
-                                for (wifi in wifiList) {
-                                    val itemView = android.widget.LinearLayout(requireContext()).apply {
-                                        orientation = android.widget.LinearLayout.HORIZONTAL
-                                        layoutParams = android.widget.LinearLayout.LayoutParams(
-                                            android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
-                                            android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
-                                        )
-                                        setPadding(24.dpToPx(), 16.dpToPx(), 24.dpToPx(), 16.dpToPx())
-                                        isClickable = true
-                                        val typedValue = android.util.TypedValue()
-                                        requireContext().theme.resolveAttribute(android.R.attr.selectableItemBackground, typedValue, true)
-                                        setBackgroundResource(typedValue.resourceId)
-                                        
-                                        setOnClickListener {
-                                            etSsid.setText(wifi)
-                                            dialog.dismiss()
-                                        }
-                                    }
-                                    
-                                    val icon = android.widget.ImageView(requireContext()).apply {
-                                        setImageResource(R.drawable.ic_wifi_status)
-                                        layoutParams = android.widget.LinearLayout.LayoutParams(24.dpToPx(), 24.dpToPx()).apply {
-                                            marginEnd = 16.dpToPx()
-                                        }
-                                        setColorFilter(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.text_secondary))
-                                    }
-                                    
-                                    val tvSsid = android.widget.TextView(requireContext()).apply {
-                                        text = wifi
-                                        textSize = 16f
-                                        setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.text_primary))
-                                        layoutParams = android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-                                    }
-                                    
-                                    itemView.addView(icon)
-                                    itemView.addView(tvSsid)
-                                    container.addView(itemView)
-                                }
-                                
-                                dialog.show()
-                                Toast.makeText(context, "Ditemukan ${wifiList.size} jaringan WiFi!", Toast.LENGTH_SHORT).show()
+                        if (success) {
+                            val configStr = "SET_WIFI:$ssid,$pass\n"
+                            if (bluetoothHelper.sendData(configStr)) {
+                                Toast.makeText(context, "Konfigurasi terkirim!", Toast.LENGTH_LONG).show()
+                                android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                                    bluetoothHelper.close()
+                                }, 1500)
                             } else {
-                                Toast.makeText(context, "Tidak ada WiFi yang ditemukan di sekitar alat.", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Gagal mengirim data", Toast.LENGTH_SHORT).show()
                             }
                         } else {
-                            Toast.makeText(context, "Gagal mendapatkan daftar WiFi atau Timeout.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                         }
                     }
-                } else {
-                    activity?.runOnUiThread {
-                        Toast.makeText(context, "Gagal mengirim perintah scan.", Toast.LENGTH_SHORT).show()
-                        bluetoothHelper.close()
-                    }
-                }
-            } else {
-                activity?.runOnUiThread {
-                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                 }
             }
+            .setNegativeButton("Batal", null)
+            .show()
+    }
+
+    private fun setupWifiDropdown(etSsid: com.google.android.material.textfield.MaterialAutoCompleteTextView) {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_WIFI_STATE), 1002)
+            // Bisa return jika ingin ketat, tapi kita tetap biarkan user ngetik manual jika izin ditolak
+        } else {
+            val wifiManager = requireContext().applicationContext.getSystemService(android.content.Context.WIFI_SERVICE) as android.net.wifi.WifiManager
+            
+            // 1. Ambil WiFi yang sedang terhubung
+            val info = wifiManager.connectionInfo
+            var currentSsid = info.ssid ?: ""
+            if (currentSsid.startsWith("\"") && currentSsid.endsWith("\"")) {
+                currentSsid = currentSsid.substring(1, currentSsid.length - 1)
+            }
+            if (currentSsid != "<unknown ssid>" && currentSsid.isNotEmpty()) {
+                etSsid.setText(currentSsid)
+            }
+
+            // 2. Ambil daftar WiFi dari hasil scan HP
+            try {
+                val results = wifiManager.scanResults
+                val ssidList = results.mapNotNull { it.SSID }.filter { it.isNotEmpty() }.distinct()
+                if (ssidList.isNotEmpty()) {
+                    val adapter = android.widget.ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, ssidList)
+                    etSsid.setAdapter(adapter)
+                }
+                wifiManager.startScan() // Trigger scan untuk memperbarui data
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+        
+        etSsid.setOnClickListener {
+            etSsid.showDropDown()
         }
     }
 
