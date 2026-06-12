@@ -308,7 +308,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
                 .show()
         }
 
-        val etSsid = view.findViewById<com.google.android.material.textfield.MaterialAutoCompleteTextView>(R.id.etSsid)
+        val etSsid = view.findViewById<TextInputEditText>(R.id.etSsid)
         val etPassword = view.findViewById<TextInputEditText>(R.id.etPassword)
         val btnSendConfig = view.findViewById<MaterialButton>(R.id.btnSendConfig)
         val btnScanWifiDevice = view.findViewById<MaterialButton>(R.id.btnScanWifiDevice)
@@ -370,7 +370,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
     }
 
     @Suppress("DEPRECATION")
-    private fun checkBluetoothAndScan(etSsid: com.google.android.material.textfield.MaterialAutoCompleteTextView, deviceId: String) {
+    private fun checkBluetoothAndScan(etSsid: TextInputEditText, deviceId: String) {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(arrayOf(Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.ACCESS_FINE_LOCATION), 1001)
             return
