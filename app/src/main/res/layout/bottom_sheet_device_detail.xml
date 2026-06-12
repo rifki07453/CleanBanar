@@ -184,6 +184,19 @@
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/margin_12"
+            android:hint="Jarak Tangan (cm)">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etDetailBatasJarakTangan"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

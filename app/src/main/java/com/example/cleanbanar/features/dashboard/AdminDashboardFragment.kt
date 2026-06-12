@@ -161,6 +161,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         val etServoNonOrg = view.findViewById<TextInputEditText>(R.id.etServoNonOrg)
         val etTinggiTong = view.findViewById<TextInputEditText>(R.id.etTinggiTong)
         val etBatasPenuh = view.findViewById<TextInputEditText>(R.id.etBatasPenuh)
+        val etBatasJarakTangan = view.findViewById<TextInputEditText>(R.id.etBatasJarakTangan)
 
         view.findViewById<MaterialButton>(R.id.btnCancel).setOnClickListener {
             dialog.dismiss()
@@ -190,9 +191,10 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
             
             val tinggi = etTinggiTong.text.toString().toDoubleOrNull() ?: 50.0
             val batas = etBatasPenuh.text.toString().toDoubleOrNull() ?: 5.0
+            val jarakTangan = etBatasJarakTangan.text.toString().toDoubleOrNull() ?: 15.0
 
             FirebaseManager.addDevice(id, nama, pins)
-            FirebaseManager.updateDeviceConfig(id, tinggi, batas)
+            FirebaseManager.updateDeviceConfig(id, tinggi, batas, jarakTangan)
             Toast.makeText(requireContext(), "Perangkat ditambahkan", Toast.LENGTH_SHORT).show()
             dialog.dismiss()
             showDeviceListBottomSheet()
@@ -251,6 +253,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         val etDetailServoNonOrg = view.findViewById<TextInputEditText>(R.id.etDetailServoNonOrg)
         val etDetailTinggiTong = view.findViewById<TextInputEditText>(R.id.etDetailTinggiTong)
         val etDetailBatasPenuh = view.findViewById<TextInputEditText>(R.id.etDetailBatasPenuh)
+        val etDetailBatasJarakTangan = view.findViewById<TextInputEditText>(R.id.etDetailBatasJarakTangan)
 
         etDetailTrigOrg.setText(device.config.pins.trigOrganik.toString())
         etDetailEchoOrg.setText(device.config.pins.echoOrganik.toString())
@@ -264,6 +267,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         etDetailServoNonOrg.setText(device.config.pins.servoNonOrganik.toString())
         etDetailTinggiTong.setText(device.config.tinggiTong.toString())
         etDetailBatasPenuh.setText(device.config.batasPenuh.toString())
+        etDetailBatasJarakTangan.setText(device.config.batasJarakTangan.toString())
 
         view.findViewById<MaterialButton>(R.id.btnUpdatePins).setOnClickListener {
             val pins = PinConfig(
@@ -280,9 +284,10 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
             )
             val tinggi = etDetailTinggiTong.text.toString().toDoubleOrNull() ?: 50.0
             val batas = etDetailBatasPenuh.text.toString().toDoubleOrNull() ?: 5.0
+            val jarakTangan = etDetailBatasJarakTangan.text.toString().toDoubleOrNull() ?: 15.0
             
             FirebaseManager.updateDevicePins(device.id, pins)
-            FirebaseManager.updateDeviceConfig(device.id, tinggi, batas)
+            FirebaseManager.updateDeviceConfig(device.id, tinggi, batas, jarakTangan)
             Toast.makeText(requireContext(), "Konfigurasi berhasil diperbarui", Toast.LENGTH_SHORT).show()
         }
 

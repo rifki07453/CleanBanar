@@ -16,7 +16,8 @@ data class PinConfig(
 data class DeviceConfig(
     val pins: PinConfig = PinConfig(),
     val tinggiTong: Double = 50.0,
-    val batasPenuh: Double = 5.0
+    val batasPenuh: Double = 5.0,
+    val batasJarakTangan: Double = 15.0
 )
 
 data class DeviceModel(

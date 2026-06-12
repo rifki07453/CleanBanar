@@ -113,8 +113,9 @@ object FirebaseManager {
                         
                         val tinggiTong = child.child("config").child("tinggiTong").getValue(Any::class.java)?.toString()?.toDoubleOrNull() ?: 50.0
                         val batasPenuh = child.child("config").child("batasPenuh").getValue(Any::class.java)?.toString()?.toDoubleOrNull() ?: 5.0
+                        val batasJarakTangan = child.child("config").child("batasJarakTangan").getValue(Any::class.java)?.toString()?.toDoubleOrNull() ?: 15.0
                         
-                        devices.add(DeviceModel(id, nama, status, terakhir, tipe, DeviceConfig(pins, tinggiTong, batasPenuh)))
+                        devices.add(DeviceModel(id, nama, status, terakhir, tipe, DeviceConfig(pins, tinggiTong, batasPenuh, batasJarakTangan)))
                     } catch (e: Exception) {
                         Log.e(TAG, "Gagal memproses device ${child.key}: ${e.message}")
                     }
@@ -139,6 +140,7 @@ object FirebaseManager {
         ref.child("config").child("pins").setValue(pins)
         ref.child("config").child("tinggiTong").setValue(50.0)
         ref.child("config").child("batasPenuh").setValue(5.0)
+        ref.child("config").child("batasJarakTangan").setValue(15.0)
         ref.child("bins").child("organik").setValue(mapOf("persentaseIsi" to 0, "status" to "Normal", "terakhirUpdate" to 0L, "terakhirDikosongkan" to 0L))
         ref.child("bins").child("nonOrganik").setValue(mapOf("persentaseIsi" to 0, "status" to "Normal", "terakhirUpdate" to 0L, "terakhirDikosongkan" to 0L))
     }
@@ -151,9 +153,10 @@ object FirebaseManager {
         rootRef?.child("devices")?.child(id)?.child("config")?.child("pins")?.setValue(pins)
     }
 
-    fun updateDeviceConfig(id: String, tinggiTong: Double, batasPenuh: Double) {
+    fun updateDeviceConfig(id: String, tinggiTong: Double, batasPenuh: Double, batasJarakTangan: Double) {
         rootRef?.child("devices")?.child(id)?.child("config")?.child("tinggiTong")?.setValue(tinggiTong)
         rootRef?.child("devices")?.child(id)?.child("config")?.child("batasPenuh")?.setValue(batasPenuh)
+        rootRef?.child("devices")?.child(id)?.child("config")?.child("batasJarakTangan")?.setValue(batasJarakTangan)
     }
 
     fun updateDeviceNetworkType(deviceId: String, tipe: String) {
