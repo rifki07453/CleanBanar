@@ -384,7 +384,7 @@
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Scan WiFi dari Alat (ESP32)"
+            android:text="Scan Hotspot dari Alat (ESP32)"
             android:textColor="#3B82F6"
             app:strokeColor="#3B82F6"
             android:layout_marginBottom="@dimen/margin_12" />
