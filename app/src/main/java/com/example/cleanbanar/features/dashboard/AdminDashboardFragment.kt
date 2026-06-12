@@ -77,20 +77,6 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         devicesListener = FirebaseManager.listenDevices { devices ->
             if (!isAdded) return@listenDevices
             cachedDevices = devices
-            
-            val isOnline = devices.any { it.statusKoneksi == "ONLINE" }
-            
-            if (isOnline) {
-                binding.tvDeviceStatusOverview.text = "ONLINE"
-                binding.tvDeviceStatusOverview.setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.green_600))
-                binding.dotStatus.setBackgroundResource(R.drawable.dot_timeline_green)
-                (binding.dotStatus.parent as android.widget.LinearLayout).setBackgroundResource(R.drawable.bg_badge_green)
-            } else {
-                binding.tvDeviceStatusOverview.text = "OFFLINE"
-                binding.tvDeviceStatusOverview.setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.red_600))
-                binding.dotStatus.setBackgroundResource(R.drawable.dot_timeline_red)
-                (binding.dotStatus.parent as android.widget.LinearLayout).setBackgroundResource(R.drawable.badge_red_bg)
-            }
         }
 
 
