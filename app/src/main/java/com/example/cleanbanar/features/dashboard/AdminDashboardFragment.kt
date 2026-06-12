@@ -49,6 +49,12 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
     private var cachedDevices = listOf<DeviceModel>()
     private var lastKnownHistory: List<Map<String, Any>> = emptyList()
 
+    // Untuk retry aksi setelah izin diberikan
+    private var pendingWifiSsidView: com.google.android.material.textfield.MaterialAutoCompleteTextView? = null
+    private var pendingBtSsid: String? = null
+    private var pendingBtPass: String? = null
+    private var pendingBtDeviceId: String? = null
+
     override fun inflateBinding(inflater: LayoutInflater, container: ViewGroup?): FragmentAdminDashboardBinding {
         return FragmentAdminDashboardBinding.inflate(inflater, container, false)
     }
@@ -317,11 +323,19 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
 
     @Suppress("DEPRECATION")
     private fun checkBluetoothAndSend(ssid: String, pass: String, deviceId: String) {
+        pendingBtSsid = ssid
+        pendingBtPass = pass
+        pendingBtDeviceId = deviceId
+
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(arrayOf(Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.ACCESS_FINE_LOCATION), 1001)
             return
         }
 
+        performBluetoothConnectAndSend(ssid, pass, deviceId)
+    }
+
+    private fun performBluetoothConnectAndSend(ssid: String, pass: String, deviceId: String) {
         val devices = bluetoothHelper.getPairedDevices()
         if (devices.isEmpty()) {
             Toast.makeText(context, "Tidak ada perangkat Bluetooth yang terpasang (paired).", Toast.LENGTH_LONG).show()
@@ -359,38 +373,74 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
     }
 
     private fun setupWifiDropdown(etSsid: com.google.android.material.textfield.MaterialAutoCompleteTextView) {
+        pendingWifiSsidView = etSsid
+        
+        val locationManager = requireContext().getSystemService(android.content.Context.LOCATION_SERVICE) as android.location.LocationManager
+        val isGpsEnabled = locationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)
+        if (!isGpsEnabled) {
+            Toast.makeText(requireContext(), "Harap nyalakan GPS/Lokasi di HP Anda untuk memindai daftar WiFi", Toast.LENGTH_LONG).show()
+        }
+
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_WIFI_STATE), 1002)
-            // Bisa return jika ingin ketat, tapi kita tetap biarkan user ngetik manual jika izin ditolak
         } else {
-            val wifiManager = requireContext().applicationContext.getSystemService(android.content.Context.WIFI_SERVICE) as android.net.wifi.WifiManager
-            
-            // 1. Ambil WiFi yang sedang terhubung
-            val info = wifiManager.connectionInfo
-            var currentSsid = info.ssid ?: ""
-            if (currentSsid.startsWith("\"") && currentSsid.endsWith("\"")) {
-                currentSsid = currentSsid.substring(1, currentSsid.length - 1)
-            }
-            if (currentSsid != "<unknown ssid>" && currentSsid.isNotEmpty()) {
-                etSsid.setText(currentSsid)
-            }
-
-            // 2. Ambil daftar WiFi dari hasil scan HP
-            try {
-                val results = wifiManager.scanResults
-                val ssidList = results.mapNotNull { it.SSID }.filter { it.isNotEmpty() }.distinct()
-                if (ssidList.isNotEmpty()) {
-                    val adapter = android.widget.ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, ssidList)
-                    etSsid.setAdapter(adapter)
-                }
-                wifiManager.startScan() // Trigger scan untuk memperbarui data
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+            performWifiScan(etSsid)
         }
         
         etSsid.setOnClickListener {
             etSsid.showDropDown()
+        }
+    }
+
+    private fun performWifiScan(etSsid: com.google.android.material.textfield.MaterialAutoCompleteTextView) {
+        val wifiManager = requireContext().applicationContext.getSystemService(android.content.Context.WIFI_SERVICE) as android.net.wifi.WifiManager
+        
+        // 1. Ambil WiFi yang sedang terhubung
+        val info = wifiManager.connectionInfo
+        var currentSsid = info.ssid ?: ""
+        if (currentSsid.startsWith("\"") && currentSsid.endsWith("\"")) {
+            currentSsid = currentSsid.substring(1, currentSsid.length - 1)
+        }
+        if (currentSsid != "<unknown ssid>" && currentSsid.isNotEmpty()) {
+            etSsid.setText(currentSsid)
+        }
+
+        // 2. Ambil daftar WiFi dari hasil scan HP
+        try {
+            val results = wifiManager.scanResults
+            val ssidList = results.mapNotNull { it.SSID }.filter { it.isNotEmpty() }.distinct()
+            if (ssidList.isNotEmpty()) {
+                val adapter = android.widget.ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, ssidList)
+                etSsid.setAdapter(adapter)
+            } else {
+                val locationManager = requireContext().getSystemService(android.content.Context.LOCATION_SERVICE) as android.location.LocationManager
+                if (!locationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)) {
+                    Toast.makeText(requireContext(), "GPS mati. Nyalakan GPS agar daftar WiFi muncul.", Toast.LENGTH_SHORT).show()
+                }
+            }
+            wifiManager.startScan() // Trigger scan untuk memperbarui data
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 1001) { // Bluetooth
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (pendingBtSsid != null && pendingBtPass != null && pendingBtDeviceId != null) {
+                    performBluetoothConnectAndSend(pendingBtSsid!!, pendingBtPass!!, pendingBtDeviceId!!)
+                }
+            } else {
+                Toast.makeText(requireContext(), "Izin Bluetooth ditolak", Toast.LENGTH_SHORT).show()
+            }
+        } else if (requestCode == 1002) { // WiFi / Location
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                pendingWifiSsidView?.let { performWifiScan(it) }
+            } else {
+                Toast.makeText(requireContext(), "Izin Lokasi ditolak, daftar WiFi tidak dapat dimuat otomatis", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
