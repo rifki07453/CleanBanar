@@ -46,6 +46,11 @@
             android:stateNotNeeded="true"
             android:theme="@style/zxing_CaptureTheme" />
 
+        <activity
+            android:name=".features.dashboard.BluetoothProgressActivity"
+            android:screenOrientation="portrait"
+            android:exported="false" />
+
         <service
             android:name=".features.dashboard.BinObserverService"
             android:enabled="true"

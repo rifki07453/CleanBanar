@@ -347,31 +347,19 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
             return
         }
 
-        val deviceNames = devices.map { it.name ?: "Unknown (${it.address})" }.toTypedArray()
+        val deviceNames = devices.map { it.name ?: it.address }.toTypedArray()
+        val pairedList = devices
 
-        android.app.AlertDialog.Builder(requireContext())
+        MaterialAlertDialogBuilder(requireContext())
             .setTitle("Pilih Perangkat Bluetooth")
             .setItems(deviceNames) { _, which ->
-                val selectedDevice = devices[which]
-                Toast.makeText(context, "Menghubungkan ke ${selectedDevice.name}...", Toast.LENGTH_SHORT).show()
+                val selectedDevice = pairedList[which]
+                val configStr = "SET_WIFI:$ssid,$pass,$deviceId"
                 
-                bluetoothHelper.connect(selectedDevice) { success, message ->
-                    activity?.runOnUiThread {
-                        if (success) {
-                            val configStr = "SET_WIFI:$ssid,$pass,$deviceId\n"
-                            if (bluetoothHelper.sendData(configStr)) {
-                                Toast.makeText(context, "Konfigurasi terkirim!", Toast.LENGTH_LONG).show()
-                                android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                                    bluetoothHelper.close()
-                                }, 1500)
-                            } else {
-                                Toast.makeText(context, "Gagal mengirim data", Toast.LENGTH_SHORT).show()
-                            }
-                        } else {
-                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
+                val intent = Intent(requireContext(), BluetoothProgressActivity::class.java)
+                intent.putExtra("bluetooth_device", selectedDevice)
+                intent.putExtra("config_str", configStr)
+                startActivity(intent)
             }
             .setNegativeButton("Batal", null)
             .show()
