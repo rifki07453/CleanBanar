@@ -355,7 +355,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
             .setTitle("Pilih Perangkat Bluetooth")
             .setItems(deviceNames) { _, which ->
                 val selectedDevice = pairedList[which]
-                val configStr = "SET_WIFI:$ssid,$pass,$deviceId"
+                val configStr = "SET_WIFI:$ssid,$pass,$deviceId\n"
                 
                 val intent = Intent(requireContext(), BluetoothProgressActivity::class.java)
                 intent.putExtra("bluetooth_device", selectedDevice)
