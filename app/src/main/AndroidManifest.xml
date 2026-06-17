@@ -51,6 +51,11 @@
             android:screenOrientation="portrait"
             android:exported="false" />
 
+        <activity
+            android:name=".features.dashboard.DeviceProvisionSuccessActivity"
+            android:screenOrientation="portrait"
+            android:exported="false" />
+
         <service
             android:name=".features.dashboard.BinObserverService"
             android:enabled="true"

@@ -26,5 +26,7 @@ data class DeviceModel(
     val statusKoneksi: String = "OFFLINE",
     val terakhirTerlihat: Long = 0L,
     val tipeJaringan: String = "WIFI",
+    val ipAddress: String = "-",
+    val kekuatanSinyal: Int = 0,
     val config: DeviceConfig = DeviceConfig()
 )

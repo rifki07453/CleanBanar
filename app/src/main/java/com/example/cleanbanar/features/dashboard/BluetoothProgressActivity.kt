@@ -1,6 +1,7 @@
 package com.example.cleanbanar.features.dashboard
 
 import android.bluetooth.BluetoothDevice
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -62,7 +63,7 @@ class BluetoothProgressActivity : AppCompatActivity() {
                     // Jeda sebentar agar UI update terlihat
                     Handler(Looper.getMainLooper()).postDelayed({
                         if (bluetoothHelper.sendData(configStr)) {
-                            showSuccess()
+                            showSuccess(configStr)
                         } else {
                             showError("Pengiriman Gagal", "Koneksi terputus saat mengirim data.")
                         }
@@ -74,22 +75,36 @@ class BluetoothProgressActivity : AppCompatActivity() {
         }
     }
 
-    private fun showSuccess() {
+    private fun showSuccess(configStr: String) {
         progressBar.visibility = View.GONE
-        ivStatusIcon.setImageResource(R.drawable.ic_check_circle_24dp) // Pastikan drawable ini ada atau gunakan built-in
+        ivStatusIcon.setImageResource(R.drawable.ic_check_circle_24dp)
         ivStatusIcon.setColorFilter(ContextCompat.getColor(this, R.color.emerald_600))
         
         tvStatusTitle.text = "Konfigurasi Berhasil Dikirim!"
         tvStatusTitle.setTextColor(ContextCompat.getColor(this, R.color.emerald_600))
-        tvStatusMessage.text = "Alat akan otomatis me-restart dan menghubungkan ke WiFi baru."
+        tvStatusMessage.text = "Membuka halaman pemantauan..."
         
-        btnKembali.visibility = View.VISIBLE
-        btnKembali.text = "Kembali ke Dashboard"
+        btnKembali.visibility = View.GONE
         
-        // Tutup koneksi setelah berhasil
+        // Ekstrak SSID dan Device ID dari configStr ("SET_WIFI:ssid,pass,deviceId")
+        var ssid = "-"
+        var deviceId = ""
+        try {
+            val parts = configStr.substringAfter("SET_WIFI:").split(",")
+            if (parts.size >= 3) {
+                ssid = parts[0]
+                deviceId = parts[2].trim()
+            }
+        } catch (e: Exception) {}
+
         Handler(Looper.getMainLooper()).postDelayed({
             bluetoothHelper.close()
-        }, 1000)
+            val intent = Intent(this, DeviceProvisionSuccessActivity::class.java)
+            intent.putExtra("device_id", deviceId)
+            intent.putExtra("ssid", ssid)
+            startActivity(intent)
+            finish()
+        }, 1500)
     }
 
     private fun showError(title: String, message: String) {
