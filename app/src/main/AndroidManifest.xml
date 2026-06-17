@@ -54,6 +54,7 @@
         <activity
             android:name=".features.dashboard.DeviceProvisionSuccessActivity"
             android:screenOrientation="portrait"
+            android:theme="@style/Theme.CleanBanar.NoActionBar"
             android:exported="false" />
 
         <service

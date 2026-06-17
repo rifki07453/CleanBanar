@@ -378,44 +378,92 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_WIFI_STATE), 1002)
         } else {
-            performWifiScan(etSsid)
+            val wifiManager = requireContext().applicationContext.getSystemService(android.content.Context.WIFI_SERVICE) as android.net.wifi.WifiManager
+            
+            // 1. Ambil WiFi yang sedang terhubung
+            val info = wifiManager.connectionInfo
+            var currentSsid = info.ssid ?: ""
+            if (currentSsid.startsWith("\"") && currentSsid.endsWith("\"")) {
+                currentSsid = currentSsid.substring(1, currentSsid.length - 1)
+            }
+            if (currentSsid != "<unknown ssid>" && currentSsid.isNotEmpty()) {
+                etSsid.setText(currentSsid)
+            }
         }
         
+        etSsid.isFocusable = false
+        etSsid.isClickable = true
+        etSsid.isCursorVisible = false
+        
         etSsid.setOnClickListener {
-            etSsid.showDropDown()
+            showWifiListDialog(etSsid)
         }
     }
 
-    private fun performWifiScan(etSsid: com.google.android.material.textfield.MaterialAutoCompleteTextView) {
+    private fun getScannedWifiList(): List<String> {
         val wifiManager = requireContext().applicationContext.getSystemService(android.content.Context.WIFI_SERVICE) as android.net.wifi.WifiManager
+        val ssidList = mutableListOf<String>()
         
-        // 1. Ambil WiFi yang sedang terhubung
-        val info = wifiManager.connectionInfo
-        var currentSsid = info.ssid ?: ""
-        if (currentSsid.startsWith("\"") && currentSsid.endsWith("\"")) {
-            currentSsid = currentSsid.substring(1, currentSsid.length - 1)
-        }
-        if (currentSsid != "<unknown ssid>" && currentSsid.isNotEmpty()) {
-            etSsid.setText(currentSsid)
-        }
-
-        // 2. Ambil daftar WiFi dari hasil scan HP
         try {
             val results = wifiManager.scanResults
-            val ssidList = results.mapNotNull { it.SSID }.filter { it.isNotEmpty() }.distinct()
-            if (ssidList.isNotEmpty()) {
-                val adapter = android.widget.ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, ssidList)
-                etSsid.setAdapter(adapter)
-            } else {
-                val locationManager = requireContext().getSystemService(android.content.Context.LOCATION_SERVICE) as android.location.LocationManager
-                if (!locationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)) {
-                    Toast.makeText(requireContext(), "GPS mati. Nyalakan GPS agar daftar WiFi muncul.", Toast.LENGTH_SHORT).show()
-                }
-            }
-            wifiManager.startScan() // Trigger scan untuk memperbarui data
+            val scannedList = results.mapNotNull { it.SSID }.filter { it.isNotEmpty() }.distinct()
+            ssidList.addAll(scannedList)
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        return ssidList
+    }
+
+    private fun showWifiListDialog(etSsid: com.google.android.material.textfield.MaterialAutoCompleteTextView) {
+        val dialogView = android.view.LayoutInflater.from(requireContext()).inflate(R.layout.dialog_wifi_list, null)
+        val btnRefreshWifi = dialogView.findViewById<android.widget.ImageView>(R.id.btnRefreshWifi)
+        val pbWifiLoading = dialogView.findViewById<android.widget.ProgressBar>(R.id.pbWifiLoading)
+        val lvWifi = dialogView.findViewById<android.widget.ListView>(R.id.lvWifi)
+        
+        val wifiManager = requireContext().applicationContext.getSystemService(android.content.Context.WIFI_SERVICE) as android.net.wifi.WifiManager
+        
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .show()
+            
+        fun updateWifiList() {
+            pbWifiLoading.visibility = android.view.View.VISIBLE
+            lvWifi.visibility = android.view.View.GONE
+            
+            // Lakukan scan
+            wifiManager.startScan()
+            
+            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                if (!isAdded) return@postDelayed
+                
+                pbWifiLoading.visibility = android.view.View.GONE
+                lvWifi.visibility = android.view.View.VISIBLE
+                
+                val list = getScannedWifiList()
+                if (list.isEmpty()) {
+                    val locationManager = requireContext().getSystemService(android.content.Context.LOCATION_SERVICE) as android.location.LocationManager
+                    if (!locationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)) {
+                        Toast.makeText(requireContext(), "GPS mati. Nyalakan GPS agar daftar WiFi muncul.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                
+                val adapter = android.widget.ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, list)
+                lvWifi.adapter = adapter
+            }, 1500) // Delay sedikit agar loading terlihat dan scan selesai
+        }
+        
+        btnRefreshWifi.setOnClickListener {
+            updateWifiList()
+        }
+        
+        lvWifi.setOnItemClickListener { _, _, position, _ ->
+            val selectedSsid = lvWifi.adapter.getItem(position) as String
+            etSsid.setText(selectedSsid)
+            dialog.dismiss()
+        }
+        
+        // Initial load
+        updateWifiList()
     }
 
     @Deprecated("Deprecated in Java")
@@ -431,7 +479,11 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
             }
         } else if (requestCode == 1002) { // WiFi / Location
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                pendingWifiSsidView?.let { performWifiScan(it) }
+                pendingWifiSsidView?.let { 
+                    val wifiManager = requireContext().applicationContext.getSystemService(android.content.Context.WIFI_SERVICE) as android.net.wifi.WifiManager
+                    wifiManager.startScan()
+                }
+
             } else {
                 Toast.makeText(requireContext(), "Izin Lokasi ditolak, daftar WiFi tidak dapat dimuat otomatis", Toast.LENGTH_SHORT).show()
             }
