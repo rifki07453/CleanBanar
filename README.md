@@ -1,12 +1,17 @@
- # CleanBanar
+# CleanBanar
 
-**CleanBanar** adalah sistem pemantauan Tempat Sampah Pintar (Smart Trash Bin) yang dibangun untuk pengelolaan sampah kampus modern. Sistem ini menyediakan dasbor interaktif secara *real-time* baik untuk **Admin** maupun **Petugas** agar dapat memantau kapasitas tempat sampah secara efisien, menerima notifikasi penting, dan mengelola personil.
+**CleanBanar** adalah sistem pemantauan Tempat Sampah Pintar (Smart Trash Bin) yang dibangun untuk pengelolaan sampah kampus modern. Sistem ini menyediakan dasbor interaktif secara *real-time* baik untuk **Admin** maupun **Petugas** agar dapat memantau kapasitas tempat sampah secara efisien, menerima notifikasi penting, mengkonfigurasi perangkat IoT, dan mengelola personil.
 
 ## Fitur Utama
 
 - **Pemantauan Real-Time**: Pelacakan langsung kapasitas tempat sampah Organik & Non-Organik melalui sensor IoT.
 - **Notifikasi Otomatis**: Peringatan otomatis saat tempat sampah mencapai ≥80% (Hampir Penuh) dan ≥95% (Penuh), dengan tampilan UI kartu yang indah.
-- **Statistik**: Diagram batang visual yang menunjukkan tren kapasitas 7 hari terakhir, rata-rata mingguan, dan total kejadian penuh.
+- **Peringatan Waktu Inap (Stale Waste)**: Deteksi otomatis jika sampah organik (≥3 hari) atau non-organik (≥7 hari) belum dikosongkan untuk mencegah bau tak sedap dan penumpukan berlebih.
+- **Manajemen & Konfigurasi Alat**: Panel admin terpusat untuk menambah, menghapus, serta mengatur parameter fisik alat seperti tinggi tong, ambang batas penuh, batas sensor jarak tangan, pemetaan pin sensor ESP32, dan tipe jaringan (Wi-Fi/Bluetooth).
+- **Pengaturan Preferensi Notifikasi**: Kemudahan bagi setiap pengguna untuk menyesuaikan jenis notifikasi yang ingin diterima (Penuh, Hampir Penuh, Selesai Dikosongkan, atau Notifikasi Sistem).
+- **Aktivasi Akun Mandiri (Pre-Registration)**: Admin cukup mendaftarkan email petugas. Petugas kemudian mengaktifkan akun secara mandiri dengan mengatur kata sandi mereka pada percobaan masuk pertama kali.
+- **Unggah Foto Profil**: Integrasi dengan Firebase Storage yang memungkinkan pengguna untuk mengubah dan mengunggah foto profil mereka secara langsung di aplikasi.
+- **Statistik**: Diagram batang visual yang menunjukkan tren kapasitas 7 hari terakhir, rata-rata mingguan, serta total kejadian penuh dan jumlah pengosongan harian.
 - **Manajemen Petugas**: Panel admin terpusat (dapat diakses langsung dari Dasbor Admin) untuk menambah, melihat, dan menghapus petugas.
 - **Riwayat Aktivitas**: Linimasa aktivitas universal (tersedia untuk Admin dan Petugas) yang mencatat peringatan status dan riwayat pengosongan tempat sampah.
 - **Keamanan Akun**: Antarmuka masuk (Login) yang aman dengan fitur UX modern (misalnya, ikon lihat/sembunyikan kata sandi).
@@ -17,6 +22,7 @@
 | ----------------- | -------------------------------------- |
 | **Frontend**      | Android (Kotlin, XML, ViewBinding)     |
 | **Database**      | Firebase Realtime Database             |
+| **Cloud Storage** | Firebase Storage (Foto Profil)         |
 | **Perangkat IoT** | ESP32 (mengirim data sensor mentah)    |
 | **Arsitektur**    | Hybrid — Firebase sebagai logika pusat |
 
@@ -28,51 +34,78 @@ Sensor ESP32 → Firebase Realtime DB → Aplikasi Android (Admin / Petugas)
  Hanya data mentah  Sumber data utama    Tampilan UI + Aksi Pengguna
 ```
 
-**Pemisahan Tanggung Jawab:**
-- **ESP32**: Hanya mengirim data jarak/kapasitas mentah dari sensor. Tidak ada logika keputusan.
-- **Firebase**: Menyimpan data mentah dan status yang telah diproses (status, notifikasi, riwayat).
-- **Aplikasi Android**: Menangani tampilan UI dan aksi yang dipicu pengguna (menandai "Telah Dikosongkan"). Memiliki pemantau ringan untuk memicu notifikasi berbasis ambang batas (threshold).
+**Pemicu & Aliran Data:**
+- **ESP32**: Hanya mengirim data jarak/kapasitas mentah dari sensor ke Firebase. Tidak ada logika keputusan di sisi mikrokontroler.
+- **Firebase**: Menyimpan konfigurasi alat, status kapasitas mentah, data notifikasi, riwayat aktivitas, foto profil, dan kredensial pengguna.
+- **Aplikasi Android**: Menampilkan visualisasi data secara real-time, mendeteksi ambang batas (threshold), memicu push notification melalui pemantau latar belakang (`BinObserver`), dan memfasilitasi aksi pengosongan tempat sampah.
 
 ## Struktur Database Firebase
 
 ```text
 cleanbanar/
-  bins/
-    organik/       { percentage: Int, status: String, lastUpdate: Long }
-    nonOrganik/    { percentage: Int, status: String, lastUpdate: Long }
-  device/
-    connectionStatus: String ("ONLINE" / "OFFLINE")
-    lastSeen: Long
+  devices/
+    {deviceId}/
+      id: String
+      nama: String
+      statusKoneksi: String ("ONLINE" / "OFFLINE")
+      terakhirTerlihat: Long
+      tipeJaringan: String ("WIFI" / "BLUETOOTH")
+      config/
+        pins/
+          trigOrganik: Int, echoOrganik: Int
+          trigNonOrganik: Int, echoNonOrganik: Int
+          trigLuarOrganik: Int, echoLuarOrganik: Int
+          trigLuarNonOrganik: Int, echoLuarNonOrganik: Int
+          servoOrganik: Int, servoNonOrganik: Int
+        tinggiTong: Double
+        batasPenuh: Double
+        batasJarakTangan: Double
+      bins/
+        organik/       { persentaseIsi: Int, status: String, terakhirUpdate: Long, terakhirDikosongkan: Long }
+        nonOrganik/    { persentaseIsi: Int, status: String, terakhirUpdate: Long, terakhirDikosongkan: Long }
   notifications/
-    {id}/          { title, message, type, timestamp, read }
-  history/
-    {id}/          { action, bin, actor, timestamp }
+    {id}/              { judul, pesan, tipe, waktu, sudahDibaca }
+  historyLogs/
+    {id}/              { aksi, tipeSampah, idPengguna, namaLengkap, waktu }
   users/
-    {id}/          { name, email, role }
+    {id}/
+      nama: String
+      email: String
+      peran: String
+      nomorHp: String
+      photoUrl: String
+      pengaturan_notifikasi/
+        hampir_penuh: Boolean
+        penuh: Boolean
+        selesai: Boolean
+        sistem: Boolean
   statistics/
     daily/
-      {date}/      { organik: Int, nonOrganik: Int }
+      {dateKey}/       { organik: Int, nonOrganik: Int, organikEmptyCount: Int, nonOrganikEmptyCount: Int }
+  public_info/
+    admin_phone: String
 ```
 
 ## Logika Sistem Inti
 
 ### Pemicu Notifikasi (BinObserver)
-- **≥80%**: Peringatan "Hampir Penuh" (Warning)
-- **≥95%**: Peringatan "Penuh" (Bahaya) + pencatatan riwayat
-- Pencegahan duplikasi melalui pemeriksaan status terakhir (last-state comparison).
-- Data anomali (di luar rentang 0-100%) akan diabaikan.
+- **≥80%**: Peringatan "Hampir Penuh" (Warning).
+- **≥95%**: Peringatan "Penuh" (Bahaya) + otomatis mencatat riwayat log peringatan.
+- **Pencegahan Duplikasi**: Perbandingan status kapasitas sebelumnya (*last-state comparison*) untuk memastikan notifikasi hanya dikirim sekali saat melewati batas threshold.
+- **Pencegahan Data Anomali**: Sensor di luar rentang kewajaran 0-100% akan dibatasi (*clamped*) atau diabaikan demi menjaga keakuratan data.
 
 ### Konsistensi Data ("Tandai Telah Dikosongkan")
 Saat Petugas menandai tempat sampah telah dikosongkan, `FirebaseManager.emptyBin()` secara otomatis akan:
-1. Mereset kapasitas menjadi 0% dan status menjadi "TERSEDIA".
-2. Menulis catatan riwayat ("dikosongkan").
-3. Mengirimkan notifikasi "dikosongkan" ke sistem.
-4. Memperbarui data statistik harian.
+1. Mereset kapasitas menjadi 0% dan status menjadi "Normal".
+2. Mencatat waktu pengosongan terakhir (`terakhirDikosongkan`).
+3. Menulis catatan riwayat log aktivitas ("pengosongan").
+4. Memperbarui jumlah pengosongan harian (`organikEmptyCount` / `nonOrganikEmptyCount`) pada statistik harian.
+5. Mengirim notifikasi selesai dikosongkan ke pengguna lain yang mengaktifkan preferensinya.
 
-### Penanganan Kondisi Khusus (Edge Cases)
-- **Perangkat Luring (Offline)**: Menampilkan data pemantauan terakhir + status "Terputus".
-- **Aksi Ganda**: Tombol sengaja dinonaktifkan sementara (disabled) selama proses komunikasi ke database untuk mencegah klik ganda.
-- **Anomali Sensor**: Nilai sensor di luar kewajaran 0-100% akan dibatasi (clamped) atau diabaikan sepenuhnya.
+### Alur Aktivasi Staf Mandiri (Pre-Registration Flow)
+1. **Pendaftaran Awal**: Administrator mendaftarkan email, nama, nomor telepon, dan peran (*role*) petugas baru melalui panel *Staff Management* di aplikasi. Data disimpan sementara di simpul `users/` dengan ID acak.
+2. **Autentikasi & Aktivasi**: Petugas masuk menggunakan email tersebut untuk pertama kali dan mengisi kata sandi baru.
+3. **Penyimpanan Kunci**: Firebase Auth memvalidasi kecocokan email pra-registrasi. Jika cocok, sistem membuat akun baru di Firebase Auth, menyalin data profil ke ID autentikasi permanen petugas, dan menghapus data pendaftaran sementara agar database tetap bersih.
 
 ## Fitur Keamanan Aplikasi
 
@@ -162,18 +195,66 @@ Untuk memverifikasi bahwa fitur keamanan di atas berfungsi dengan baik, Anda dap
   1. Masuk menggunakan akun admin (contoh: `admin@cleanbanar.com`).
   2. **Hasil yang diharapkan**: Dasbor Admin dimuat lengkap dengan kartu akses cepat **Manajemen Petugas** yang berfungsi penuh untuk menambah atau menghapus petugas lapangan.
 
-## Cara Menjalankan Aplikasi
+## Cara Menjalankan Aplikasi & Konfigurasi Firebase
 
-1. *Clone* repositori ini:
-   ```bash
-   git clone https://github.com/rifki07453/CleanBanar.git
+Ikuti panduan berikut untuk menyiapkan Firebase dan menjalankan aplikasi **CleanBanar**:
+
+### 1. Registrasi Proyek di Firebase Console
+1. Buka [Firebase Console](https://console.firebase.google.com/) dan buat proyek baru dengan nama **CleanBanar**.
+2. Tambahkan aplikasi Android ke proyek Anda dengan parameter:
+   - **Nama Paket Android**: `com.example.cleanbanar`
+   - **Nama Panggilan Aplikasi**: `CleanBanar App`
+3. Unduh berkas konfigurasi `google-services.json`.
+4. Letakkan berkas `google-services.json` tersebut di dalam direktori `app/` dari proyek Anda.
+
+### 2. Mengaktifkan Firebase Authentication
+1. Pada menu navigasi Firebase Console, masuk ke **Build** -> **Authentication**.
+2. Klik **Get Started**, lalu di tab **Sign-in method**, aktifkan opsi **Email/Password**.
+3. Simpan konfigurasi.
+
+### 3. Mengatur Firebase Realtime Database
+1. Buka **Build** -> **Realtime Database**, lalu klik **Create Database**.
+2. Pilih lokasi server database terdekat (misal: Singapore) dan pilih **Start in locked mode**.
+3. Masuk ke tab **Rules** dan ubah aturan akses agar mewajibkan autentikasi bagi semua baca/tulis:
+   ```json
+   {
+     "rules": {
+       ".read": "auth != null",
+       ".write": "auth != null"
+     }
+   }
    ```
-2. Buka proyek ini di dalam **Android Studio**.
-3. Lakukan *Sync* Gradle untuk mengunduh dependensi (Proyek ini dikonfigurasi menggunakan JDK 21).
-4. Pengaturan Firebase:
-   - Letakkan file asli `google-services.json` milik Anda di dalam direktori `app/`.
-   - Pastikan aturan Firebase Realtime Database Anda diatur untuk mengizinkan instruksi baca/tulis.
-5. Jalankan (*Run*) kode di emulator Android atau perangkat fisik langsung.
+4. Klik **Publish** untuk menyimpan perubahan.
+
+### 4. Mengatur Firebase Storage
+1. Buka **Build** -> **Storage**, klik **Get Started**, lalu pilih lokasi server dan klik **Done**.
+2. Masuk ke tab **Rules** dan perbarui aturan akses agar foto profil dapat diunggah secara aman oleh pengguna yang terautentikasi:
+   ```rules
+   rules_version = '2';
+   service firebase.storage {
+     match /b/{bucket}/o {
+       match /profile_pictures/{userId}.jpg {
+         allow read, write: if request.auth != null && request.auth.uid == userId;
+       }
+     }
+   }
+   ```
+3. Klik **Publish**.
+
+### 5. Seeding Akun Bawaan (Default Accounts)
+Untuk memudahkan akses awal, sistem memiliki mekanisme *auto-seeding* profil database:
+1. Buat dua akun autentikasi secara manual di tab **Authentication** -> **Users** pada Firebase Console:
+   - **Admin**: `admin@cleanbanar.com` dengan kata sandi `admin123`
+   - **Petugas**: `petugas@cleanbanar.com` dengan kata sandi `petugas123`
+2. Jalankan aplikasi di emulator atau perangkat fisik Anda.
+3. Masuk menggunakan akun admin atau petugas yang telah dibuat.
+4. Saat pertama kali masuk, aplikasi akan secara otomatis melakukan inisialisasi (*seeding*) data profil ke node Realtime Database `users/{uid}/` berdasarkan kredensial default tersebut.
+
+### 6. Menjalankan Aplikasi
+1. Buka proyek ini di **Android Studio**.
+2. Pastikan koneksi internet aktif, lalu lakukan **Sync Project with Gradle Files** untuk mengunduh semua pustaka dependensi (Proyek menggunakan JDK 21).
+3. Sambungkan emulator Android atau perangkat Android fisik (Min. Android 9.0 Pie / API Level 28).
+4. Klik tombol **Run 'app'** di Android Studio untuk membangun dan menjalankan aplikasi.
 
 ## Tata Letak Navigasi
 
@@ -196,7 +277,7 @@ Untuk memverifikasi bahwa fitur keamanan di atas berfungsi dengan baik, Anda dap
 | **Compile SDK**      | API Level 35                                             |
 | **Bahasa Kotlin**    | JVM Target 17 (JDK 17)                                   |
 | **Build Tools**      | Gradle (Kotlin DSL) + Android Studio                     |
-| **Firebase SDK**     | Firebase BoM 33.7.0 (Auth, Realtime Database, Analytics) |
+| **Firebase SDK**     | Firebase BoM 33.7.0 (Auth, Realtime Database, Storage, Analytics) |
 | **Security Library** | androidx.security:security-crypto 1.1.0-alpha06          |
 | **Versi Aplikasi**   | 1.0 (versionCode 1)                                      |
 
