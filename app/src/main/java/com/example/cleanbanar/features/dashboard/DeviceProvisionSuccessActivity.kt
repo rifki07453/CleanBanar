@@ -9,9 +9,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.cleanbanar.R
 import com.example.cleanbanar.core.data.DeviceModel
-import com.example.cleanbanar.core.data.FirebaseManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 class DeviceProvisionSuccessActivity : AppCompatActivity() {
 
@@ -41,7 +44,6 @@ class DeviceProvisionSuccessActivity : AppCompatActivity() {
 
     private var deviceId: String = ""
     private var ssid: String = ""
-    private val firebaseManager = FirebaseManager()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,7 +97,7 @@ class DeviceProvisionSuccessActivity : AppCompatActivity() {
 
         btnRestart.setOnClickListener {
             if (deviceId.isNotEmpty()) {
-                val ref = firebaseManager.getDatabase().getReference("cleanbanar/devices/$deviceId/perintah/restart")
+                val ref = FirebaseDatabase.getInstance().getReference("cleanbanar/devices/$deviceId/perintah/restart")
                 ref.setValue(true).addOnSuccessListener {
                     Toast.makeText(this, "Perintah restart dikirim ke alat!", Toast.LENGTH_SHORT).show()
                     // Reset timeline
@@ -118,55 +120,63 @@ class DeviceProvisionSuccessActivity : AppCompatActivity() {
         tvTitleRestart.setTextColor(ContextCompat.getColor(this, R.color.gray_900))
         tvDescRestart.text = "ESP32 sedang mencoba terhubung ke WiFi..."
 
-        firebaseManager.listenToDevice(deviceId) { device ->
-            if (device != null) {
-                updateUI(device)
+        val ref = FirebaseDatabase.getInstance().getReference("cleanbanar/devices/$deviceId")
+        ref.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (!snapshot.exists()) return
+                
+                tvDeviceName.text = snapshot.child("nama").getValue(String::class.java) ?: "-"
+                
+                val ipAddr = snapshot.child("ipAddress").getValue(String::class.java) ?: "-"
+                if (ipAddr != "-") tvIpAddress.text = ipAddr
+                
+                val signal = snapshot.child("kekuatanSinyal").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 0
+                if (signal < 0) tvSignal.text = "$signal dBm"
+
+                val statusKoneksi = snapshot.child("statusKoneksi").getValue(String::class.java) ?: "OFFLINE"
+                val isOnline = statusKoneksi == "ONLINE"
+                
+                if (isOnline) {
+                    tvCloudConnection.text = "Online"
+                    tvCloudConnection.setTextColor(ContextCompat.getColor(this@DeviceProvisionSuccessActivity, R.color.primary))
+                    
+                    tvOnlineStatus.text = "Online"
+                    tvOnlineStatus.setTextColor(ContextCompat.getColor(this@DeviceProvisionSuccessActivity, R.color.primary))
+                    dotOnlineStatus.setBackgroundResource(R.drawable.dot_timeline_green)
+
+                    // Update Timeline Step 3
+                    dotOnline.setBackgroundResource(R.drawable.dot_timeline_green)
+                    tvTitleOnline.setTextColor(ContextCompat.getColor(this@DeviceProvisionSuccessActivity, R.color.gray_900))
+                    tvDescOnline.text = "Berhasil terhubung ke Cloud"
+                } else {
+                    tvCloudConnection.text = "Offline"
+                    tvCloudConnection.setTextColor(ContextCompat.getColor(this@DeviceProvisionSuccessActivity, R.color.red_600))
+                    
+                    tvOnlineStatus.text = "Offline"
+                    tvOnlineStatus.setTextColor(ContextCompat.getColor(this@DeviceProvisionSuccessActivity, R.color.red_600))
+                    dotOnlineStatus.setBackgroundResource(R.drawable.dot_timeline_red)
+                }
+
+                val terakhirTerlihat = snapshot.child("terakhirTerlihat").getValue(Any::class.java)?.toString()?.toLongOrNull() ?: 0L
+                tvCapacityLastUpdate.text = "Terakhir dilihat: " + formatTime(terakhirTerlihat)
+                tvLastSeen.text = formatTime(terakhirTerlihat)
             }
-        }
-    }
 
-    private fun updateUI(device: DeviceModel) {
-        tvDeviceName.text = device.nama
-        
-        if (device.ipAddress != "-") {
-            tvIpAddress.text = device.ipAddress
-        }
-        
-        if (device.kekuatanSinyal < 0) {
-            tvSignal.text = "${device.kekuatanSinyal} dBm"
-        }
+            override fun onCancelled(error: DatabaseError) {}
+        })
 
-        val isOnline = device.statusKoneksi == "ONLINE"
-        if (isOnline) {
-            tvCloudConnection.text = "Online"
-            tvCloudConnection.setTextColor(ContextCompat.getColor(this, R.color.primary))
-            
-            tvOnlineStatus.text = "Online"
-            tvOnlineStatus.setTextColor(ContextCompat.getColor(this, R.color.primary))
-            dotOnlineStatus.setBackgroundResource(R.drawable.dot_timeline_green)
-
-            // Update Timeline Step 3
-            dotOnline.setBackgroundResource(R.drawable.dot_timeline_green)
-            tvTitleOnline.setTextColor(ContextCompat.getColor(this, R.color.gray_900))
-            tvDescOnline.text = "Berhasil terhubung ke Cloud"
-
-        } else {
-            tvCloudConnection.text = "Offline"
-            tvCloudConnection.setTextColor(ContextCompat.getColor(this, R.color.red_600))
-            
-            tvOnlineStatus.text = "Offline"
-            tvOnlineStatus.setTextColor(ContextCompat.getColor(this, R.color.red_600))
-            dotOnlineStatus.setBackgroundResource(R.drawable.dot_timeline_red)
-        }
-
-        // Kalkulasi rata-rata kapasitas
-        val pctOrg = device.config.bins["organik"]?.persentaseIsi ?: 0
-        val pctNon = device.config.bins["nonOrganik"]?.persentaseIsi ?: 0
-        val avg = (pctOrg + pctNon) / 2
-        tvAvgCapacity.text = "$avg%"
-
-        tvCapacityLastUpdate.text = "Terakhir dilihat: " + formatTime(device.terakhirTerlihat)
-        tvLastSeen.text = formatTime(device.terakhirTerlihat)
+        // Listen for bins percentage
+        val binsRef = FirebaseDatabase.getInstance().getReference("cleanbanar/devices/$deviceId/bins")
+        binsRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (!snapshot.exists()) return
+                val pctOrg = snapshot.child("organik").child("persentaseIsi").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 0
+                val pctNon = snapshot.child("nonOrganik").child("persentaseIsi").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 0
+                val avg = (pctOrg + pctNon) / 2
+                tvAvgCapacity.text = "$avg%"
+            }
+            override fun onCancelled(error: DatabaseError) {}
+        })
     }
 
     private fun formatTime(millis: Long): String {

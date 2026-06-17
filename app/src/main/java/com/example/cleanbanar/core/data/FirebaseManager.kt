@@ -115,7 +115,10 @@ object FirebaseManager {
                         val batasPenuh = child.child("config").child("batasPenuh").getValue(Any::class.java)?.toString()?.toDoubleOrNull() ?: 5.0
                         val batasJarakTangan = child.child("config").child("batasJarakTangan").getValue(Any::class.java)?.toString()?.toDoubleOrNull() ?: 15.0
                         
-                        devices.add(DeviceModel(id, nama, status, terakhir, tipe, DeviceConfig(pins, tinggiTong, batasPenuh, batasJarakTangan)))
+                        val ipAddr = child.child("ipAddress").getValue(String::class.java) ?: "-"
+                        val sinyal = child.child("kekuatanSinyal").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 0
+                        
+                        devices.add(DeviceModel(id, nama, status, terakhir, tipe, ipAddr, sinyal, DeviceConfig(pins, tinggiTong, batasPenuh, batasJarakTangan)))
                     } catch (e: Exception) {
                         Log.e(TAG, "Gagal memproses device ${child.key}: ${e.message}")
                     }
