@@ -74,24 +74,28 @@
                         </LinearLayout>
                     </RelativeLayout>
 
-                    <GridLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:columnCount="2" android:rowCount="2">
-                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:orientation="vertical" android:layout_marginBottom="16dp">
-                            <TextView android:text="NAMA PERANGKAT" android:textSize="10sp" android:textColor="@color/gray_500" android:textStyle="bold"/>
-                            <TextView android:id="@+id/tvDeviceName" android:text="-" android:textSize="14sp" android:textColor="@color/gray_900" android:textStyle="bold"/>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="16dp" android:baselineAligned="false">
+                            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                                <TextView android:text="NAMA PERANGKAT" android:textSize="10sp" android:textColor="@color/gray_500" android:textStyle="bold"/>
+                                <TextView android:id="@+id/tvDeviceName" android:text="-" android:textSize="14sp" android:textColor="@color/gray_900" android:textStyle="bold"/>
+                            </LinearLayout>
+                            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                                <TextView android:text="SERIAL NUMBER / ID" android:textSize="10sp" android:textColor="@color/gray_500" android:textStyle="bold"/>
+                                <TextView android:id="@+id/tvDeviceId" android:text="-" android:textSize="14sp" android:textColor="@color/gray_900"/>
+                            </LinearLayout>
                         </LinearLayout>
-                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:orientation="vertical" android:layout_marginBottom="16dp">
-                            <TextView android:text="SERIAL NUMBER / ID" android:textSize="10sp" android:textColor="@color/gray_500" android:textStyle="bold"/>
-                            <TextView android:id="@+id/tvDeviceId" android:text="-" android:textSize="14sp" android:textColor="@color/gray_900"/>
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:baselineAligned="false">
+                            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                                <TextView android:text="TERAKHIR DILIHAT" android:textSize="10sp" android:textColor="@color/gray_500" android:textStyle="bold"/>
+                                <TextView android:id="@+id/tvLastSeen" android:text="Belum sinkron" android:textSize="14sp" android:textColor="@color/gray_900"/>
+                            </LinearLayout>
+                            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                                <TextView android:text="FIRMWARE" android:textSize="10sp" android:textColor="@color/gray_500" android:textStyle="bold"/>
+                                <TextView android:text="v1.0.0" android:textSize="14sp" android:textColor="@color/gray_900"/>
+                            </LinearLayout>
                         </LinearLayout>
-                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:orientation="vertical">
-                            <TextView android:text="TERAKHIR DILIHAT" android:textSize="10sp" android:textColor="@color/gray_500" android:textStyle="bold"/>
-                            <TextView android:id="@+id/tvLastSeen" android:text="Belum sinkron" android:textSize="14sp" android:textColor="@color/gray_900"/>
-                        </LinearLayout>
-                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:orientation="vertical">
-                            <TextView android:text="FIRMWARE" android:textSize="10sp" android:textColor="@color/gray_500" android:textStyle="bold"/>
-                            <TextView android:text="v1.0.0" android:textSize="14sp" android:textColor="@color/gray_900"/>
-                        </LinearLayout>
-                    </GridLayout>
+                    </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
