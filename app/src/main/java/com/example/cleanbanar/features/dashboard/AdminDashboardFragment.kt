@@ -431,7 +431,11 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
             lvWifi.visibility = android.view.View.GONE
             
             // Lakukan scan
-            wifiManager.startScan()
+            try {
+                wifiManager.startScan()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
             
             android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
                 if (!isAdded) return@postDelayed
@@ -481,7 +485,11 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 pendingWifiSsidView?.let { 
                     val wifiManager = requireContext().applicationContext.getSystemService(android.content.Context.WIFI_SERVICE) as android.net.wifi.WifiManager
-                    wifiManager.startScan()
+                    try {
+                        wifiManager.startScan()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
 
             } else {
