@@ -136,8 +136,8 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             }
 
             if (bitmap != null) {
-                // Resize if too large
-                val maxDim = 500
+                // Resize if too large (diperkecil lagi agar Base64 sangat ringan)
+                val maxDim = 250
                 var width = bitmap.width
                 var height = bitmap.height
                 if (width > maxDim || height > maxDim) {
@@ -153,7 +153,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                 }
 
                 val baos = java.io.ByteArrayOutputStream()
-                bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 80, baos)
+                bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 60, baos)
                 val data = baos.toByteArray()
 
                 FirebaseManager.uploadProfilePictureBytes(userId, data,

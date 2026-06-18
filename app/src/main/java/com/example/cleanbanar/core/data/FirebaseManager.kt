@@ -381,21 +381,17 @@ object FirebaseManager {
     }
 
     fun uploadProfilePictureBytes(userId: String, data: ByteArray, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
-        val storageRef = FirebaseStorage.getInstance().reference.child("profile_pictures/$userId.jpg")
-        
-        storageRef.putBytes(data)
-            .addOnSuccessListener {
-                storageRef.downloadUrl.addOnSuccessListener { uri ->
-                    val photoUrl = uri.toString()
-                    updateUserPhotoUrl(userId, photoUrl)
-                    onSuccess(photoUrl)
-                }.addOnFailureListener { e ->
-                    onFailure(e)
-                }
-            }
-            .addOnFailureListener { e ->
-                onFailure(e)
-            }
+        try {
+            // Karena Firebase Storage sekarang mewajibkan Blaze Plan (Berbayar/Kartu Kredit),
+            // kita akali dengan mengubah gambar menjadi teks Base64 dan menyimpannya langsung ke Realtime Database!
+            val base64String = android.util.Base64.encodeToString(data, android.util.Base64.NO_WRAP)
+            val photoDataUrl = "data:image/jpeg;base64,$base64String"
+            
+            updateUserPhotoUrl(userId, photoDataUrl)
+            onSuccess(photoDataUrl)
+        } catch (e: Exception) {
+            onFailure(e)
+        }
     }
 
     fun updateUserPhotoUrl(userId: String, photoUrl: String) {
