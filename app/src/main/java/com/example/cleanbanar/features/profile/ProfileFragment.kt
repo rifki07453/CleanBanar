@@ -78,12 +78,20 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                 .into(binding.ivUserAvatar)
         }
 
-        // Klik pada Edit Photo (atau flAvatarContainer)
+        // Klik pada ikon kamera untuk ganti foto
         binding.flEditPhoto.setOnClickListener {
             pickMedia.launch("image/*")
         }
+        
+        // Klik pada avatar untuk melihat foto besar
         binding.flAvatarContainer.setOnClickListener {
-            pickMedia.launch("image/*")
+            val photoUrl = authManager.getUserPhotoUrl()
+            if (photoUrl.isNotEmpty()) {
+                showFullScreenProfilePicture(photoUrl)
+            } else {
+                // Jika belum ada foto, tawarkan untuk upload
+                pickMedia.launch("image/*")
+            }
         }
 
         // Edit Profil — dinamis & tersimpan ke Firebase
@@ -129,7 +137,10 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             var bitmap: android.graphics.Bitmap? = null
             if (android.os.Build.VERSION.SDK_INT >= 28) {
                 val source = android.graphics.ImageDecoder.createSource(requireContext().contentResolver, uri)
-                bitmap = android.graphics.ImageDecoder.decodeBitmap(source)
+                bitmap = android.graphics.ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
+                    decoder.allocator = android.graphics.ImageDecoder.ALLOCATOR_SOFTWARE
+                    decoder.isMutableRequired = true
+                }
             } else {
                 @Suppress("DEPRECATION")
                 bitmap = android.provider.MediaStore.Images.Media.getBitmap(requireContext().contentResolver, uri)
@@ -179,6 +190,28 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             e.printStackTrace()
             Toast.makeText(requireContext(), "Gagal memproses foto: ${e.message}", Toast.LENGTH_LONG).show()
         }
+    }
+
+    private fun showFullScreenProfilePicture(url: String) {
+        val dialog = android.app.Dialog(requireContext(), android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+        
+        val imageView = android.widget.ImageView(requireContext())
+        imageView.layoutParams = android.view.ViewGroup.LayoutParams(
+            android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+            android.view.ViewGroup.LayoutParams.MATCH_PARENT
+        )
+        imageView.setBackgroundColor(android.graphics.Color.BLACK)
+        
+        Glide.with(this)
+            .load(url)
+            .into(imageView)
+            
+        imageView.setOnClickListener {
+            dialog.dismiss()
+        }
+        
+        dialog.setContentView(imageView)
+        dialog.show()
     }
 
     override fun observeData() {}
