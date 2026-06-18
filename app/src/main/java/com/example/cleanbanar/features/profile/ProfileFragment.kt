@@ -150,7 +150,11 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                 btnHapus.setBackgroundResource(outValue.resourceId)
                 btnHapus.setOnClickListener {
                     bottomSheetDialog.dismiss()
+                    // Hapus dari cache lokal
                     authManager.updatePhotoUrl("")
+                    // Hapus murni dari Realtime Database (mengosongkan datanya sehingga ringan kembali)
+                    com.example.cleanbanar.core.data.FirebaseManager.updateUserPhotoUrl(authManager.getUserId(), "")
+                    
                     binding.ivUserAvatar.setImageResource(R.drawable.ic_profile)
                     binding.ivUserAvatar.setPadding(resources.getDimensionPixelSize(R.dimen.margin_12), resources.getDimensionPixelSize(R.dimen.margin_12), resources.getDimensionPixelSize(R.dimen.margin_12), resources.getDimensionPixelSize(R.dimen.margin_12))
                     binding.ivUserAvatar.imageTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.WHITE)
