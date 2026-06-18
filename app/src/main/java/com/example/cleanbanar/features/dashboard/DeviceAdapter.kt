@@ -45,6 +45,7 @@ class DeviceAdapter(
                 (binding.dotStatus.parent as android.widget.LinearLayout).setBackgroundResource(com.example.cleanbanar.R.drawable.badge_red_bg)
             }
 
+            com.example.cleanbanar.core.utils.AnimationUtils.applyBouncyTouchEffect(binding.root)
             binding.root.setOnClickListener {
                 onItemClick(device)
             }

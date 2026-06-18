@@ -56,6 +56,7 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
             intent.data = android.net.Uri.parse(url)
             try {
                 startActivity(intent)
+                overridePendingTransition(com.example.cleanbanar.R.anim.slide_in_up, com.example.cleanbanar.R.anim.fade_out)
             } catch (e: Exception) {
                 Toast.makeText(this, "Gagal membuka WhatsApp. Pastikan aplikasi terinstal.", Toast.LENGTH_SHORT).show()
             }
@@ -175,10 +176,18 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
         binding.btnLogin.text = if (isLoading) "Memuat..." else "Masuk"
     }
 
+    private fun navigateToMain() {
+        val intent = android.content.Intent(this, com.example.cleanbanar.features.dashboard.MainActivity::class.java)
+        startActivity(intent)
+        overridePendingTransition(com.example.cleanbanar.R.anim.slide_in_up, com.example.cleanbanar.R.anim.fade_out)
+        finish()
+    }
+
     private fun navigateToDashboard(role: String) {
         val intent = Intent(this, MainActivity::class.java)
         intent.putExtra("USER_ROLE", role)
         startActivity(intent)
+        overridePendingTransition(com.example.cleanbanar.R.anim.slide_in_up, com.example.cleanbanar.R.anim.fade_out)
         finish()
     }
 

@@ -287,9 +287,11 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
                 bottomMargin = 4.dpToPx()
             }
             max = 100
-            progress = percent
             progressDrawable = resources.getDrawable(actualProgressDrawableRes, null)
             scaleY = 1.0f 
+            
+            // Animasi halus dari 0 ke persen
+            com.example.cleanbanar.core.utils.AnimationUtils.animateProgressBar(this, percent)
         }
 
         row.addView(topLayout)

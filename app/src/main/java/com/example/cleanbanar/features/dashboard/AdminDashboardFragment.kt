@@ -635,6 +635,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
     private fun addEmptyActivity() {
         binding.lottieEmptyState.visibility = android.view.View.VISIBLE
         binding.tvEmptyStateText.visibility = android.view.View.VISIBLE
+        com.example.cleanbanar.core.utils.AnimationUtils.applyFloatingEffect(binding.lottieEmptyState)
     }
 
     private fun hideEmptyActivity() {
