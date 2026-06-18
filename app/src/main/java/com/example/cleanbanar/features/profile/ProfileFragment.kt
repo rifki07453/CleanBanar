@@ -130,43 +130,15 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         val userId = authManager.getUserId()
         if (userId.isEmpty()) return
 
-        Toast.makeText(requireContext(), "Memproses foto...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(requireContext(), "Memproses foto (Tanpa Kompresi)...", Toast.LENGTH_SHORT).show()
 
         try {
-            // Kompresi gambar menjadi ukuran yang wajar (max 500px, 80% JPEG)
-            var bitmap: android.graphics.Bitmap? = null
-            if (android.os.Build.VERSION.SDK_INT >= 28) {
-                val source = android.graphics.ImageDecoder.createSource(requireContext().contentResolver, uri)
-                bitmap = android.graphics.ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
-                    decoder.allocator = android.graphics.ImageDecoder.ALLOCATOR_SOFTWARE
-                    decoder.isMutableRequired = true
-                }
-            } else {
-                @Suppress("DEPRECATION")
-                bitmap = android.provider.MediaStore.Images.Media.getBitmap(requireContext().contentResolver, uri)
-            }
+            // Membaca file gambar asli 100% tanpa kompresi / tanpa resize sesuai permintaan
+            val inputStream = requireContext().contentResolver.openInputStream(uri)
+            val data = inputStream?.readBytes()
+            inputStream?.close()
 
-            if (bitmap != null) {
-                // Resize if too large (diperkecil lagi agar Base64 sangat ringan)
-                val maxDim = 250
-                var width = bitmap.width
-                var height = bitmap.height
-                if (width > maxDim || height > maxDim) {
-                    val ratio = width.toFloat() / height.toFloat()
-                    if (ratio > 1) {
-                        width = maxDim
-                        height = (maxDim / ratio).toInt()
-                    } else {
-                        height = maxDim
-                        width = (maxDim * ratio).toInt()
-                    }
-                    bitmap = android.graphics.Bitmap.createScaledBitmap(bitmap, width, height, true)
-                }
-
-                val baos = java.io.ByteArrayOutputStream()
-                bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 60, baos)
-                val data = baos.toByteArray()
-
+            if (data != null) {
                 FirebaseManager.uploadProfilePictureBytes(userId, data,
                     onSuccess = { photoUrl ->
                         authManager.updatePhotoUrl(photoUrl)
@@ -185,6 +157,8 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                         }
                     }
                 )
+            } else {
+                Toast.makeText(requireContext(), "Gagal membaca file foto", Toast.LENGTH_SHORT).show()
             }
         } catch (e: Exception) {
             e.printStackTrace()
