@@ -60,7 +60,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             val uCropIntent = com.yalantis.ucrop.UCrop.of(uri, destinationUri)
                 .withOptions(options)
                 .withAspectRatio(1f, 1f) // Wajib persegi/bulat sempurna
-                .withMaxResultSize(1080, 1080) // 1080p sudah sangat tajam dan tidak membuat server menolak file
+                .withMaxResultSize(720, 720) // Resolusi 720p sangat aman, anti-gagal, dan tetap tajam!
                 .getIntent(requireContext())
                 
             cropImageLauncher.launch(uCropIntent)
@@ -103,27 +103,64 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
 
         // Klik pada ikon kamera untuk ganti foto
         binding.flEditPhoto.setOnClickListener {
-            val options = if (authManager.getUserPhotoUrl().isNotEmpty()) {
-                arrayOf("Pilih Foto dari Galeri", "Hapus Foto Profil")
-            } else {
-                arrayOf("Pilih Foto dari Galeri")
+            val bottomSheetDialog = com.google.android.material.bottomsheet.BottomSheetDialog(requireContext())
+            
+            val container = android.widget.LinearLayout(requireContext())
+            container.orientation = android.widget.LinearLayout.VERTICAL
+            container.setPadding(0, 48, 0, 48)
+            
+            // Title
+            val title = android.widget.TextView(requireContext())
+            title.text = "Atur Foto Profil"
+            title.textSize = 18f
+            title.setTypeface(null, android.graphics.Typeface.BOLD)
+            title.setTextColor(android.graphics.Color.parseColor("#1F2937"))
+            title.setPadding(64, 16, 64, 48)
+            container.addView(title)
+            
+            // Pilih Foto
+            val btnPilih = android.widget.TextView(requireContext())
+            btnPilih.text = "Pilih Foto dari Galeri"
+            btnPilih.textSize = 16f
+            btnPilih.setTextColor(android.graphics.Color.parseColor("#374151"))
+            btnPilih.setPadding(64, 32, 64, 32)
+            val outValue = android.util.TypedValue()
+            requireContext().theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)
+            btnPilih.setBackgroundResource(outValue.resourceId)
+            btnPilih.setOnClickListener {
+                bottomSheetDialog.dismiss()
+                pickMedia.launch("image/*")
             }
-
-            android.app.AlertDialog.Builder(requireContext())
-                .setTitle("Atur Foto Profil")
-                .setItems(options) { _, which ->
-                    if (which == 0) {
-                        pickMedia.launch("image/*")
-                    } else if (which == 1) {
-                        // Hapus Foto Profil
-                        authManager.updatePhotoUrl("")
-                        binding.ivUserAvatar.setImageResource(R.drawable.ic_profile)
-                        binding.ivUserAvatar.setPadding(resources.getDimensionPixelSize(R.dimen.margin_12), resources.getDimensionPixelSize(R.dimen.margin_12), resources.getDimensionPixelSize(R.dimen.margin_12), resources.getDimensionPixelSize(R.dimen.margin_12))
-                        binding.ivUserAvatar.imageTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.WHITE)
-                        Toast.makeText(requireContext(), "Foto profil dihapus", Toast.LENGTH_SHORT).show()
-                    }
+            container.addView(btnPilih)
+            
+            if (authManager.getUserPhotoUrl().isNotEmpty()) {
+                // Divider
+                val divider = android.view.View(requireContext())
+                divider.setBackgroundColor(android.graphics.Color.parseColor("#E5E7EB"))
+                val divParams = android.widget.LinearLayout.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, 2)
+                divParams.setMargins(0, 16, 0, 16)
+                container.addView(divider, divParams)
+                
+                // Hapus Foto
+                val btnHapus = android.widget.TextView(requireContext())
+                btnHapus.text = "Hapus Foto Profil"
+                btnHapus.setTextColor(android.graphics.Color.parseColor("#EF4444")) // Merah
+                btnHapus.textSize = 16f
+                btnHapus.setPadding(64, 32, 64, 32)
+                btnHapus.setBackgroundResource(outValue.resourceId)
+                btnHapus.setOnClickListener {
+                    bottomSheetDialog.dismiss()
+                    authManager.updatePhotoUrl("")
+                    binding.ivUserAvatar.setImageResource(R.drawable.ic_profile)
+                    binding.ivUserAvatar.setPadding(resources.getDimensionPixelSize(R.dimen.margin_12), resources.getDimensionPixelSize(R.dimen.margin_12), resources.getDimensionPixelSize(R.dimen.margin_12), resources.getDimensionPixelSize(R.dimen.margin_12))
+                    binding.ivUserAvatar.imageTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.WHITE)
+                    Toast.makeText(requireContext(), "Foto profil dihapus", Toast.LENGTH_SHORT).show()
                 }
-                .show()
+                container.addView(btnHapus)
+            }
+            
+            bottomSheetDialog.setContentView(container)
+            bottomSheetDialog.show()
         }
         
         // Klik pada avatar untuk melihat foto besar
