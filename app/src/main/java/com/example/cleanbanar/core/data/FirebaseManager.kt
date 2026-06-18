@@ -191,7 +191,7 @@ object FirebaseManager {
                 Log.e(TAG, "listenNotifications error: ${error.message} (code=${error.code})")
             }
         }
-        ref.orderByChild("waktu").limitToLast(30).addValueEventListener(listener)
+        ref.orderByChild("waktu").limitToLast(10).addValueEventListener(listener)
         return listener
     }
 
@@ -366,6 +366,24 @@ object FirebaseManager {
         val storageRef = FirebaseStorage.getInstance().reference.child("profile_pictures/$userId.jpg")
         
         storageRef.putFile(imageUri)
+            .addOnSuccessListener {
+                storageRef.downloadUrl.addOnSuccessListener { uri ->
+                    val photoUrl = uri.toString()
+                    updateUserPhotoUrl(userId, photoUrl)
+                    onSuccess(photoUrl)
+                }.addOnFailureListener { e ->
+                    onFailure(e)
+                }
+            }
+            .addOnFailureListener { e ->
+                onFailure(e)
+            }
+    }
+
+    fun uploadProfilePictureBytes(userId: String, data: ByteArray, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
+        val storageRef = FirebaseStorage.getInstance().reference.child("profile_pictures/$userId.jpg")
+        
+        storageRef.putBytes(data)
             .addOnSuccessListener {
                 storageRef.downloadUrl.addOnSuccessListener { uri ->
                     val photoUrl = uri.toString()

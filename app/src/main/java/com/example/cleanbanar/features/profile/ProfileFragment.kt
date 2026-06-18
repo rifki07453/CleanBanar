@@ -122,30 +122,63 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         val userId = authManager.getUserId()
         if (userId.isEmpty()) return
 
-        Toast.makeText(requireContext(), "Mengunggah foto...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(requireContext(), "Memproses foto...", Toast.LENGTH_SHORT).show()
 
-        FirebaseManager.uploadProfilePicture(userId, uri,
-            onSuccess = { photoUrl ->
-                // Update cache lokal
-                authManager.updatePhotoUrl(photoUrl)
-
-                if (isAdded) {
-                    // Update tampilan dengan Glide
-                    Glide.with(this)
-                        .load(photoUrl)
-                        .transform(CircleCrop())
-                        .placeholder(R.drawable.ic_profile)
-                        .into(binding.ivUserAvatar)
-
-                    Toast.makeText(requireContext(), "Foto profil berhasil diperbarui", Toast.LENGTH_SHORT).show()
-                }
-            },
-            onFailure = { e ->
-                if (isAdded) {
-                    Toast.makeText(requireContext(), "Gagal mengunggah foto: ${e.message}", Toast.LENGTH_LONG).show()
-                }
+        try {
+            // Kompresi gambar menjadi ukuran yang wajar (max 500px, 80% JPEG)
+            var bitmap: android.graphics.Bitmap? = null
+            if (android.os.Build.VERSION.SDK_INT >= 28) {
+                val source = android.graphics.ImageDecoder.createSource(requireContext().contentResolver, uri)
+                bitmap = android.graphics.ImageDecoder.decodeBitmap(source)
+            } else {
+                @Suppress("DEPRECATION")
+                bitmap = android.provider.MediaStore.Images.Media.getBitmap(requireContext().contentResolver, uri)
             }
-        )
+
+            if (bitmap != null) {
+                // Resize if too large
+                val maxDim = 500
+                var width = bitmap.width
+                var height = bitmap.height
+                if (width > maxDim || height > maxDim) {
+                    val ratio = width.toFloat() / height.toFloat()
+                    if (ratio > 1) {
+                        width = maxDim
+                        height = (maxDim / ratio).toInt()
+                    } else {
+                        height = maxDim
+                        width = (maxDim * ratio).toInt()
+                    }
+                    bitmap = android.graphics.Bitmap.createScaledBitmap(bitmap, width, height, true)
+                }
+
+                val baos = java.io.ByteArrayOutputStream()
+                bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 80, baos)
+                val data = baos.toByteArray()
+
+                FirebaseManager.uploadProfilePictureBytes(userId, data,
+                    onSuccess = { photoUrl ->
+                        authManager.updatePhotoUrl(photoUrl)
+                        if (isAdded) {
+                            Glide.with(this)
+                                .load(photoUrl)
+                                .transform(com.bumptech.glide.load.resource.bitmap.CircleCrop())
+                                .placeholder(R.drawable.ic_profile)
+                                .into(binding.ivUserAvatar)
+                            Toast.makeText(requireContext(), "Foto profil berhasil diperbarui", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    onFailure = { e ->
+                        if (isAdded) {
+                            Toast.makeText(requireContext(), "Gagal mengunggah foto: ${e.message}", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                )
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(requireContext(), "Gagal memproses foto: ${e.message}", Toast.LENGTH_LONG).show()
+        }
     }
 
     override fun observeData() {}
