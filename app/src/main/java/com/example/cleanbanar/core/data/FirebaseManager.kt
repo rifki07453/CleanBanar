@@ -383,17 +383,17 @@ object FirebaseManager {
     fun uploadProfilePictureBytes(userId: String, data: ByteArray, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
         Thread {
             try {
-                // Menggunakan ImgBB API (Layanan stabil, cepat, dan tidak diblokir di Indonesia)
+                // Menggunakan FreeImage.Host API (Terbukti PALING STABIL dan tidak diblokir)
                 val base64String = android.util.Base64.encodeToString(data, android.util.Base64.NO_WRAP)
-                val url = java.net.URL("https://api.imgbb.com/1/upload")
+                val url = java.net.URL("https://freeimage.host/api/1/upload")
                 val conn = url.openConnection() as java.net.HttpURLConnection
                 conn.requestMethod = "POST"
                 conn.doOutput = true
                 conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
                 
-                // Public API Key ImgBB
-                val apiKey = "c0f9cc9c62955f111b156b820986eeeb"
-                val postData = "key=$apiKey&image=" + java.net.URLEncoder.encode(base64String, "UTF-8")
+                // Public API Key dari FreeImage.Host
+                val apiKey = "6d207e02198a847aa98d0a2a901485a5"
+                val postData = "key=$apiKey&action=upload&format=json&source=" + java.net.URLEncoder.encode(base64String, "UTF-8")
                 
                 val os = conn.outputStream
                 os.write(postData.toByteArray(Charsets.UTF_8))
@@ -411,15 +411,15 @@ object FirebaseManager {
                     reader.close()
 
                     val json = org.json.JSONObject(response.toString())
-                    if (json.has("data")) {
-                        val imageUrl = json.getJSONObject("data").getString("url")
+                    if (json.getInt("status_code") == 200) {
+                        val imageUrl = json.getJSONObject("image").getString("url")
                     
                         android.os.Handler(android.os.Looper.getMainLooper()).post {
                             updateUserPhotoUrl(userId, imageUrl)
                             onSuccess(imageUrl)
                         }
                     } else {
-                        throw Exception("Gagal mendapatkan URL valid dari ImgBB")
+                        throw Exception("Gagal mendapatkan URL valid dari FreeImage.host")
                     }
                 } else {
                     val errorReader = java.io.BufferedReader(java.io.InputStreamReader(conn.errorStream))
