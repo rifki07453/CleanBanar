@@ -383,30 +383,20 @@ object FirebaseManager {
     fun uploadProfilePictureBytes(userId: String, data: ByteArray, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
         Thread {
             try {
-                // Menggunakan Catbox.moe API (100% tanpa kompresi, stabil, dan mendukung file besar)
-                val url = java.net.URL("https://catbox.moe/user/api.php")
+                // Menggunakan ImgBB API (Layanan stabil, cepat, dan tidak diblokir di Indonesia)
+                val base64String = android.util.Base64.encodeToString(data, android.util.Base64.NO_WRAP)
+                val url = java.net.URL("https://api.imgbb.com/1/upload")
                 val conn = url.openConnection() as java.net.HttpURLConnection
-                val boundary = "----WebKitFormBoundary" + System.currentTimeMillis()
                 conn.requestMethod = "POST"
                 conn.doOutput = true
-                conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=$boundary")
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
                 
-                val os = java.io.DataOutputStream(conn.outputStream)
+                // Public API Key ImgBB
+                val apiKey = "c0f9cc9c62955f111b156b820986eeeb"
+                val postData = "key=$apiKey&image=" + java.net.URLEncoder.encode(base64String, "UTF-8")
                 
-                // Add reqtype
-                os.writeBytes("--$boundary\r\n")
-                os.writeBytes("Content-Disposition: form-data; name=\"reqtype\"\r\n\r\n")
-                os.writeBytes("fileupload\r\n")
-                
-                // Add fileToUpload
-                os.writeBytes("--$boundary\r\n")
-                os.writeBytes("Content-Disposition: form-data; name=\"fileToUpload\"; filename=\"profile.jpg\"\r\n")
-                os.writeBytes("Content-Type: image/jpeg\r\n\r\n")
-                os.write(data)
-                os.writeBytes("\r\n")
-                
-                // End boundary
-                os.writeBytes("--$boundary--\r\n")
+                val os = conn.outputStream
+                os.write(postData.toByteArray(Charsets.UTF_8))
                 os.flush()
                 os.close()
 
@@ -419,15 +409,17 @@ object FirebaseManager {
                         response.append(line)
                     }
                     reader.close()
+
+                    val json = org.json.JSONObject(response.toString())
+                    if (json.has("data")) {
+                        val imageUrl = json.getJSONObject("data").getString("url")
                     
-                    val imageUrl = response.toString().trim()
-                    if (imageUrl.startsWith("http")) {
                         android.os.Handler(android.os.Looper.getMainLooper()).post {
                             updateUserPhotoUrl(userId, imageUrl)
                             onSuccess(imageUrl)
                         }
                     } else {
-                        throw Exception("Gagal mendapatkan URL valid dari server: $imageUrl")
+                        throw Exception("Gagal mendapatkan URL valid dari ImgBB")
                     }
                 } else {
                     val errorReader = java.io.BufferedReader(java.io.InputStreamReader(conn.errorStream))
