@@ -381,17 +381,51 @@ object FirebaseManager {
     }
 
     fun uploadProfilePictureBytes(userId: String, data: ByteArray, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
-        try {
-            // Karena Firebase Storage sekarang mewajibkan Blaze Plan (Berbayar/Kartu Kredit),
-            // kita akali dengan mengubah gambar menjadi teks Base64 dan menyimpannya langsung ke Realtime Database!
-            val base64String = android.util.Base64.encodeToString(data, android.util.Base64.NO_WRAP)
-            val photoDataUrl = "data:image/jpeg;base64,$base64String"
-            
-            updateUserPhotoUrl(userId, photoDataUrl)
-            onSuccess(photoDataUrl)
-        } catch (e: Exception) {
-            onFailure(e)
-        }
+        Thread {
+            try {
+                // Menggunakan FreeImage.Host API (Layanan Hosting Gambar Profesional & Gratis)
+                // Ini sangat bersih dan menghasilkan URL gambar sungguhan (bukan Base64)
+                val base64String = android.util.Base64.encodeToString(data, android.util.Base64.NO_WRAP)
+                val url = java.net.URL("https://freeimage.host/api/1/upload")
+                val conn = url.openConnection() as java.net.HttpURLConnection
+                conn.requestMethod = "POST"
+                conn.doOutput = true
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
+                
+                // Public API Key dari FreeImage.Host
+                val apiKey = "6d207e02198a847aa98d0a2a901485a5"
+                val postData = "key=$apiKey&action=upload&format=json&source=" + java.net.URLEncoder.encode(base64String, "UTF-8")
+                
+                val os = conn.outputStream
+                os.write(postData.toByteArray(Charsets.UTF_8))
+                os.flush()
+                os.close()
+                
+                val responseCode = conn.responseCode
+                if (responseCode == 200) {
+                    val reader = java.io.BufferedReader(java.io.InputStreamReader(conn.inputStream))
+                    val response = reader.readText()
+                    reader.close()
+                    
+                    val json = org.json.JSONObject(response)
+                    val imageUrl = json.getJSONObject("image").getString("url")
+                    
+                    android.os.Handler(android.os.Looper.getMainLooper()).post {
+                        updateUserPhotoUrl(userId, imageUrl)
+                        onSuccess(imageUrl)
+                    }
+                } else {
+                    val errorReader = java.io.BufferedReader(java.io.InputStreamReader(conn.errorStream))
+                    val errorMsg = errorReader.readText()
+                    throw Exception("HTTP $responseCode: $errorMsg")
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                android.os.Handler(android.os.Looper.getMainLooper()).post {
+                    onFailure(e)
+                }
+            }
+        }.start()
     }
 
     fun updateUserPhotoUrl(userId: String, photoUrl: String) {
