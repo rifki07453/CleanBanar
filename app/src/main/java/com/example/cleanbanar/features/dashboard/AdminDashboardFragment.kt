@@ -315,7 +315,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
             dialog.dismiss()
             val intent = Intent(requireContext(), DeviceProvisionSuccessActivity::class.java)
             intent.putExtra("device_id", device.id)
-            intent.putExtra("ssid", "-")
+            intent.putExtra("ssid", device.ssid)
             intent.putExtra("is_provisioning", false)
             startActivity(intent)
         }

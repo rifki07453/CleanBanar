@@ -53,6 +53,14 @@ class DeviceProvisionSuccessActivity : AppCompatActivity() {
         val isProvisioning = intent.getBooleanExtra("is_provisioning", true)
         if (!isProvisioning) {
             findViewById<android.view.View>(R.id.llSuccessHeader)?.visibility = android.view.View.GONE
+            val contentContainer = findViewById<android.view.View>(R.id.llContentContainer)
+            val params = contentContainer?.layoutParams as? android.view.ViewGroup.MarginLayoutParams
+            if (params != null) {
+                // Convert 16dp to px
+                val marginInPx = (16 * resources.displayMetrics.density).toInt()
+                params.topMargin = marginInPx
+                contentContainer.layoutParams = params
+            }
         }
 
         initViews()
@@ -130,6 +138,11 @@ class DeviceProvisionSuccessActivity : AppCompatActivity() {
                 
                 val ipAddr = snapshot.child("ipAddress").getValue(String::class.java) ?: "-"
                 if (ipAddr != "-") tvIpAddress.text = ipAddr
+                
+                val fbSsid = snapshot.child("ssid").getValue(String::class.java)
+                if (fbSsid != null && fbSsid.isNotEmpty() && fbSsid != "-") {
+                    tvSSID.text = fbSsid
+                }
                 
                 val signal = snapshot.child("kekuatanSinyal").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 0
                 if (signal < 0) tvSignal.text = "$signal dBm"
