@@ -60,7 +60,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             val uCropIntent = com.yalantis.ucrop.UCrop.of(uri, destinationUri)
                 .withOptions(options)
                 .withAspectRatio(1f, 1f) // Wajib persegi/bulat sempurna
-                .withMaxResultSize(720, 720) // Resolusi 720p sangat aman, anti-gagal, dan tetap tajam!
+                .withMaxResultSize(1440, 1440) // Resolusi 1440p (Super HD) dijamin tajam saat full screen
                 .getIntent(requireContext())
                 
             cropImageLauncher.launch(uCropIntent)

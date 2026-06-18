@@ -383,20 +383,25 @@ object FirebaseManager {
     fun uploadProfilePictureBytes(userId: String, data: ByteArray, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
         Thread {
             try {
-                // Menggunakan FreeImage.Host API (Terbukti PALING STABIL dan tidak diblokir)
-                val base64String = android.util.Base64.encodeToString(data, android.util.Base64.NO_WRAP)
-                val url = java.net.URL("https://freeimage.host/api/1/upload")
+                // Menggunakan ImgBB dengan metode Stream Multipart (Sangat stabil, anti-gagal, resolusi murni tidak dikompres)
+                val url = java.net.URL("https://api.imgbb.com/1/upload?key=c0f9cc9c62955f111b156b820986eeeb")
                 val conn = url.openConnection() as java.net.HttpURLConnection
+                val boundary = "----WebKitFormBoundary" + System.currentTimeMillis()
                 conn.requestMethod = "POST"
                 conn.doOutput = true
-                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
+                conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=$boundary")
                 
-                // Public API Key dari FreeImage.Host
-                val apiKey = "6d207e02198a847aa98d0a2a901485a5"
-                val postData = "key=$apiKey&action=upload&format=json&source=" + java.net.URLEncoder.encode(base64String, "UTF-8")
+                val os = java.io.DataOutputStream(conn.outputStream)
                 
-                val os = conn.outputStream
-                os.write(postData.toByteArray(Charsets.UTF_8))
+                // Tambahkan file image
+                os.writeBytes("--$boundary\r\n")
+                os.writeBytes("Content-Disposition: form-data; name=\"image\"; filename=\"profile.jpg\"\r\n")
+                os.writeBytes("Content-Type: image/jpeg\r\n\r\n")
+                os.write(data)
+                os.writeBytes("\r\n")
+                
+                // End boundary
+                os.writeBytes("--$boundary--\r\n")
                 os.flush()
                 os.close()
 
@@ -411,15 +416,15 @@ object FirebaseManager {
                     reader.close()
 
                     val json = org.json.JSONObject(response.toString())
-                    if (json.getInt("status_code") == 200) {
-                        val imageUrl = json.getJSONObject("image").getString("url")
+                    if (json.has("data")) {
+                        val imageUrl = json.getJSONObject("data").getString("url")
                     
                         android.os.Handler(android.os.Looper.getMainLooper()).post {
                             updateUserPhotoUrl(userId, imageUrl)
                             onSuccess(imageUrl)
                         }
                     } else {
-                        throw Exception("Gagal mendapatkan URL valid dari FreeImage.host")
+                        throw Exception("Gagal mendapatkan URL valid dari ImgBB")
                     }
                 } else {
                     val errorReader = java.io.BufferedReader(java.io.InputStreamReader(conn.errorStream))
