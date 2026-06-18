@@ -52,12 +52,12 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             options.setToolbarColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary))
             options.setStatusBarColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary_dark))
             options.setActiveControlsWidgetColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary))
+            options.setCompressionFormat(android.graphics.Bitmap.CompressFormat.PNG) // 100% Kualitas Lossless
             
             // Mulai Intent uCrop
             val uCropIntent = com.yalantis.ucrop.UCrop.of(uri, destinationUri)
                 .withOptions(options)
                 .withAspectRatio(1f, 1f) // Wajib persegi/bulat sempurna
-                .withMaxResultSize(800, 800) // Ukuran maksimal agar ringan namun tajam
                 .getIntent(requireContext())
                 
             cropImageLauncher.launch(uCropIntent)
@@ -212,6 +212,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         
         Glide.with(this)
             .load(url)
+            .override(com.bumptech.glide.request.target.Target.SIZE_ORIGINAL, com.bumptech.glide.request.target.Target.SIZE_ORIGINAL)
             .into(imageView)
             
         imageView.setOnClickListener {
