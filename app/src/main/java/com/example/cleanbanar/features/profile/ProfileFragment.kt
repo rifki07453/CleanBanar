@@ -52,12 +52,15 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             options.setToolbarColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary))
             options.setStatusBarColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary_dark))
             options.setActiveControlsWidgetColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary))
-            options.setCompressionFormat(android.graphics.Bitmap.CompressFormat.PNG) // 100% Kualitas Lossless
+            options.setHideBottomControls(false) // Tampilkan kontrol bawah
+            options.setCompressionFormat(android.graphics.Bitmap.CompressFormat.JPEG) 
+            options.setCompressionQuality(100) // Kualitas maksimal 100%
             
             // Mulai Intent uCrop
             val uCropIntent = com.yalantis.ucrop.UCrop.of(uri, destinationUri)
                 .withOptions(options)
                 .withAspectRatio(1f, 1f) // Wajib persegi/bulat sempurna
+                .withMaxResultSize(1080, 1080) // 1080p sudah sangat tajam dan tidak membuat server menolak file
                 .getIntent(requireContext())
                 
             cropImageLauncher.launch(uCropIntent)
@@ -100,7 +103,27 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
 
         // Klik pada ikon kamera untuk ganti foto
         binding.flEditPhoto.setOnClickListener {
-            pickMedia.launch("image/*")
+            val options = if (authManager.getUserPhotoUrl().isNotEmpty()) {
+                arrayOf("Pilih Foto dari Galeri", "Hapus Foto Profil")
+            } else {
+                arrayOf("Pilih Foto dari Galeri")
+            }
+
+            android.app.AlertDialog.Builder(requireContext())
+                .setTitle("Atur Foto Profil")
+                .setItems(options) { _, which ->
+                    if (which == 0) {
+                        pickMedia.launch("image/*")
+                    } else if (which == 1) {
+                        // Hapus Foto Profil
+                        authManager.updatePhotoUrl("")
+                        binding.ivUserAvatar.setImageResource(R.drawable.ic_profile)
+                        binding.ivUserAvatar.setPadding(resources.getDimensionPixelSize(R.dimen.margin_12), resources.getDimensionPixelSize(R.dimen.margin_12), resources.getDimensionPixelSize(R.dimen.margin_12), resources.getDimensionPixelSize(R.dimen.margin_12))
+                        binding.ivUserAvatar.imageTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.WHITE)
+                        Toast.makeText(requireContext(), "Foto profil dihapus", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                .show()
         }
         
         // Klik pada avatar untuk melihat foto besar
