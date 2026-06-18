@@ -98,4 +98,33 @@ object AnimationUtils {
         floatAnim.start()
         return floatAnim
     }
+
+    /**
+     * Menerapkan efek bernapas (skala membesar perlahan) pada latar belakang header.
+     * Memberikan kesan elegan dan modern pada dashboard.
+     */
+    fun applyHeaderBreathingEffect(view: View) {
+        // Atur pivot di tengah atas agar membesarnya ke bawah dan ke samping
+        view.pivotX = view.resources.displayMetrics.widthPixels / 2f
+        view.pivotY = 0f
+
+        val scaleX = ObjectAnimator.ofFloat(view, "scaleX", 1.0f, 1.06f)
+        val scaleY = ObjectAnimator.ofFloat(view, "scaleY", 1.0f, 1.06f)
+
+        scaleX.duration = 6000
+        scaleY.duration = 6000
+
+        scaleX.repeatMode = ValueAnimator.REVERSE
+        scaleY.repeatMode = ValueAnimator.REVERSE
+
+        scaleX.repeatCount = ValueAnimator.INFINITE
+        scaleY.repeatCount = ValueAnimator.INFINITE
+
+        scaleX.interpolator = android.view.animation.AccelerateDecelerateInterpolator()
+        scaleY.interpolator = android.view.animation.AccelerateDecelerateInterpolator()
+
+        val animatorSet = AnimatorSet()
+        animatorSet.playTogether(scaleX, scaleY)
+        animatorSet.start()
+    }
 }

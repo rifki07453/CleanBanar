@@ -75,7 +75,11 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
             showDeviceListBottomSheet()
         }
 
-
+        // Terapkan animasi bernapas pada background hijau header
+        val headerBlock = view?.findViewById<android.widget.FrameLayout>(R.id.headerBlock)
+        if (headerBlock != null) {
+            com.example.cleanbanar.core.utils.AnimationUtils.applyHeaderBreathingEffect(headerBlock)
+        }
     }
 
 
