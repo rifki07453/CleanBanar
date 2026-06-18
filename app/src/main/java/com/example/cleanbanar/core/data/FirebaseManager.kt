@@ -385,61 +385,28 @@ object FirebaseManager {
     }
 
     fun uploadProfilePictureBytes(userId: String, data: ByteArray, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
-        Thread {
-            try {
-                // Menggunakan Telegra.ph (Server milik Telegram: 100% Gratis, Tidak Berbayar, Anti-Gagal, Kualitas Super Tajam)
-                val url = java.net.URL("https://telegra.ph/upload")
-                val conn = url.openConnection() as java.net.HttpURLConnection
-                val boundary = "----WebKitFormBoundary" + System.currentTimeMillis()
-                conn.requestMethod = "POST"
-                conn.doOutput = true
-                conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=$boundary")
-                
-                val os = java.io.DataOutputStream(conn.outputStream)
-                
-                // Tambahkan file image
-                os.writeBytes("--$boundary\r\n")
-                os.writeBytes("Content-Disposition: form-data; name=\"file\"; filename=\"profile.jpg\"\r\n")
-                os.writeBytes("Content-Type: image/jpeg\r\n\r\n")
-                os.write(data)
-                os.writeBytes("\r\n")
-                
-                // End boundary
-                os.writeBytes("--$boundary--\r\n")
-                os.flush()
-                os.close()
-
-                val responseCode = conn.responseCode
-                if (responseCode == 200) {
-                    val reader = java.io.BufferedReader(java.io.InputStreamReader(conn.inputStream))
-                    val response = java.lang.StringBuilder()
-                    var line: String?
-                    while (reader.readLine().also { line = it } != null) {
-                        response.append(line)
-                    }
-                    reader.close()
-
-                    // Response berupa array JSON: [{"src":"\/file\/abcd1234.jpg"}]
-                    val jsonArray = org.json.JSONArray(response.toString())
-                    val src = jsonArray.getJSONObject(0).getString("src")
-                    val imageUrl = "https://telegra.ph" + src
-                    
-                    android.os.Handler(android.os.Looper.getMainLooper()).post {
-                        updateUserPhotoUrl(userId, imageUrl)
-                        onSuccess(imageUrl)
-                    }
-                } else {
-                    val errorReader = java.io.BufferedReader(java.io.InputStreamReader(conn.errorStream))
-                    val errorMsg = errorReader.readText()
-                    throw Exception("HTTP $responseCode: $errorMsg")
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                android.os.Handler(android.os.Looper.getMainLooper()).post {
-                    onFailure(e)
-                }
+        try {
+            // Trik Pamungkas: Simpan foto sebagai Data URI murni (Base64) langsung ke Realtime Database!
+            // 1. Tidak butuh server pihak ketiga (bebas blokir, bebas error koneksi)
+            // 2. Tidak butuh Firebase Storage (100% gratis, tanpa syarat apapun)
+            // 3. Resolusi 100% utuh, tidak ada server yang akan mengompresnya.
+            
+            val base64String = android.util.Base64.encodeToString(data, android.util.Base64.NO_WRAP)
+            val dataUri = "data:image/jpeg;base64,$base64String"
+            
+            // Simpan langsung ke Realtime Database
+            updateUserPhotoUrl(userId, dataUri)
+            
+            // Panggil sukses langsung di Main Thread
+            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                onSuccess(dataUri)
             }
-        }.start()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                onFailure(e)
+            }
+        }
     }
 
     fun updateUserPhotoUrl(userId: String, photoUrl: String) {
