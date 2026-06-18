@@ -29,6 +29,10 @@ object FirebaseManager {
     private val rootRef: DatabaseReference? by lazy {
         database?.getReference("cleanbanar")
     }
+    
+    private val storage: FirebaseStorage by lazy {
+        FirebaseStorage.getInstance()
+    }
 
     // ==========================================
     // Status Tempat Sampah
@@ -383,8 +387,8 @@ object FirebaseManager {
     fun uploadProfilePictureBytes(userId: String, data: ByteArray, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
         Thread {
             try {
-                // Menggunakan ImgBB dengan metode Stream Multipart (Sangat stabil, anti-gagal, resolusi murni tidak dikompres)
-                val url = java.net.URL("https://api.imgbb.com/1/upload?key=c0f9cc9c62955f111b156b820986eeeb")
+                // Menggunakan Telegra.ph (Server milik Telegram: 100% Gratis, Tidak Berbayar, Anti-Gagal, Kualitas Super Tajam)
+                val url = java.net.URL("https://telegra.ph/upload")
                 val conn = url.openConnection() as java.net.HttpURLConnection
                 val boundary = "----WebKitFormBoundary" + System.currentTimeMillis()
                 conn.requestMethod = "POST"
@@ -395,7 +399,7 @@ object FirebaseManager {
                 
                 // Tambahkan file image
                 os.writeBytes("--$boundary\r\n")
-                os.writeBytes("Content-Disposition: form-data; name=\"image\"; filename=\"profile.jpg\"\r\n")
+                os.writeBytes("Content-Disposition: form-data; name=\"file\"; filename=\"profile.jpg\"\r\n")
                 os.writeBytes("Content-Type: image/jpeg\r\n\r\n")
                 os.write(data)
                 os.writeBytes("\r\n")
@@ -415,16 +419,14 @@ object FirebaseManager {
                     }
                     reader.close()
 
-                    val json = org.json.JSONObject(response.toString())
-                    if (json.has("data")) {
-                        val imageUrl = json.getJSONObject("data").getString("url")
+                    // Response berupa array JSON: [{"src":"\/file\/abcd1234.jpg"}]
+                    val jsonArray = org.json.JSONArray(response.toString())
+                    val src = jsonArray.getJSONObject(0).getString("src")
+                    val imageUrl = "https://telegra.ph" + src
                     
-                        android.os.Handler(android.os.Looper.getMainLooper()).post {
-                            updateUserPhotoUrl(userId, imageUrl)
-                            onSuccess(imageUrl)
-                        }
-                    } else {
-                        throw Exception("Gagal mendapatkan URL valid dari ImgBB")
+                    android.os.Handler(android.os.Looper.getMainLooper()).post {
+                        updateUserPhotoUrl(userId, imageUrl)
+                        onSuccess(imageUrl)
                     }
                 } else {
                     val errorReader = java.io.BufferedReader(java.io.InputStreamReader(conn.errorStream))
