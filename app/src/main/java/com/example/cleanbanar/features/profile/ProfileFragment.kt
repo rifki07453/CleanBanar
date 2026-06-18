@@ -27,9 +27,40 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
 
     private lateinit var authManager: AuthManager
 
+    private val cropImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK && result.data != null) {
+            val resultUri = com.yalantis.ucrop.UCrop.getOutput(result.data!!)
+            if (resultUri != null) {
+                uploadAndSetProfilePicture(resultUri)
+            }
+        } else if (result.resultCode == com.yalantis.ucrop.UCrop.RESULT_ERROR && result.data != null) {
+            val cropError = com.yalantis.ucrop.UCrop.getError(result.data!!)
+            Toast.makeText(requireContext(), "Gagal memotong foto: ${cropError?.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private val pickMedia = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         if (uri != null) {
-            uploadAndSetProfilePicture(uri)
+            // Setup destinasi file hasil crop
+            val destinationUri = Uri.fromFile(java.io.File(requireContext().cacheDir, "cropped_profile_${System.currentTimeMillis()}.jpg"))
+            
+            // Konfigurasi uCrop untuk bentuk bulat dan tema hijau
+            val options = com.yalantis.ucrop.UCrop.Options()
+            options.setCircleDimmedLayer(true) // Memunculkan bingkai potong bulat
+            options.setShowCropGrid(false) // Hilangkan kotak-kotak grid
+            options.setToolbarTitle("Atur Foto Profil")
+            options.setToolbarColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary))
+            options.setStatusBarColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary_dark))
+            options.setActiveControlsWidgetColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary))
+            
+            // Mulai Intent uCrop
+            val uCropIntent = com.yalantis.ucrop.UCrop.of(uri, destinationUri)
+                .withOptions(options)
+                .withAspectRatio(1f, 1f) // Wajib persegi/bulat sempurna
+                .withMaxResultSize(800, 800) // Ukuran maksimal agar ringan namun tajam
+                .getIntent(requireContext())
+                
+            cropImageLauncher.launch(uCropIntent)
         }
     }
 
@@ -59,6 +90,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         val initialPhotoUrl = authManager.getUserPhotoUrl()
         if (initialPhotoUrl.isNotEmpty()) {
             binding.ivUserAvatar.imageTintList = null
+            binding.ivUserAvatar.setPadding(0, 0, 0, 0) // Hapus padding agar foto penuh di lingkaran
             Glide.with(this)
                 .load(initialPhotoUrl)
                 .transform(com.bumptech.glide.load.resource.bitmap.CircleCrop())
@@ -144,6 +176,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                         authManager.updatePhotoUrl(photoUrl)
                         if (isAdded) {
                             binding.ivUserAvatar.imageTintList = null
+                            binding.ivUserAvatar.setPadding(0, 0, 0, 0) // Hapus padding agar foto penuh di lingkaran
                             Glide.with(this)
                                 .load(photoUrl)
                                 .transform(com.bumptech.glide.load.resource.bitmap.CircleCrop())

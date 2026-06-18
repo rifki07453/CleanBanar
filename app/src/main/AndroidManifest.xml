@@ -58,6 +58,11 @@
             android:theme="@style/Theme.CleanBanar.NoActionBar"
             android:exported="false" />
 
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+
         <service
             android:name=".features.dashboard.BinObserverService"
             android:enabled="true"
