@@ -29,20 +29,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
 
     private val pickMedia = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         if (uri != null) {
-            var size: Long = 0
-            requireContext().contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-                val sizeIndex = cursor.getColumnIndex(android.provider.OpenableColumns.SIZE)
-                if (sizeIndex != -1 && cursor.moveToFirst()) {
-                    size = cursor.getLong(sizeIndex)
-                }
-            }
-            
-            // Batas maksimal 2 MB (2 * 1024 * 1024 bytes)
-            if (size <= 2 * 1024 * 1024) {
-                uploadAndSetProfilePicture(uri)
-            } else {
-                Toast.makeText(requireContext(), "Ukuran foto maksimal 2 MB!", Toast.LENGTH_LONG).show()
-            }
+            uploadAndSetProfilePicture(uri)
         }
     }
 
@@ -68,12 +55,13 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
             binding.tvProfilePhone.visibility = View.GONE
         }
 
-        // Load foto profil (jika ada)
-        val photoUrl = authManager.getUserPhotoUrl()
-        if (photoUrl.isNotEmpty()) {
+        // Tampilkan foto profil (jika ada)
+        val initialPhotoUrl = authManager.getUserPhotoUrl()
+        if (initialPhotoUrl.isNotEmpty()) {
+            binding.ivUserAvatar.imageTintList = null
             Glide.with(this)
-                .load(photoUrl)
-                .transform(CircleCrop())
+                .load(initialPhotoUrl)
+                .transform(com.bumptech.glide.load.resource.bitmap.CircleCrop())
                 .placeholder(R.drawable.ic_profile)
                 .into(binding.ivUserAvatar)
         }
@@ -155,6 +143,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
                     onSuccess = { photoUrl ->
                         authManager.updatePhotoUrl(photoUrl)
                         if (isAdded) {
+                            binding.ivUserAvatar.imageTintList = null
                             Glide.with(this)
                                 .load(photoUrl)
                                 .transform(com.bumptech.glide.load.resource.bitmap.CircleCrop())
