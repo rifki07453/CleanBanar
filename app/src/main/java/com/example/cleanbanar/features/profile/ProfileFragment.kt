@@ -130,15 +130,27 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         val userId = authManager.getUserId()
         if (userId.isEmpty()) return
 
-        Toast.makeText(requireContext(), "Memproses foto (Tanpa Kompresi)...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(requireContext(), "Memproses foto...", Toast.LENGTH_SHORT).show()
 
         try {
-            // Membaca file gambar asli 100% tanpa kompresi / tanpa resize sesuai permintaan
-            val inputStream = requireContext().contentResolver.openInputStream(uri)
-            val data = inputStream?.readBytes()
-            inputStream?.close()
+            // Kita gunakan ImageDecoder dengan ALLOCATOR_SOFTWARE agar terhindar dari bug "gambar putih/blank" dari Google Photos
+            var bitmap: android.graphics.Bitmap? = null
+            if (android.os.Build.VERSION.SDK_INT >= 28) {
+                val source = android.graphics.ImageDecoder.createSource(requireContext().contentResolver, uri)
+                bitmap = android.graphics.ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
+                    decoder.allocator = android.graphics.ImageDecoder.ALLOCATOR_SOFTWARE
+                    decoder.isMutableRequired = true
+                }
+            } else {
+                @Suppress("DEPRECATION")
+                bitmap = android.provider.MediaStore.Images.Media.getBitmap(requireContext().contentResolver, uri)
+            }
 
-            if (data != null) {
+            if (bitmap != null) {
+                // Mengubah ke byte array tanpa menurunkan resolusi (100% quality) agar gambar tajam
+                val baos = java.io.ByteArrayOutputStream()
+                bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 100, baos)
+                val data = baos.toByteArray()
                 FirebaseManager.uploadProfilePictureBytes(userId, data,
                     onSuccess = { photoUrl ->
                         authManager.updatePhotoUrl(photoUrl)
