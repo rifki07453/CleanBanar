@@ -25,8 +25,6 @@ class DeviceProvisionSuccessActivity : AppCompatActivity() {
     private lateinit var tvIpAddress: TextView
     private lateinit var tvSignal: TextView
     private lateinit var tvCloudConnection: TextView
-    private lateinit var tvAvgCapacity: TextView
-    private lateinit var tvCapacityLastUpdate: TextView
     private lateinit var tvOnlineStatus: TextView
     private lateinit var dotOnlineStatus: View
 
@@ -65,8 +63,6 @@ class DeviceProvisionSuccessActivity : AppCompatActivity() {
         tvIpAddress = findViewById(R.id.tvIpAddress)
         tvSignal = findViewById(R.id.tvSignal)
         tvCloudConnection = findViewById(R.id.tvCloudConnection)
-        tvAvgCapacity = findViewById(R.id.tvAvgCapacity)
-        tvCapacityLastUpdate = findViewById(R.id.tvCapacityLastUpdate)
         tvOnlineStatus = findViewById(R.id.tvOnlineStatus)
         dotOnlineStatus = findViewById(R.id.dotOnlineStatus)
 
@@ -158,25 +154,13 @@ class DeviceProvisionSuccessActivity : AppCompatActivity() {
                 }
 
                 val terakhirTerlihat = snapshot.child("terakhirTerlihat").getValue(Any::class.java)?.toString()?.toLongOrNull() ?: 0L
-                tvCapacityLastUpdate.text = "Terakhir dilihat: " + formatTime(terakhirTerlihat)
                 tvLastSeen.text = formatTime(terakhirTerlihat)
             }
 
             override fun onCancelled(error: DatabaseError) {}
         })
 
-        // Listen for bins percentage
-        val binsRef = FirebaseDatabase.getInstance().getReference("cleanbanar/devices/$deviceId/bins")
-        binsRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if (!snapshot.exists()) return
-                val pctOrg = snapshot.child("organik").child("persentaseIsi").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 0
-                val pctNon = snapshot.child("nonOrganik").child("persentaseIsi").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 0
-                val avg = (pctOrg + pctNon) / 2
-                tvAvgCapacity.text = "$avg%"
-            }
-            override fun onCancelled(error: DatabaseError) {}
-        })
+
     }
 
     private fun formatTime(millis: Long): String {

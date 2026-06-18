@@ -140,27 +140,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- CARD STATUS UTAMA (BLUE CARD) -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
-                app:cardBackgroundColor="@color/primary"
-                app:cardElevation="2dp">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="RATA-RATA KAPASITAS" android:textColor="#E0F2FE" android:textSize="10sp" android:textStyle="bold" android:layout_marginBottom="4dp"/>
-                    <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content">
-                        <TextView android:id="@+id/tvAvgCapacity" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0%" android:textColor="@color/white" android:textSize="36sp" android:textStyle="bold"/>
-                        <ImageView android:layout_width="40dp" android:layout_height="40dp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:src="@drawable/ic_delete_sweep_24dp" app:tint="#60FFFFFF"/>
-                    </RelativeLayout>
-                    <TextView android:id="@+id/tvCapacityLastUpdate" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Terakhir Update: Belum ada" android:textColor="#B0E0E6" android:textSize="12sp" android:layout_marginTop="8dp"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
 
             <!-- QUICK ACTIONS -->
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Aksi Cepat" android:textSize="12sp" android:textStyle="bold" android:textColor="@color/gray_500" android:layout_marginBottom="8dp" android:textAllCaps="true"/>
