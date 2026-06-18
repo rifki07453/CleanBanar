@@ -90,10 +90,7 @@
                                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="TERAKHIR DILIHAT" android:textSize="10sp" android:textColor="@color/gray_500" android:textStyle="bold"/>
                                 <TextView android:id="@+id/tvLastSeen" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Belum sinkron" android:textSize="14sp" android:textColor="@color/gray_900"/>
                             </LinearLayout>
-                            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="FIRMWARE" android:textSize="10sp" android:textColor="@color/gray_500" android:textStyle="bold"/>
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="v1.0.0" android:textSize="14sp" android:textColor="@color/gray_900"/>
-                            </LinearLayout>
+
                         </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
