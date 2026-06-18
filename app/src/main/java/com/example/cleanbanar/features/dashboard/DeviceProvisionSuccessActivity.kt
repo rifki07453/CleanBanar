@@ -50,6 +50,11 @@ class DeviceProvisionSuccessActivity : AppCompatActivity() {
         deviceId = intent.getStringExtra("device_id") ?: ""
         ssid = intent.getStringExtra("ssid") ?: "-"
 
+        val isProvisioning = intent.getBooleanExtra("is_provisioning", true)
+        if (!isProvisioning) {
+            findViewById<android.view.View>(R.id.llSuccessHeader)?.visibility = android.view.View.GONE
+        }
+
         initViews()
         setupListeners()
         startMonitoring()

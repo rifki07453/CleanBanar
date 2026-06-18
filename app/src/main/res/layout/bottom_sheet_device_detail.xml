@@ -85,6 +85,16 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/margin_1"
             android:background="#F3F4F6"
+            android:layout_marginBottom="@dimen/margin_16" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnViewOverview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Overview"
+            android:textColor="@color/white"
+            app:backgroundTint="@color/primary"
+            app:cornerRadius="8dp"
             android:layout_marginBottom="@dimen/margin_24" />
 
         <!-- QR Code Section -->

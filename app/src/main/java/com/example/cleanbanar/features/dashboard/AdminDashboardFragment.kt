@@ -215,6 +215,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         val ivDeviceQrCode = view.findViewById<android.widget.ImageView>(R.id.ivDeviceQrCode)
         val tvDeviceId = view.findViewById<android.widget.TextView>(R.id.tvDeviceId)
         val btnPrintQr = view.findViewById<MaterialButton>(R.id.btnPrintQr)
+        val btnViewOverview = view.findViewById<MaterialButton>(R.id.btnViewOverview)
         
         tvDetailDeviceName.text = device.nama
         tvDeviceId.text = "ID: ${device.id}"
@@ -309,6 +310,15 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         val etSsid = view.findViewById<com.google.android.material.textfield.MaterialAutoCompleteTextView>(R.id.etSsid)
         val etPassword = view.findViewById<TextInputEditText>(R.id.etPassword)
         val btnSendConfig = view.findViewById<MaterialButton>(R.id.btnSendConfig)
+
+        btnViewOverview.setOnClickListener {
+            dialog.dismiss()
+            val intent = Intent(requireContext(), DeviceProvisionSuccessActivity::class.java)
+            intent.putExtra("device_id", device.id)
+            intent.putExtra("ssid", "-")
+            intent.putExtra("is_provisioning", false)
+            startActivity(intent)
+        }
 
         setupWifiDropdown(etSsid)
 
