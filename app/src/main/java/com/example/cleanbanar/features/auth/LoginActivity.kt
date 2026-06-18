@@ -78,7 +78,7 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                 .addOnSuccessListener { authResult ->
                     val uid = authResult.user?.uid ?: return@addOnSuccessListener
 
-                    FirebaseManager.getUserData(uid) { nama, peran, nomorHp ->
+                    FirebaseManager.getUserData(uid) { nama, peran, nomorHp, photoUrl ->
                         if (peran.isEmpty()) {
                             val seedData = getSeedDataForEmail(email)
                             if (seedData == null) {
@@ -96,13 +96,13 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                                 nomorHp = ""
                             ) {
                                 setLoading(false)
-                                authManager.saveSession(uid = uid, name = seedData.first, email = email, role = seedData.second, phone = "")
+                                authManager.saveSession(uid = uid, name = seedData.first, email = email, role = seedData.second, phone = "", photoUrl = "")
                                 Toast.makeText(this, "Selamat datang, ${seedData.first}!", Toast.LENGTH_SHORT).show()
                                 navigateToDashboard(seedData.second)
                             }
                         } else {
                             setLoading(false)
-                            authManager.saveSession(uid = uid, name = nama, email = email, role = peran, phone = nomorHp)
+                            authManager.saveSession(uid = uid, name = nama, email = email, role = peran, phone = nomorHp, photoUrl = photoUrl)
                             Toast.makeText(this, "Selamat datang, $nama!", Toast.LENGTH_SHORT).show()
                             navigateToDashboard(peran)
                         }
@@ -134,7 +134,8 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                         FirebaseManager.seedUserData(uid, nama, email, peran, nomorHp) {
                             FirebaseManager.deleteUser(oldId)
                             setLoading(false)
-                            authManager.saveSession(uid, nama, email, peran, nomorHp)
+                            // Jika staff baru register, foto belum ada
+                            authManager.saveSession(uid, nama, email, peran, nomorHp, photoUrl = "")
                             Toast.makeText(this, "Akun berhasil diaktifkan! Selamat datang, $nama", Toast.LENGTH_LONG).show()
                             navigateToDashboard(peran)
                         }

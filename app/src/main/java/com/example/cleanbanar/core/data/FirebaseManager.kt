@@ -330,10 +330,10 @@ object FirebaseManager {
         rootRef?.child("users")?.child(userId)?.removeValue()
     }
 
-    fun getUserData(uid: String, callback: (nama: String, peran: String, nomorHp: String) -> Unit) {
+    fun getUserData(uid: String, callback: (nama: String, peran: String, nomorHp: String, photoUrl: String) -> Unit) {
         val ref = rootRef?.child("users")?.child(uid)
         if (ref == null) {
-            callback("", "", "")
+            callback("", "", "", "")
             return
         }
         ref.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -341,10 +341,11 @@ object FirebaseManager {
                 callback(
                     snapshot.child("nama").getValue(String::class.java) ?: "",
                     snapshot.child("peran").getValue(String::class.java) ?: "",
-                    snapshot.child("nomorHp").getValue(String::class.java) ?: ""
+                    snapshot.child("nomorHp").getValue(String::class.java) ?: "",
+                    snapshot.child("photoUrl").getValue(String::class.java) ?: ""
                 )
             }
-            override fun onCancelled(error: DatabaseError) { callback("", "", "") }
+            override fun onCancelled(error: DatabaseError) { callback("", "", "", "") }
         })
     }
 
