@@ -29,7 +29,20 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
 
     private val pickMedia = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         if (uri != null) {
-            uploadAndSetProfilePicture(uri)
+            var size: Long = 0
+            requireContext().contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                val sizeIndex = cursor.getColumnIndex(android.provider.OpenableColumns.SIZE)
+                if (sizeIndex != -1 && cursor.moveToFirst()) {
+                    size = cursor.getLong(sizeIndex)
+                }
+            }
+            
+            // Batas maksimal 2 MB (2 * 1024 * 1024 bytes)
+            if (size <= 2 * 1024 * 1024) {
+                uploadAndSetProfilePicture(uri)
+            } else {
+                Toast.makeText(requireContext(), "Ukuran foto maksimal 2 MB!", Toast.LENGTH_LONG).show()
+            }
         }
     }
 

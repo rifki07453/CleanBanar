@@ -14,6 +14,7 @@ import com.example.cleanbanar.core.data.FirebaseManager
 import com.example.cleanbanar.core.ui.BaseFragment
 import com.example.cleanbanar.databinding.FragmentStaffManagementBinding
 import com.google.firebase.database.ValueEventListener
+import com.bumptech.glide.Glide
 
 /**
  * Fragment untuk manajemen petugas lapangan oleh Admin.
@@ -66,7 +67,8 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
                     addStaffCard(
                         userId = user["id"] as? String ?: "",
                         name = user["nama"] as? String ?: "",
-                        email = user["email"] as? String ?: ""
+                        email = user["email"] as? String ?: "",
+                        photoUrl = user["photoUrl"] as? String ?: ""
                     )
                 }
             }
@@ -112,7 +114,7 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
             .show()
     }
 
-    private fun addStaffCard(userId: String, name: String, email: String) {
+    private fun addStaffCard(userId: String, name: String, email: String, photoUrl: String = "") {
         val cardView = com.google.android.material.card.MaterialCardView(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -147,7 +149,25 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
             textSize = 18f
             setTypeface(typeface, android.graphics.Typeface.BOLD)
         }
+        val avatarImg = ImageView(requireContext()).apply {
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+        }
         avatarBg.addView(avatarTv)
+        avatarBg.addView(avatarImg)
+
+        if (photoUrl.isNotEmpty()) {
+            avatarTv.visibility = android.view.View.GONE
+            Glide.with(requireContext())
+                .load(photoUrl)
+                .circleCrop()
+                .into(avatarImg)
+        } else {
+            avatarTv.visibility = android.view.View.VISIBLE
+            Glide.with(requireContext()).clear(avatarImg)
+        }
 
         val info = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL
