@@ -99,6 +99,19 @@ class BluetoothProgressActivity : AppCompatActivity() {
 
         Handler(Looper.getMainLooper()).postDelayed({
             bluetoothHelper.close()
+            
+            // Perbarui data WiFi di Firebase agar bersih & tidak menampilkan SSID/IP lama
+            if (deviceId.isNotEmpty()) {
+                val dbRef = com.google.firebase.database.FirebaseDatabase.getInstance()
+                    .getReference("cleanbanar/devices/$deviceId")
+                val updates = mapOf(
+                    "statusKoneksi" to "OFFLINE",
+                    "ipAddress" to "-",
+                    "ssid" to ssid
+                )
+                dbRef.updateChildren(updates)
+            }
+
             val intent = Intent(this, DeviceProvisionSuccessActivity::class.java)
             intent.putExtra("device_id", deviceId)
             intent.putExtra("ssid", ssid)

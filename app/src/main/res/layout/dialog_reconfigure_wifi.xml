@@ -89,8 +89,6 @@
         app:boxCornerRadiusTopEnd="12dp"
         app:boxCornerRadiusTopStart="12dp"
         app:passwordToggleEnabled="true"
-        app:startIconDrawable="@drawable/ic_bluetooth_status"
-        app:startIconTint="#6B7280"
         android:layout_marginBottom="20dp">
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etReconfigPassword"

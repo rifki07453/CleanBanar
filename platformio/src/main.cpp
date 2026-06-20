@@ -332,10 +332,14 @@ void loop() {
   else { lcdLine0 += String(persenNonOrg); lcdLine0 += "%"; }
 
   lcdPrintLine(0, lcdLine0);
-  if (Firebase.ready()) {
-    lcdPrintLine(1, "Net:OK Cloud:OK");
+  if (WiFi.status() == WL_CONNECTED) {
+    if (Firebase.ready()) {
+      lcdPrintLine(1, "Net:OK Cloud:OK");
+    } else {
+      lcdPrintLine(1, "Net:OK Cloud:X ");
+    }
   } else {
-    lcdPrintLine(1, "Net:OK Cloud:X ");
+    lcdPrintLine(1, "Net:X  Cloud:X ");
   }
 
   // ====== UPDATE & SINKRONISASI FIREBASE (Tiap 5 Detik) ======
