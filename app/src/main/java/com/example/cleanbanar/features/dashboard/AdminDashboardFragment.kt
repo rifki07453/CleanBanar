@@ -45,6 +45,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
     
     private var devicesListener: ValueEventListener? = null
     private var notifListener: ValueEventListener? = null
+    private var usersListener: ValueEventListener? = null
 
     
     private var cachedDevices = listOf<DeviceModel>()
@@ -79,6 +80,12 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
 
 
     override fun observeData() {
+        usersListener = FirebaseManager.listenUsers { users ->
+            if (!isAdded) return@listenUsers
+            val staffCount = users.count { it["peran"] == "Petugas" }
+            binding.tvTotalPetugasCount.text = staffCount.toString()
+        }
+
         devicesListener = FirebaseManager.listenDevices { devices ->
             if (!isAdded) return@listenDevices
             cachedDevices = devices
@@ -665,7 +672,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
     override fun onDestroyView() {
         devicesListener?.let { FirebaseManager.removeDeviceListener(it) }
         notifListener?.let { FirebaseManager.removeNotificationListener(it) }
+        usersListener?.let { FirebaseManager.removeUsersListener(it) }
         super.onDestroyView()
     }
-
 }

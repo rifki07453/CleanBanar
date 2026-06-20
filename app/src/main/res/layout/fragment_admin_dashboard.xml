@@ -63,11 +63,11 @@
 
         <!-- Total Petugas -->
         <TextView
-            android:id="@+id/tvTotalPetugasLabel"
+            android:id="@+id/tvTotalStaffLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Total Petugas Aktif"
-            android:textColor="#D1FAE5"
+            android:text="Total Petugas"
+            android:textColor="#A7F3D0"
             android:textSize="@dimen/text_12"
             android:layout_marginTop="@dimen/margin_24"
             app:layout_constraintStart_toStartOf="@id/tvOverviewTitle"
@@ -77,9 +77,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:baselineAligned="true"
+            android:layout_marginTop="@dimen/margin_8"
             app:layout_constraintStart_toStartOf="@id/tvOverviewTitle"
-            app:layout_constraintTop_toBottomOf="@id/tvTotalPetugasLabel">
+            app:layout_constraintTop_toBottomOf="@id/tvTotalStaffLabel">
 
             <TextView
                 android:id="@+id/tvTotalPetugasCount"

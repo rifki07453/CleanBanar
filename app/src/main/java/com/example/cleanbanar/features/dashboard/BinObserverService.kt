@@ -54,9 +54,9 @@ class BinObserverService : Service() {
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("CleanBanar Monitoring")
-            .setContentText("Monitoring aktif di latar belakang")
+            .setContentText("Monitoring berjalan di latar belakang")
             .setSmallIcon(R.drawable.ic_notification)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(NotificationCompat.PRIORITY_MIN)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
@@ -68,7 +68,7 @@ class BinObserverService : Service() {
             val serviceChannel = NotificationChannel(
                 CHANNEL_ID,
                 "Bin Monitoring Service",
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_MIN
             ).apply {
                 description = "Saluran untuk layanan pemantauan tong sampah"
             }
@@ -78,7 +78,7 @@ class BinObserverService : Service() {
     }
 
     companion object {
-        const val CHANNEL_ID = "BinObserverChannel"
+        const val CHANNEL_ID = "BinObserverChannel_v2"
         const val NOTIFICATION_ID = 1001
 
         fun startService(context: Context) {

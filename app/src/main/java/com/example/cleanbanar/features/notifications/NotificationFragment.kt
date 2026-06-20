@@ -187,8 +187,14 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
         val container = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
-            setPadding(0, 48.dpToPx(), 0, 48.dpToPx())
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+            // Gunakan weight atau margins agar ke tengah
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, 
+                LinearLayout.LayoutParams.MATCH_PARENT
+            ).apply {
+                // Menambahkan margin atas agak besar agar turun ke tengah
+                topMargin = 120.dpToPx()
+            }
         }
 
         val icon = ImageView(requireContext()).apply {
