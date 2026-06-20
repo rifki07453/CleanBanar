@@ -97,8 +97,11 @@ object FirebaseManager {
                     try {
                         val id = child.child("id").getValue(String::class.java) ?: child.key ?: ""
                         val nama = child.child("nama").getValue(String::class.java) ?: ""
-                        val status = child.child("statusKoneksi").getValue(String::class.java) ?: "OFFLINE"
+                        var status = child.child("statusKoneksi").getValue(String::class.java) ?: "OFFLINE"
                         val terakhir = child.child("terakhirTerlihat").getValue(Any::class.java)?.toString()?.toLongOrNull() ?: 0L
+                        if (status == "ONLINE" && terakhir > 0 && (System.currentTimeMillis() - terakhir > 15000)) {
+                            status = "OFFLINE"
+                        }
                         val tipe = child.child("tipeJaringan").getValue(String::class.java) ?: "WIFI"
                         
                         val pinsNode = child.child("config").child("pins")

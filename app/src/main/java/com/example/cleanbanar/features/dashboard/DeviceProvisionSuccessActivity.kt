@@ -318,7 +318,11 @@ class DeviceProvisionSuccessActivity : AppCompatActivity() {
                 val signal = snapshot.child("kekuatanSinyal").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 0
                 if (signal < 0) tvSignal.text = "$signal dBm"
 
-                val statusKoneksi = snapshot.child("statusKoneksi").getValue(String::class.java) ?: "OFFLINE"
+                val terakhirTerlihat = snapshot.child("terakhirTerlihat").getValue(Any::class.java)?.toString()?.toLongOrNull() ?: 0L
+                var statusKoneksi = snapshot.child("statusKoneksi").getValue(String::class.java) ?: "OFFLINE"
+                if (statusKoneksi == "ONLINE" && terakhirTerlihat > 0 && (System.currentTimeMillis() - terakhirTerlihat > 15000)) {
+                    statusKoneksi = "OFFLINE"
+                }
                 val isOnline = statusKoneksi == "ONLINE"
 
                 if (isOnline) {
@@ -338,7 +342,6 @@ class DeviceProvisionSuccessActivity : AppCompatActivity() {
                     dotOnlineStatus.setBackgroundResource(R.drawable.dot_timeline_red)
                 }
 
-                val terakhirTerlihat = snapshot.child("terakhirTerlihat").getValue(Any::class.java)?.toString()?.toLongOrNull() ?: 0L
                 tvLastSeen.text = formatTime(terakhirTerlihat)
             }
 

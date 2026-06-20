@@ -53,6 +53,12 @@ float tinggiTong = 50.0;
 float batasPenuh = 5.0;
 float batasJarakTangan = 15.0;
 
+// Konfigurasi Derajat Servo (Dinamis)
+int servoDerajatBukaOrganik = 90;
+int servoDerajatTutupOrganik = 0;
+int servoDerajatBukaNonOrganik = 90;
+int servoDerajatTutupNonOrganik = 0;
+
 // Pin Dalam (Ultrasonik Kepenuhan)
 int trigOrganik = 5;
 int echoOrganik = 18;
@@ -132,11 +138,11 @@ void setup() {
   
   servoOrganik.setPeriodHertz(50);
   servoOrganik.attach(pinServoOrganik, 500, 2400);
-  servoOrganik.write(0); // Tutup
+  servoOrganik.write(servoDerajatTutupOrganik); // Tutup
   
   servoNonOrganik.setPeriodHertz(50);
   servoNonOrganik.attach(pinServoNonOrganik, 500, 2400);
-  servoNonOrganik.write(0); // Tutup
+  servoNonOrganik.write(servoDerajatTutupNonOrganik); // Tutup
 
   pinMode(trigOrganik, OUTPUT); pinMode(echoOrganik, INPUT);
   pinMode(trigNonOrganik, OUTPUT); pinMode(echoNonOrganik, INPUT);
@@ -231,13 +237,6 @@ void loop() {
          lcdPrintLine(1, WiFi.localIP().toString());
       }
     }
-    // Hapus return; dan delay panjang di sini agar kode terus berjalan ke bawah untuk membaca sensor secara offline!
-  }
-
-  // Cek konfigurasi Firebase tiap 30 detik
-  if (millis() - lastCheckConfig > 30000) {
-    updateConfigFromFirebase();
-    lastCheckConfig = millis();
   }
 
   // ====== BACA SENSOR ======
@@ -254,17 +253,14 @@ void loop() {
   delay(50);
 
   // Sensor Dalam HANYA aktif 1x setiap 2 detik, DAN HANYA saat penutup TERTUTUP.
-  // Ini 100% mencegah sensor luar mati/hang akibat tabrakan gelombang ultrasonik!
   if (millis() - lastBacaDalam > 2000) {
     if (!statusBukaOrganik) {
       float bacaOrg = ukurJarak(trigOrganik, echoOrganik);
-      // Hanya pakai jika nilai wajar (bukan timeout/noise)
       if (bacaOrg > 0.5 && bacaOrg < 500.0) jarakOrgDalam = bacaOrg;
       delay(50);
     }
     if (!statusBukaNonOrganik) {
       float bacaNonOrg = ukurJarak(trigNonOrganik, echoNonOrganik);
-      // Hanya pakai jika nilai wajar (bukan timeout/noise)
       if (bacaNonOrg > 0.5 && bacaNonOrg < 500.0) jarakNonOrgDalam = bacaNonOrg;
       delay(50);
     }
@@ -290,7 +286,7 @@ void loop() {
     countOrg++;
     if (countOrg >= 2) { // Harus terdeteksi 2x berturut-turut
       if (!statusBukaOrganik) {
-        servoOrganik.write(90); // Buka
+        servoOrganik.write(servoDerajatBukaOrganik); // Buka
         statusBukaOrganik = true;
       }
       waktuBukaOrganik = millis();
@@ -300,7 +296,7 @@ void loop() {
   }
 
   if (statusBukaOrganik && (millis() - waktuBukaOrganik > DELAY_TUTUP)) {
-    servoOrganik.write(0); // Tutup
+    servoOrganik.write(servoDerajatTutupOrganik); // Tutup
     statusBukaOrganik = false;
   }
 
@@ -310,7 +306,7 @@ void loop() {
     countNonOrg++;
     if (countNonOrg >= 2) { // Harus terdeteksi 2x berturut-turut
       if (!statusBukaNonOrganik) {
-        servoNonOrganik.write(90); // Buka
+        servoNonOrganik.write(servoDerajatBukaNonOrganik); // Buka
         statusBukaNonOrganik = true;
       }
       waktuBukaNonOrganik = millis();
@@ -320,7 +316,7 @@ void loop() {
   }
 
   if (statusBukaNonOrganik && (millis() - waktuBukaNonOrganik > DELAY_TUTUP)) {
-    servoNonOrganik.write(0); // Tutup
+    servoNonOrganik.write(servoDerajatTutupNonOrganik); // Tutup
     statusBukaNonOrganik = false;
   }
 
@@ -342,57 +338,40 @@ void loop() {
     lcdPrintLine(1, "Net:OK Cloud:X ");
   }
 
-  // ====== UPDATE FIREBASE (Tiap 5 Detik) ======
+  // ====== UPDATE & SINKRONISASI FIREBASE (Tiap 5 Detik) ======
   if (Firebase.ready() && signupOK && (millis() - lastUpdateFirebase > 5000)) {
     lastUpdateFirebase = millis();
 
+    // 1. Ambil config & cek perintah restart
+    updateConfigFromFirebase();
+
+    // 2. Kirim update status & sensor ke Firebase (Single request PATCH)
     time_t now;
     time(&now);
     
     FirebaseJson jsonUpdate;
     if(now > 10000) {
-      // Ubah ke double lalu format ke string tanpa desimal untuk mencegah parsing error di Kotlin
       String tsStr = String((double)now * 1000.0, 0); 
-      jsonUpdate.set("terakhirTerlihat", tsStr.toDouble()); // Atau biarkan string tapi di Android tetap bisa parse double string tanpa E
+      jsonUpdate.set("terakhirTerlihat", tsStr.toDouble());
+      jsonUpdate.set("bins/organik/terakhirUpdate", tsStr.toDouble());
+      jsonUpdate.set("bins/nonOrganik/terakhirUpdate", tsStr.toDouble());
     }
     jsonUpdate.set("statusKoneksi", "ONLINE");
     jsonUpdate.set("ipAddress", WiFi.localIP().toString());
     jsonUpdate.set("kekuatanSinyal", WiFi.RSSI());
     jsonUpdate.set("ssid", WiFi.SSID());
     
-    Firebase.RTDB.updateNode(&fbdo, "/cleanbanar/devices/" + currentDeviceId, &jsonUpdate);
-
-    // Update Organik
-    FirebaseJson jsonOrg;
-    jsonOrg.set("persentaseIsi", persenOrg);
-    jsonOrg.set("status", statOrg);
-    if(now > 10000) {
-      String tsStr = String((double)now * 1000.0, 0);
-      jsonOrg.set("terakhirUpdate", tsStr.toDouble());
+    jsonUpdate.set("bins/organik/persentaseIsi", persenOrg);
+    jsonUpdate.set("bins/organik/status", statOrg);
+    
+    jsonUpdate.set("bins/nonOrganik/persentaseIsi", persenNonOrg);
+    jsonUpdate.set("bins/nonOrganik/status", statNon);
+    
+    if (Firebase.RTDB.updateNode(&fbdo, "/cleanbanar/devices/" + currentDeviceId, &jsonUpdate)) {
+      Serial.println("Update Firebase OK");
+    } else {
+      Serial.printf("Gagal update Firebase: %s\n", fbdo.errorReason().c_str());
     }
-    Firebase.RTDB.updateNode(&fbdo, "/cleanbanar/devices/" + currentDeviceId + "/bins/organik", &jsonOrg);
-
-    // Update Non-Organik
-    FirebaseJson jsonNonOrg;
-    jsonNonOrg.set("persentaseIsi", persenNonOrg);
-    jsonNonOrg.set("status", statNon);
-    if(now > 10000) {
-      String tsStr = String((double)now * 1000.0, 0);
-      jsonNonOrg.set("terakhirUpdate", tsStr.toDouble());
-    }
-    Firebase.RTDB.updateNode(&fbdo, "/cleanbanar/devices/" + currentDeviceId + "/bins/nonOrganik", &jsonNonOrg);
-
-    // Cek perintah restart
-    if (Firebase.RTDB.getBool(&fbdo, "/cleanbanar/devices/" + currentDeviceId + "/perintah/restart")) {
-      if (fbdo.boolData() == true) {
-        lcdPrintLine(1, "Memulai Ulang..");
-        Firebase.RTDB.setBool(&fbdo, "/cleanbanar/devices/" + currentDeviceId + "/perintah/restart", false);
-        delay(1000);
-        ESP.restart();
-      }
-    }
-
-    Serial.println("Update Firebase OK");
   }
 
   delay(100);
@@ -418,47 +397,106 @@ float ukurJarak(int trigPin, int echoPin) {
 
 void updateConfigFromFirebase() {
   if (Firebase.ready() && signupOK) {
-    Serial.println("Mengambil konfigurasi dari Firebase...");
-    String pathConfig = "/cleanbanar/devices/" + currentDeviceId + "/config";
-    
-    if(Firebase.RTDB.getFloat(&fbdo, pathConfig + "/tinggiTong")) tinggiTong = fbdo.floatData();
-    if(Firebase.RTDB.getFloat(&fbdo, pathConfig + "/batasPenuh")) batasPenuh = fbdo.floatData();
-    if(Firebase.RTDB.getFloat(&fbdo, pathConfig + "/batasJarakTangan")) batasJarakTangan = fbdo.floatData();
-    
-    // Update Pins
-    int tO, eO, tL_O, eL_O, sO;
-    int tN, eN, tL_N, eL_N, sN;
-
-    String pPath = pathConfig + "/pins";
-    if(Firebase.RTDB.getInt(&fbdo, pPath + "/trigOrganik")) tO = fbdo.intData(); else tO = trigOrganik;
-    if(Firebase.RTDB.getInt(&fbdo, pPath + "/echoOrganik")) eO = fbdo.intData(); else eO = echoOrganik;
-    if(Firebase.RTDB.getInt(&fbdo, pPath + "/trigLuarOrganik")) tL_O = fbdo.intData(); else tL_O = trigLuarOrganik;
-    if(Firebase.RTDB.getInt(&fbdo, pPath + "/echoLuarOrganik")) eL_O = fbdo.intData(); else eL_O = echoLuarOrganik;
-    if(Firebase.RTDB.getInt(&fbdo, pPath + "/servoOrganik")) sO = fbdo.intData(); else sO = pinServoOrganik;
-    
-    if(Firebase.RTDB.getInt(&fbdo, pPath + "/trigNonOrganik")) tN = fbdo.intData(); else tN = trigNonOrganik;
-    if(Firebase.RTDB.getInt(&fbdo, pPath + "/echoNonOrganik")) eN = fbdo.intData(); else eN = echoNonOrganik;
-    if(Firebase.RTDB.getInt(&fbdo, pPath + "/trigLuarNonOrganik")) tL_N = fbdo.intData(); else tL_N = trigLuarNonOrganik;
-    if(Firebase.RTDB.getInt(&fbdo, pPath + "/echoLuarNonOrganik")) eL_N = fbdo.intData(); else eL_N = echoLuarNonOrganik;
-    if(Firebase.RTDB.getInt(&fbdo, pPath + "/servoNonOrganik")) sN = fbdo.intData(); else sN = pinServoNonOrganik;
-
-    // Terapkan PIN baru jika berbeda
-    if (tO != trigOrganik || eO != echoOrganik) { trigOrganik = tO; echoOrganik = eO; pinMode(trigOrganik, OUTPUT); pinMode(echoOrganik, INPUT); }
-    if (tN != trigNonOrganik || eN != echoNonOrganik) { trigNonOrganik = tN; echoNonOrganik = eN; pinMode(trigNonOrganik, OUTPUT); pinMode(echoNonOrganik, INPUT); }
-    
-    if (tL_O != trigLuarOrganik || eL_O != echoLuarOrganik) { trigLuarOrganik = tL_O; echoLuarOrganik = eL_O; pinMode(trigLuarOrganik, OUTPUT); pinMode(echoLuarOrganik, INPUT); }
-    if (tL_N != trigLuarNonOrganik || eL_N != echoLuarNonOrganik) { trigLuarNonOrganik = tL_N; echoLuarNonOrganik = eL_N; pinMode(trigLuarNonOrganik, OUTPUT); pinMode(echoLuarNonOrganik, INPUT); }
-    
-    if (sO != pinServoOrganik) {
-      pinServoOrganik = sO;
-      servoOrganik.detach();
-      servoOrganik.attach(pinServoOrganik, 500, 2400);
-    }
-    
-    if (sN != pinServoNonOrganik) {
-      pinServoNonOrganik = sN;
-      servoNonOrganik.detach();
-      servoNonOrganik.attach(pinServoNonOrganik, 500, 2400);
+    Serial.println("Mengambil data perangkat dari Firebase...");
+    if (Firebase.RTDB.getJSON(&fbdo, "/cleanbanar/devices/" + currentDeviceId)) {
+      FirebaseJson &json = fbdo.jsonObject();
+      FirebaseJsonData jsonData;
+      
+      // 1. Cek perintah restart
+      json.get(jsonData, "perintah/restart");
+      if (jsonData.success && jsonData.type == "boolean" && jsonData.boolValue == true) {
+        Serial.println("Menerima perintah restart dari Firebase! Mereset flag...");
+        lcdPrintLine(0, "Perintah Restart");
+        lcdPrintLine(1, "Memulai Ulang..");
+        
+        // Ubah status ke OFFLINE sebelum restart
+        Firebase.RTDB.setString(&fbdo, "/cleanbanar/devices/" + currentDeviceId + "/statusKoneksi", "OFFLINE");
+        
+        // Reset flag restart di Firebase sebelum reboot agar tidak loop reboot
+        Firebase.RTDB.setBool(&fbdo, "/cleanbanar/devices/" + currentDeviceId + "/perintah/restart", false);
+        delay(1000);
+        ESP.restart();
+      }
+      
+      // 2. Baca konfigurasi dasar
+      json.get(jsonData, "config/tinggiTong");
+      if (jsonData.success) tinggiTong = jsonData.floatValue;
+      
+      json.get(jsonData, "config/batasPenuh");
+      if (jsonData.success) batasPenuh = jsonData.floatValue;
+      
+      json.get(jsonData, "config/batasJarakTangan");
+      if (jsonData.success) batasJarakTangan = jsonData.floatValue;
+      
+      // 3. Baca konfigurasi derajat servo
+      json.get(jsonData, "config/servoDerajatBukaOrganik");
+      if (jsonData.success) servoDerajatBukaOrganik = jsonData.intValue;
+      
+      json.get(jsonData, "config/servoDerajatTutupOrganik");
+      if (jsonData.success) servoDerajatTutupOrganik = jsonData.intValue;
+      
+      json.get(jsonData, "config/servoDerajatBukaNonOrganik");
+      if (jsonData.success) servoDerajatBukaNonOrganik = jsonData.intValue;
+      
+      json.get(jsonData, "config/servoDerajatTutupNonOrganik");
+      if (jsonData.success) servoDerajatTutupNonOrganik = jsonData.intValue;
+      
+      // 4. Baca konfigurasi PIN
+      int tO = trigOrganik, eO = echoOrganik;
+      int tL_O = trigLuarOrganik, eL_O = echoLuarOrganik;
+      int sO = pinServoOrganik;
+      
+      int tN = trigNonOrganik, eN = echoNonOrganik;
+      int tL_N = trigLuarNonOrganik, eL_N = echoLuarNonOrganik;
+      int sN = pinServoNonOrganik;
+      
+      json.get(jsonData, "config/pins/trigOrganik"); if (jsonData.success) tO = jsonData.intValue;
+      json.get(jsonData, "config/pins/echoOrganik"); if (jsonData.success) eO = jsonData.intValue;
+      json.get(jsonData, "config/pins/trigLuarOrganik"); if (jsonData.success) tL_O = jsonData.intValue;
+      json.get(jsonData, "config/pins/echoLuarOrganik"); if (jsonData.success) eL_O = jsonData.intValue;
+      json.get(jsonData, "config/pins/servoOrganik"); if (jsonData.success) sO = jsonData.intValue;
+      
+      json.get(jsonData, "config/pins/trigNonOrganik"); if (jsonData.success) tN = jsonData.intValue;
+      json.get(jsonData, "config/pins/echoNonOrganik"); if (jsonData.success) eN = jsonData.intValue;
+      json.get(jsonData, "config/pins/trigLuarNonOrganik"); if (jsonData.success) tL_N = jsonData.intValue;
+      json.get(jsonData, "config/pins/echoLuarNonOrganik"); if (jsonData.success) eL_N = jsonData.intValue;
+      json.get(jsonData, "config/pins/servoNonOrganik"); if (jsonData.success) sN = jsonData.intValue;
+      
+      // Terapkan PIN baru jika berbeda
+      if (tO != trigOrganik || eO != echoOrganik) { 
+        trigOrganik = tO; echoOrganik = eO; 
+        pinMode(trigOrganik, OUTPUT); pinMode(echoOrganik, INPUT); 
+      }
+      if (tN != trigNonOrganik || eN != echoNonOrganik) { 
+        trigNonOrganik = tN; echoNonOrganik = eN; 
+        pinMode(trigNonOrganik, OUTPUT); pinMode(echoNonOrganik, INPUT); 
+      }
+      if (tL_O != trigLuarOrganik || eL_O != echoLuarOrganik) { 
+        trigLuarOrganik = tL_O; echoLuarOrganik = eL_O; 
+        pinMode(trigLuarOrganik, OUTPUT); pinMode(echoLuarOrganik, INPUT); 
+      }
+      if (tL_N != trigLuarNonOrganik || eL_N != echoLuarNonOrganik) { 
+        trigLuarNonOrganik = tL_N; echoLuarNonOrganik = eL_N; 
+        pinMode(trigLuarNonOrganik, OUTPUT); pinMode(echoLuarNonOrganik, INPUT); 
+      }
+      
+      if (sO != pinServoOrganik) {
+        pinServoOrganik = sO;
+        servoOrganik.detach();
+        servoOrganik.attach(pinServoOrganik, 500, 2400);
+        servoOrganik.write(servoDerajatTutupOrganik);
+      }
+      
+      if (sN != pinServoNonOrganik) {
+        pinServoNonOrganik = sN;
+        servoNonOrganik.detach();
+        servoNonOrganik.attach(pinServoNonOrganik, 500, 2400);
+        servoNonOrganik.write(servoDerajatTutupNonOrganik);
+      }
+      
+      Serial.println("Konfigurasi berhasil disinkronkan.");
+    } else {
+      Serial.printf("Gagal mengambil data perangkat: %s\n", fbdo.errorReason().c_str());
     }
   }
 }
@@ -508,6 +546,11 @@ void handleBluetoothProvisioning() {
         SerialBT.println("SUCCESS");
         lcdPrintLine(0, "Config ID:");
         lcdPrintLine(1, btDeviceId);
+        
+        // Ubah status ke OFFLINE di Firebase jika siap
+        if (Firebase.ready() && signupOK) {
+          Firebase.RTDB.setString(&fbdo, "/cleanbanar/devices/" + currentDeviceId + "/statusKoneksi", "OFFLINE");
+        }
         
         delay(3000);
         lcdPrintLine(0, "Memulai Ulang..");
