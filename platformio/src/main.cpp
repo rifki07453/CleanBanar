@@ -403,6 +403,25 @@ void updateConfigFromFirebase() {
   if (Firebase.ready() && signupOK) {
     Serial.println("Mengambil data perangkat dari Firebase...");
     if (Firebase.RTDB.getJSON(&fbdo, "/cleanbanar/devices/" + currentDeviceId)) {
+      
+      // Jika tipe datanya "null", berarti perangkat telah dihapus oleh Admin di Firebase
+      if (fbdo.dataType() == "null") {
+        Serial.println("Perangkat tidak terdaftar atau telah dihapus dari Firebase!");
+        lcdPrintLine(0, "ID Dihapus!");
+        lcdPrintLine(1, "Mereset Alat...");
+        
+        // Hapus konfigurasi WiFi & Device ID di flash memori
+        preferences.clear();
+        
+        // Putus koneksi WiFi secara permanen
+        WiFi.disconnect(true, true);
+        delay(2000);
+        
+        // Restart ke mode provisioning/menunggu bluetooth
+        ESP.restart();
+        return;
+      }
+
       FirebaseJson &json = fbdo.jsonObject();
       FirebaseJsonData jsonData;
       
