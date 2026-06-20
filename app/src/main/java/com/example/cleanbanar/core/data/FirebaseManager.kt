@@ -118,12 +118,20 @@ object FirebaseManager {
                         val tinggiTong = child.child("config").child("tinggiTong").getValue(Any::class.java)?.toString()?.toDoubleOrNull() ?: 50.0
                         val batasPenuh = child.child("config").child("batasPenuh").getValue(Any::class.java)?.toString()?.toDoubleOrNull() ?: 5.0
                         val batasJarakTangan = child.child("config").child("batasJarakTangan").getValue(Any::class.java)?.toString()?.toDoubleOrNull() ?: 15.0
+
+                        val servoDerajatBukaOrg = child.child("config").child("servoDerajatBukaOrganik").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 90
+                        val servoDerajatTutupOrg = child.child("config").child("servoDerajatTutupOrganik").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 0
+                        val servoDerajatBukaNon = child.child("config").child("servoDerajatBukaNonOrganik").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 90
+                        val servoDerajatTutupNon = child.child("config").child("servoDerajatTutupNonOrganik").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 0
                         
                         val ipAddr = child.child("ipAddress").getValue(String::class.java) ?: "-"
                         val fbSsid = child.child("ssid").getValue(String::class.java) ?: "-"
                         val sinyal = child.child("kekuatanSinyal").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 0
                         
-                        devices.add(DeviceModel(id, nama, status, terakhir, tipe, ipAddr, fbSsid, sinyal, DeviceConfig(pins, tinggiTong, batasPenuh, batasJarakTangan)))
+                        devices.add(DeviceModel(id, nama, status, terakhir, tipe, ipAddr, fbSsid, sinyal,
+                            DeviceConfig(pins, tinggiTong, batasPenuh, batasJarakTangan,
+                                servoDerajatBukaOrg, servoDerajatTutupOrg,
+                                servoDerajatBukaNon, servoDerajatTutupNon)))
                     } catch (e: Exception) {
                         Log.e(TAG, "Gagal memproses device ${child.key}: ${e.message}")
                     }
@@ -149,6 +157,10 @@ object FirebaseManager {
         ref.child("config").child("tinggiTong").setValue(50.0)
         ref.child("config").child("batasPenuh").setValue(5.0)
         ref.child("config").child("batasJarakTangan").setValue(15.0)
+        ref.child("config").child("servoDerajatBukaOrganik").setValue(90)
+        ref.child("config").child("servoDerajatTutupOrganik").setValue(0)
+        ref.child("config").child("servoDerajatBukaNonOrganik").setValue(90)
+        ref.child("config").child("servoDerajatTutupNonOrganik").setValue(0)
         ref.child("bins").child("organik").setValue(mapOf("persentaseIsi" to 0, "status" to "Normal", "terakhirUpdate" to 0L, "terakhirDikosongkan" to 0L))
         ref.child("bins").child("nonOrganik").setValue(mapOf("persentaseIsi" to 0, "status" to "Normal", "terakhirUpdate" to 0L, "terakhirDikosongkan" to 0L))
     }
@@ -165,6 +177,18 @@ object FirebaseManager {
         rootRef?.child("devices")?.child(id)?.child("config")?.child("tinggiTong")?.setValue(tinggiTong)
         rootRef?.child("devices")?.child(id)?.child("config")?.child("batasPenuh")?.setValue(batasPenuh)
         rootRef?.child("devices")?.child(id)?.child("config")?.child("batasJarakTangan")?.setValue(batasJarakTangan)
+    }
+
+    fun updateServoDerajat(
+        id: String,
+        bukaOrganik: Int, tutupOrganik: Int,
+        bukaNonOrganik: Int, tutupNonOrganik: Int
+    ) {
+        val cfg = rootRef?.child("devices")?.child(id)?.child("config") ?: return
+        cfg.child("servoDerajatBukaOrganik").setValue(bukaOrganik.coerceIn(0, 360))
+        cfg.child("servoDerajatTutupOrganik").setValue(tutupOrganik.coerceIn(0, 360))
+        cfg.child("servoDerajatBukaNonOrganik").setValue(bukaNonOrganik.coerceIn(0, 360))
+        cfg.child("servoDerajatTutupNonOrganik").setValue(tutupNonOrganik.coerceIn(0, 360))
     }
 
     fun updateDeviceNetworkType(deviceId: String, tipe: String) {

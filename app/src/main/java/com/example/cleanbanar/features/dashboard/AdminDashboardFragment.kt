@@ -262,6 +262,12 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         val etDetailBatasPenuh = view.findViewById<TextInputEditText>(R.id.etDetailBatasPenuh)
         val etDetailBatasJarakTangan = view.findViewById<TextInputEditText>(R.id.etDetailBatasJarakTangan)
 
+        // Servo derajat — terpisah per jenis servo
+        val etServoDerajatBukaOrg = view.findViewById<TextInputEditText>(R.id.etServoDerajatBukaOrg)
+        val etServoDerajatTutupOrg = view.findViewById<TextInputEditText>(R.id.etServoDerajatTutupOrg)
+        val etServoDerajatBukaNon = view.findViewById<TextInputEditText>(R.id.etServoDerajatBukaNon)
+        val etServoDerajatTutupNon = view.findViewById<TextInputEditText>(R.id.etServoDerajatTutupNon)
+
         etDetailTrigOrg.setText(device.config.pins.trigOrganik.toString())
         etDetailEchoOrg.setText(device.config.pins.echoOrganik.toString())
         etDetailTrigLuarOrg.setText(device.config.pins.trigLuarOrganik.toString())
@@ -275,6 +281,12 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         etDetailTinggiTong.setText(device.config.tinggiTong.toString())
         etDetailBatasPenuh.setText(device.config.batasPenuh.toString())
         etDetailBatasJarakTangan.setText(device.config.batasJarakTangan.toString())
+
+        // Isi nilai derajat servo yang tersimpan
+        etServoDerajatBukaOrg.setText(device.config.servoDerajatBukaOrganik.toString())
+        etServoDerajatTutupOrg.setText(device.config.servoDerajatTutupOrganik.toString())
+        etServoDerajatBukaNon.setText(device.config.servoDerajatBukaNonOrganik.toString())
+        etServoDerajatTutupNon.setText(device.config.servoDerajatTutupNonOrganik.toString())
 
         view.findViewById<MaterialButton>(R.id.btnUpdatePins).setOnClickListener {
             val pins = PinConfig(
@@ -295,7 +307,26 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
             
             FirebaseManager.updateDevicePins(device.id, pins)
             FirebaseManager.updateDeviceConfig(device.id, tinggi, batas, jarakTangan)
-            Toast.makeText(requireContext(), "Konfigurasi berhasil diperbarui", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Konfigurasi pin berhasil diperbarui", Toast.LENGTH_SHORT).show()
+        }
+
+        view.findViewById<MaterialButton>(R.id.btnUpdateServoDerajat).setOnClickListener {
+            val bukaOrg = etServoDerajatBukaOrg.text.toString().toIntOrNull()
+            val tutupOrg = etServoDerajatTutupOrg.text.toString().toIntOrNull()
+            val bukaNon = etServoDerajatBukaNon.text.toString().toIntOrNull()
+            val tutupNon = etServoDerajatTutupNon.text.toString().toIntOrNull()
+
+            if (bukaOrg == null || tutupOrg == null || bukaNon == null || tutupNon == null) {
+                Toast.makeText(requireContext(), "Semua field derajat harus diisi (0–360)", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            if (listOf(bukaOrg, tutupOrg, bukaNon, tutupNon).any { it !in 0..360 }) {
+                Toast.makeText(requireContext(), "Derajat harus antara 0° dan 360°", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            FirebaseManager.updateServoDerajat(device.id, bukaOrg, tutupOrg, bukaNon, tutupNon)
+            Toast.makeText(requireContext(), "✓ Derajat servo berhasil disimpan", Toast.LENGTH_SHORT).show()
         }
 
         btnDeleteDevice.setOnClickListener {

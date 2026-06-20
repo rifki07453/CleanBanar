@@ -17,7 +17,12 @@ data class DeviceConfig(
     val pins: PinConfig = PinConfig(),
     val tinggiTong: Double = 50.0,
     val batasPenuh: Double = 5.0,
-    val batasJarakTangan: Double = 15.0
+    val batasJarakTangan: Double = 15.0,
+    // Derajat buka servo masing-masing (terpisah agar bisa berbeda jenis servo)
+    val servoDerajatBukaOrganik: Int = 90,
+    val servoDerajatTutupOrganik: Int = 0,
+    val servoDerajatBukaNonOrganik: Int = 90,
+    val servoDerajatTutupNonOrganik: Int = 0
 )
 
 data class DeviceModel(

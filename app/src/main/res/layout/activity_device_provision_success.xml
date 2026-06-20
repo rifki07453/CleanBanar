@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F5F7FA"
-    android:fillViewport="true">
+    android:fillViewport="true"
+    android:fitsSystemWindows="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -154,7 +155,14 @@
                 <com.google.android.material.card.MaterialCardView android:id="@+id/btnRestart" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="8dp" app:strokeColor="@color/gray_100" app:strokeWidth="1dp" app:cardElevation="0dp" app:cardCornerRadius="8dp">
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center" android:padding="12dp">
                         <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/ic_power_settings_new_24dp" app:tint="@color/gray_800" android:layout_marginEnd="8dp"/>
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Restart Alat" android:textColor="@color/gray_900" android:textStyle="bold"/>
+                        <TextView android:id="@+id/tvRestartLabel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Restart Alat" android:textColor="@color/gray_900" android:textStyle="bold"/>
+                        <ProgressBar
+                            android:id="@+id/pbRestart"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_marginStart="8dp"
+                            android:visibility="gone"
+                            style="?android:attr/progressBarStyleSmall"/>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
