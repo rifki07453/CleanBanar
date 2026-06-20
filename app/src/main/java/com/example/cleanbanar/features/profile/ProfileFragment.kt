@@ -15,6 +15,7 @@ import com.example.cleanbanar.core.data.AuthManager
 import com.example.cleanbanar.core.data.FirebaseManager
 import com.example.cleanbanar.core.ui.BaseFragment
 import com.example.cleanbanar.databinding.FragmentProfileBinding
+import com.google.firebase.database.ValueEventListener
 import com.example.cleanbanar.features.auth.LoginActivity
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
@@ -26,6 +27,7 @@ import android.net.Uri
 class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
 
     private lateinit var authManager: AuthManager
+    private var userListener: ValueEventListener? = null
 
     private val cropImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == android.app.Activity.RESULT_OK && result.data != null) {
@@ -72,35 +74,20 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
     }
 
     // ==========================================
+    // Lifecycle - Cleanup
+    // ==========================================
+    override fun onDestroyView() {
+        userListener?.let { FirebaseManager.removeUserListener(authManager.getUserId(), it) }
+        super.onDestroyView()
+    }
+
+    // ==========================================
     // View Setup & User Info
     // ==========================================
     override fun setupViews() {
         authManager = AuthManager(requireContext())
 
-        // Tampilkan data user dari sesi lokal
-        binding.tvProfileName.text = authManager.getUserName()
-        binding.tvProfileEmail.text = authManager.getUserEmail()
-        
-        val phone = authManager.getUserPhone()
-        if (phone.isNotEmpty()) {
-            binding.tvProfilePhone.text = phone
-            binding.tvProfilePhone.visibility = View.VISIBLE
-        } else {
-            binding.tvProfilePhone.visibility = View.GONE
-        }
-
-        // Tampilkan foto profil (jika ada)
-        val initialPhotoUrl = authManager.getUserPhotoUrl()
-        if (initialPhotoUrl.isNotEmpty()) {
-            binding.ivUserAvatar.imageTintList = null
-            binding.ivUserAvatar.setPadding(0, 0, 0, 0) // Hapus padding agar foto penuh di lingkaran
-            Glide.with(this)
-                .load(initialPhotoUrl)
-                .transform(com.bumptech.glide.load.resource.bitmap.CircleCrop())
-                .placeholder(R.drawable.ic_profile)
-                .into(binding.ivUserAvatar)
-        }
-
+        // Data profil sekarang akan diambil secara live di observeData()
         // Klik pada ikon kamera untuk ganti foto
         binding.flEditPhoto.setOnClickListener {
             val bottomSheetDialog = com.google.android.material.bottomsheet.BottomSheetDialog(requireContext())
@@ -287,7 +274,44 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         dialog.show()
     }
 
-    override fun observeData() {}
+    override fun observeData() {
+        val userId = authManager.getUserId()
+        userListener = FirebaseManager.listenUser(userId) { user ->
+            if (!isAdded || user == null) return@listenUser
+            
+            // Perbarui UI dengan data terbaru dari Firebase
+            binding.tvProfileName.text = user["nama"] as? String ?: ""
+            binding.tvProfileEmail.text = user["email"] as? String ?: ""
+            
+            val phone = user["nomorHp"] as? String ?: ""
+            if (phone.isNotEmpty()) {
+                binding.tvProfilePhone.text = phone
+                binding.tvProfilePhone.visibility = View.VISIBLE
+            } else {
+                binding.tvProfilePhone.visibility = View.GONE
+            }
+
+            // Sync foto profil
+            val photoUrl = user["photoUrl"] as? String ?: ""
+            if (photoUrl.isNotEmpty()) {
+                binding.ivUserAvatar.imageTintList = null
+                binding.ivUserAvatar.setPadding(0, 0, 0, 0) // Hapus padding agar foto penuh
+                Glide.with(this)
+                    .load(photoUrl)
+                    .transform(com.bumptech.glide.load.resource.bitmap.CircleCrop())
+                    .placeholder(R.drawable.ic_profile)
+                    .into(binding.ivUserAvatar)
+                    
+                // Update ke sesi lokal juga biar konsisten saat pindah halaman
+                authManager.updatePhotoUrl(photoUrl)
+            } else {
+                binding.ivUserAvatar.setImageResource(R.drawable.ic_profile)
+                binding.ivUserAvatar.imageTintList = androidx.core.content.ContextCompat.getColorStateList(requireContext(), R.color.text_secondary)
+                binding.ivUserAvatar.setPadding(32.dpToPx(), 32.dpToPx(), 32.dpToPx(), 32.dpToPx())
+                authManager.updatePhotoUrl("")
+            }
+        }
+    }
 
     // ==========================================
     // Edit Profil Dialog (Dinamis → Firebase)

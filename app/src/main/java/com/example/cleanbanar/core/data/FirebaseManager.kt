@@ -277,6 +277,36 @@ object FirebaseManager {
         return listener
     }
 
+    fun listenUser(userId: String, callback: (Map<String, Any>?) -> Unit): ValueEventListener? {
+        val ref = rootRef?.child("users")?.child(userId) ?: return null
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    val user = mapOf(
+                        "id" to (snapshot.key ?: ""),
+                        "nama" to (snapshot.child("nama").getValue(String::class.java) ?: ""),
+                        "email" to (snapshot.child("email").getValue(String::class.java) ?: ""),
+                        "peran" to (snapshot.child("peran").getValue(String::class.java) ?: ""),
+                        "nomorHp" to (snapshot.child("nomorHp").getValue(String::class.java) ?: ""),
+                        "photoUrl" to (snapshot.child("photoUrl").getValue(String::class.java) ?: "")
+                    )
+                    callback(user)
+                } else {
+                    callback(null)
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {
+                Log.e(TAG, "listenUser error: ${error.message} (code=${error.code})")
+            }
+        }
+        ref.addValueEventListener(listener)
+        return listener
+    }
+
+    fun removeUserListener(userId: String, listener: ValueEventListener) {
+        rootRef?.child("users")?.child(userId)?.removeEventListener(listener)
+    }
+
     fun addUser(nama: String, email: String, peran: String, nomorHp: String = "", onSuccess: () -> Unit = {}, onFailure: (String) -> Unit = {}) {
         val ref = rootRef?.child("users")?.push() ?: run { onFailure("Firebase error"); return }
         ref.setValue(mapOf("nama" to nama, "email" to email, "peran" to peran, "nomorHp" to nomorHp, "photoUrl" to ""))
