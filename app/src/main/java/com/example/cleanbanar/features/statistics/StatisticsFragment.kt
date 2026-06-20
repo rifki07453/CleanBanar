@@ -86,7 +86,7 @@ class StatisticsFragment : BaseFragment<FragmentStatisticsBinding>() {
         // Listen to history node for "total penuh" count (last 7 days)
         penuhListener = FirebaseManager.countPenuhEvents { count ->
             if (!isAdded) return@countPenuhEvents
-            binding.tvTotalPenuh.text = count.toString()
+            binding.tvTotalPenuh.animateCount(0, count.toInt())
         }
     }
 
@@ -141,8 +141,8 @@ class StatisticsFragment : BaseFragment<FragmentStatisticsBinding>() {
         val avgOrganik = currentWeekStats.map { (it["organik"] as? Int) ?: 0 }.average().toInt()
         val avgNonOrganik = currentWeekStats.map { (it["nonOrganik"] as? Int) ?: 0 }.average().toInt()
 
-        binding.tvOrganikAvg.text = "$avgOrganik"
-        binding.tvNonOrganikAvg.text = "$avgNonOrganik"
+        binding.tvOrganikAvg.animateCount(0, avgOrganik)
+        binding.tvNonOrganikAvg.animateCount(0, avgNonOrganik)
 
         val prevAvgOrganik = compareWeekStats.map { (it["organik"] as? Int) ?: 0 }.average().toInt()
         val prevAvgNonOrganik = compareWeekStats.map { (it["nonOrganik"] as? Int) ?: 0 }.average().toInt()
@@ -181,7 +181,7 @@ class StatisticsFragment : BaseFragment<FragmentStatisticsBinding>() {
         }
 
         val weeklyAvg = if (allValues.isNotEmpty()) allValues.average().toInt() else 0
-        binding.tvWeeklyAvg.text = "$weeklyAvg%"
+        binding.tvWeeklyAvg.animateCount(0, weeklyAvg, "%")
     }
 
     // ==========================================
@@ -355,8 +355,8 @@ class StatisticsFragment : BaseFragment<FragmentStatisticsBinding>() {
             val currentAvgNonOrg = currentWeekStats.map { (it["nonOrganik"] as? Int) ?: 0 }.average()
             val compareAvgNonOrg = compareWeekStats.map { (it["nonOrganik"] as? Int) ?: 0 }.average()
 
-            binding.tvCompareOrganikValue.text = "${currentAvgOrg.toInt()}%"
-            binding.tvCompareNonOrganikValue.text = "${currentAvgNonOrg.toInt()}%"
+            binding.tvCompareOrganikValue.animateCount(0, currentAvgOrg.toInt(), "%")
+            binding.tvCompareNonOrganikValue.animateCount(0, currentAvgNonOrg.toInt(), "%")
 
             val diffOrg = currentAvgOrg - compareAvgOrg
             val diffNonOrg = currentAvgNonOrg - compareAvgNonOrg
@@ -389,8 +389,8 @@ class StatisticsFragment : BaseFragment<FragmentStatisticsBinding>() {
             val currentTotalNonOrg = currentWeekStats.sumOf { (it["nonOrganikEmptyCount"] as? Int) ?: 0 }
             val compareTotalNonOrg = compareWeekStats.sumOf { (it["nonOrganikEmptyCount"] as? Int) ?: 0 }
 
-            binding.tvCompareOrganikValue.text = "$currentTotalOrg kali"
-            binding.tvCompareNonOrganikValue.text = "$currentTotalNonOrg kali"
+            binding.tvCompareOrganikValue.animateCount(0, currentTotalOrg, " kali")
+            binding.tvCompareNonOrganikValue.animateCount(0, currentTotalNonOrg, " kali")
 
             val diffOrg = currentTotalOrg - compareTotalOrg
             val diffNonOrg = currentTotalNonOrg - compareTotalNonOrg
@@ -462,4 +462,15 @@ class StatisticsFragment : BaseFragment<FragmentStatisticsBinding>() {
     // Utility
     // ==========================================
     private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()
+
+    private fun TextView.animateCount(start: Int, end: Int, suffix: String = "") {
+        val animator = android.animation.ValueAnimator.ofInt(start, end)
+        animator.duration = 1200 // 1.2 detik agar terlihat mulus dan keren
+        animator.interpolator = android.view.animation.DecelerateInterpolator()
+        animator.addUpdateListener { animation ->
+            val value = animation.animatedValue as Int
+            this.text = "$value$suffix"
+        }
+        animator.start()
+    }
 }
