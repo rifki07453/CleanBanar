@@ -444,9 +444,9 @@ class DeviceProvisionSuccessActivity : AppCompatActivity() {
 
                 if (isOnline) {
                     tvCloudConnection.text = "Online"
-                    tvCloudConnection.setTextColor(ContextCompat.getColor(this@DeviceProvisionSuccessActivity, R.color.primary))
+                    tvCloudConnection.setTextColor(ContextCompat.getColor(this@DeviceProvisionSuccessActivity, R.color.emerald_600))
                     tvOnlineStatus.text = "Online"
-                    tvOnlineStatus.setTextColor(ContextCompat.getColor(this@DeviceProvisionSuccessActivity, R.color.primary))
+                    tvOnlineStatus.setTextColor(ContextCompat.getColor(this@DeviceProvisionSuccessActivity, R.color.emerald_600))
                     dotOnlineStatus.setBackgroundResource(R.drawable.dot_timeline_green)
                     dotOnline.setBackgroundResource(R.drawable.dot_timeline_green)
                     tvTitleOnline.setTextColor(ContextCompat.getColor(this@DeviceProvisionSuccessActivity, R.color.gray_900))

@@ -19,33 +19,22 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/emerald_600"
-            android:padding="24dp"
+            android:padding="16dp"
             android:orientation="horizontal"
             android:gravity="center_vertical">
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:src="@drawable/ic_check_circle_24dp"
                 app:tint="@color/white"/>
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginStart="16dp">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Sukses"
-                    android:textColor="@color/white"
-                    android:textSize="20sp"
-                    android:textStyle="bold"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Konfigurasi dan koneksi WiFi berhasil dikirim."
-                    android:textColor="#E0F2FE"
-                    android:textSize="14sp"/>
-            </LinearLayout>
+                android:text="Konfigurasi dan koneksi WiFi berhasil dikirim."
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                android:layout_marginStart="12dp"
+                android:textStyle="bold"/>
         </LinearLayout>
 
         <LinearLayout
@@ -54,7 +43,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp"
-            android:layout_marginTop="-16dp">
+            android:layout_marginTop="12dp">
 
             <!-- CARD DEVICE OVERVIEW -->
             <com.google.android.material.card.MaterialCardView
