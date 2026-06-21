@@ -98,17 +98,32 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
         }
 
         val isNonOrganik = title.lowercase().contains("non")
-        val (iconRes, iconBgColor, iconTintColor) = when (type) {
-            "danger" -> Triple(R.drawable.ic_trash_modern, "#FEF2F2", resources.getColor(R.color.red_500, null))
-            "warning" -> Triple(R.drawable.ic_trash_modern, "#FEFCE8", resources.getColor(R.color.amber_600, null))
-            "success" -> {
-                if (isNonOrganik) {
-                    Triple(R.drawable.ic_trash_modern, "#EFF6FF", androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.blue_600))
-                } else {
-                    Triple(R.drawable.ic_trash_modern, "#ECFDF5", androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.green_600))
+        val isRestart = title.lowercase().contains("restart")
+        val isConfig = title.lowercase().contains("config")
+
+        val (iconRes, iconBgColor, iconTintColor) = when {
+            isRestart -> Triple(
+                R.drawable.ic_power_settings_new_24dp,
+                "#FEF2F2",
+                androidx.core.content.ContextCompat.getColor(requireContext(), R.color.red_500)
+            )
+            isConfig -> Triple(
+                R.drawable.ic_bluetooth_24dp,
+                "#EFF6FF",
+                androidx.core.content.ContextCompat.getColor(requireContext(), R.color.blue_600)
+            )
+            else -> when (type) {
+                "danger" -> Triple(R.drawable.ic_trash_modern, "#FEF2F2", resources.getColor(R.color.red_500, null))
+                "warning" -> Triple(R.drawable.ic_trash_modern, "#FEFCE8", resources.getColor(R.color.amber_600, null))
+                "success" -> {
+                    if (isNonOrganik) {
+                        Triple(R.drawable.ic_trash_modern, "#EFF6FF", androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.blue_600))
+                    } else {
+                        Triple(R.drawable.ic_trash_modern, "#ECFDF5", androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.green_600))
+                    }
                 }
+                else -> Triple(R.drawable.ic_trash_modern, "#F9FAFB", androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_secondary))
             }
-            else -> Triple(R.drawable.ic_trash_modern, "#F9FAFB", androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_secondary))
         }
 
         val iconFrame = android.widget.FrameLayout(requireContext()).apply {

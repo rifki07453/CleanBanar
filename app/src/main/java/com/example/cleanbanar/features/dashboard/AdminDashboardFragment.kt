@@ -598,13 +598,20 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         }
 
         val isNonOrganik = title.lowercase().contains("non")
-        val (iconRes, iconBg, iconColor) = when (type) {
-            "danger" -> Triple(R.drawable.ic_trash_modern, R.drawable.badge_red_bg, "#EF4444")
-            "success" -> {
-                if (isNonOrganik) Triple(R.drawable.ic_trash_modern, R.drawable.bg_rounded_light_blue, "#2563EB")
-                else Triple(R.drawable.ic_trash_modern, R.drawable.bg_badge_green, "#16A34A")
+        val isRestart = title.lowercase().contains("restart")
+        val isConfig = title.lowercase().contains("config")
+
+        val (iconRes, iconBg, iconColor) = when {
+            isRestart -> Triple(R.drawable.ic_power_settings_new_24dp, R.drawable.badge_red_bg, "#EF4444")
+            isConfig -> Triple(R.drawable.ic_bluetooth_24dp, R.drawable.bg_rounded_light_blue, "#2563EB")
+            else -> when (type) {
+                "danger" -> Triple(R.drawable.ic_trash_modern, R.drawable.badge_red_bg, "#EF4444")
+                "success" -> {
+                    if (isNonOrganik) Triple(R.drawable.ic_trash_modern, R.drawable.bg_rounded_light_blue, "#2563EB")
+                    else Triple(R.drawable.ic_trash_modern, R.drawable.bg_badge_green, "#16A34A")
+                }
+                else -> Triple(android.R.drawable.ic_popup_reminder, R.drawable.bg_rounded_light_blue, "#3B82F6")
             }
-            else -> Triple(android.R.drawable.ic_popup_reminder, R.drawable.bg_rounded_light_blue, "#3B82F6")
         }
 
         val frame = android.widget.FrameLayout(context).apply {
