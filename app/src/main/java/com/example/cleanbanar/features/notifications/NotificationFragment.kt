@@ -175,26 +175,12 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
             gravity = Gravity.END
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT)
         }
-        if (isUnread) {
-            val dot = android.view.View(requireContext()).apply {
-                layoutParams = LinearLayout.LayoutParams(8.dpToPx(), 8.dpToPx()).apply { topMargin = 4.dpToPx() }
-                background = getCircleDrawable(iconTintColor)
-            }
-            rightCol.addView(dot)
-        }
 
         row.addView(iconFrame)
         row.addView(info)
         row.addView(rightCol)
         cardView.addView(row)
         binding.notifListContainer.addView(cardView)
-    }
-
-    private fun getCircleDrawable(color: Int): android.graphics.drawable.GradientDrawable {
-        return android.graphics.drawable.GradientDrawable().apply {
-            shape = android.graphics.drawable.GradientDrawable.OVAL
-            setColor(color)
-        }
     }
 
     private fun addEmptyState() {
