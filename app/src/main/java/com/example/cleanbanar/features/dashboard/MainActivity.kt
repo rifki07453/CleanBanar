@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import androidx.fragment.app.Fragment
 import com.example.cleanbanar.R
 import com.example.cleanbanar.core.data.AuthManager
+import com.example.cleanbanar.core.data.FirebaseManager
 import com.example.cleanbanar.core.ui.BaseActivity
 import com.example.cleanbanar.databinding.ActivityMainBinding
 import com.example.cleanbanar.features.admin.StaffManagementFragment

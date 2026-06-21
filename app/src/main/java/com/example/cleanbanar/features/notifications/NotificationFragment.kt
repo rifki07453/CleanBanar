@@ -102,7 +102,7 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
         val isRestart = title.lowercase().contains("restart")
         val isConfig = title.lowercase().contains("config")
 
-        val (iconRes, _, iconTintColor) = when {
+        val (iconRes, iconBgColor, iconTintColor) = when {
             isRestart -> Triple(
                 R.drawable.ic_power_settings_new_24dp,
                 "#FEF2F2",
@@ -131,6 +131,7 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
             layoutParams = LinearLayout.LayoutParams(48.dpToPx(), 48.dpToPx()).apply {
                 marginEnd = 16.dpToPx()
             }
+            background = getCircleDrawable(android.graphics.Color.parseColor(iconBgColor))
         }
 
         val icon = ImageView(requireContext()).apply {
@@ -182,6 +183,13 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
         row.addView(rightCol)
         cardView.addView(row)
         binding.notifListContainer.addView(cardView)
+    }
+
+    private fun getCircleDrawable(color: Int): android.graphics.drawable.GradientDrawable {
+        return android.graphics.drawable.GradientDrawable().apply {
+            shape = android.graphics.drawable.GradientDrawable.OVAL
+            setColor(color)
+        }
     }
 
     private fun addEmptyState() {
