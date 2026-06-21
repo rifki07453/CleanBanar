@@ -279,7 +279,7 @@ Untuk memudahkan akses awal, sistem memiliki mekanisme *auto-seeding* profil dat
 | **Build Tools**      | Gradle (Kotlin DSL) + Android Studio                     |
 | **Firebase SDK**     | Firebase BoM 33.7.0 (Auth, Realtime Database, Storage, Analytics) |
 | **Security Library** | androidx.security:security-crypto 1.1.0-alpha06          |
-| **Versi Aplikasi**   | 1.0 (versionCode 1)                                      |
+| **Versi Aplikasi**   | 1.1.0 (versionCode 2)                                    |
 
 > **Catatan Build**: Mode *release* mengaktifkan ProGuard (`isMinifyEnabled = true`) dan *resource shrinking* (`isShrinkResources = true`) untuk mengecilkan ukuran APK dan mempersulit proses *reverse engineering*. Mode *debug* dikonfigurasi dengan `isDebuggable = false` sebagai lapisan keamanan tambahan.
 

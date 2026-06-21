@@ -233,6 +233,29 @@ object FirebaseManager {
         ref.child("tipe").setValue(tipe)
         ref.child("waktu").setValue(System.currentTimeMillis())
         ref.child("sudahDibaca").setValue(false)
+        pruneNotifications()
+    }
+
+    private fun pruneNotifications() {
+        val ref = rootRef?.child("notifications") ?: return
+        ref.orderByChild("waktu").addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.childrenCount > 30) {
+                    var toDelete = snapshot.childrenCount - 30
+                    for (child in snapshot.children) {
+                        if (toDelete > 0) {
+                            child.ref.removeValue()
+                            toDelete--
+                        } else {
+                            break
+                        }
+                    }
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {
+                Log.e(TAG, "pruneNotifications error: ${error.message}")
+            }
+        })
     }
 
     fun clearAllNotifications() {
@@ -274,6 +297,29 @@ object FirebaseManager {
         ref.child("idPengguna").setValue(idPengguna)
         ref.child("namaLengkap").setValue(namaLengkap)
         ref.child("waktu").setValue(System.currentTimeMillis())
+        pruneHistoryLogs()
+    }
+
+    private fun pruneHistoryLogs() {
+        val ref = rootRef?.child("historyLogs") ?: return
+        ref.orderByChild("waktu").addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.childrenCount > 50) {
+                    var toDelete = snapshot.childrenCount - 50
+                    for (child in snapshot.children) {
+                        if (toDelete > 0) {
+                            child.ref.removeValue()
+                            toDelete--
+                        } else {
+                            break
+                        }
+                    }
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {
+                Log.e(TAG, "pruneHistoryLogs error: ${error.message}")
+            }
+        })
     }
 
     // ==========================================
