@@ -601,7 +601,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         val isRestart = title.lowercase().contains("restart")
         val isConfig = title.lowercase().contains("config")
 
-        val (iconRes, iconBg, iconColor) = when {
+        val (iconRes, _, iconColor) = when {
             isRestart -> Triple(R.drawable.ic_power_settings_new_24dp, R.drawable.badge_red_bg, "#EF4444")
             isConfig -> Triple(R.drawable.ic_bluetooth_24dp, R.drawable.bg_rounded_light_blue, "#2563EB")
             else -> when (type) {
@@ -616,7 +616,6 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
 
         val frame = android.widget.FrameLayout(context).apply {
             layoutParams = android.widget.LinearLayout.LayoutParams(36.dpToPx(), 36.dpToPx())
-            setBackgroundResource(iconBg)
         }
 
         val icon = android.widget.ImageView(context).apply {

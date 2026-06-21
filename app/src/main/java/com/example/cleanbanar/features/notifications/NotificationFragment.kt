@@ -101,7 +101,7 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
         val isRestart = title.lowercase().contains("restart")
         val isConfig = title.lowercase().contains("config")
 
-        val (iconRes, iconBgColor, iconTintColor) = when {
+        val (iconRes, _, iconTintColor) = when {
             isRestart -> Triple(
                 R.drawable.ic_power_settings_new_24dp,
                 "#FEF2F2",
@@ -130,7 +130,6 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
             layoutParams = LinearLayout.LayoutParams(48.dpToPx(), 48.dpToPx()).apply {
                 marginEnd = 16.dpToPx()
             }
-            background = getCircleDrawable(android.graphics.Color.parseColor(iconBgColor))
         }
 
         val icon = ImageView(requireContext()).apply {
