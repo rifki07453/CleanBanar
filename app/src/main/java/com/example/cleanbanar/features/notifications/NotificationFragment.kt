@@ -28,6 +28,7 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
     }
 
     override fun setupViews() {
+        FirebaseManager.markAllNotificationsAsRead()
         binding.tvClearAll.setOnClickListener {
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Hapus Semua Notifikasi")

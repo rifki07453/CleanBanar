@@ -24,6 +24,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     private lateinit var authManager: AuthManager
     private var userRole: String = "Admin"
+    private var notifListener: com.google.firebase.database.ValueEventListener? = null
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
@@ -78,6 +79,17 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         BinObserverService.startService(this)
 
         askNotificationPermission()
+
+        notifListener = FirebaseManager.listenNotifications { notifData ->
+            val unreadCount = notifData.count { !(it["sudahDibaca"] as? Boolean ?: true) }
+            if (unreadCount > 0) {
+                binding.bottomNavigation.getOrCreateBadge(R.id.nav_notification).apply {
+                    isVisible = true
+                }
+            } else {
+                binding.bottomNavigation.removeBadge(R.id.nav_notification)
+            }
+        }
     }
 
     private fun askNotificationPermission() {
@@ -193,6 +205,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     // ==========================================
     override fun onDestroy() {
         BinObserver.stop()
+        notifListener?.let { FirebaseManager.removeNotificationListener(it) }
         super.onDestroy()
     }
 }

@@ -262,6 +262,20 @@ object FirebaseManager {
         rootRef?.child("notifications")?.removeValue()
     }
 
+    fun markAllNotificationsAsRead() {
+        val ref = rootRef?.child("notifications") ?: return
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                for (child in snapshot.children) {
+                    child.ref.child("sudahDibaca").setValue(true)
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {
+                Log.e(TAG, "markAllNotificationsAsRead error: ${error.message}")
+            }
+        })
+    }
+
     // ==========================================
     // Riwayat (History)
     // ==========================================
