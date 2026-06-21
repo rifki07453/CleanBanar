@@ -52,7 +52,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
     private var lastKnownHistory: List<Map<String, Any>> = emptyList()
 
     // Untuk retry aksi setelah izin diberikan
-    private var pendingWifiSsidView: com.google.android.material.textfield.MaterialAutoCompleteTextView? = null
+    private var pendingWifiSsidView: com.google.android.material.textfield.TextInputEditText? = null
     private var pendingBtSsid: String? = null
     private var pendingBtPass: String? = null
     private var pendingBtDeviceId: String? = null
@@ -343,7 +343,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
                 .show()
         }
 
-        val etSsid = view.findViewById<com.google.android.material.textfield.MaterialAutoCompleteTextView>(R.id.etSsid)
+        val etSsid = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etSsid)
         val etPassword = view.findViewById<TextInputEditText>(R.id.etPassword)
         val btnSendConfig = view.findViewById<MaterialButton>(R.id.btnSendConfig)
 
@@ -412,7 +412,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
             .show()
     }
 
-    private fun setupWifiDropdown(etSsid: com.google.android.material.textfield.MaterialAutoCompleteTextView) {
+    private fun setupWifiDropdown(etSsid: com.google.android.material.textfield.TextInputEditText) {
         pendingWifiSsidView = etSsid
         
         val locationManager = requireContext().getSystemService(android.content.Context.LOCATION_SERVICE) as android.location.LocationManager
@@ -460,7 +460,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         return ssidList
     }
 
-    private fun showWifiListDialog(etSsid: com.google.android.material.textfield.MaterialAutoCompleteTextView) {
+    private fun showWifiListDialog(etSsid: com.google.android.material.textfield.TextInputEditText) {
         val dialogView = android.view.LayoutInflater.from(requireContext()).inflate(R.layout.dialog_wifi_list, null)
         val btnRefreshWifi = dialogView.findViewById<android.widget.ImageView>(R.id.btnRefreshWifi)
         val pbWifiLoading = dialogView.findViewById<android.widget.ProgressBar>(R.id.pbWifiLoading)

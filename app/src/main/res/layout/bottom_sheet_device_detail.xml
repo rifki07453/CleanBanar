@@ -541,7 +541,7 @@
             app:boxCornerRadiusTopEnd="@dimen/margin_12"
             app:boxCornerRadiusTopStart="@dimen/margin_12"
             android:layout_marginBottom="@dimen/margin_12">
-            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etSsid"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

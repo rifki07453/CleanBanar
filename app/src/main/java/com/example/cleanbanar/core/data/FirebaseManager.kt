@@ -286,7 +286,7 @@ object FirebaseManager {
                 Log.e(TAG, "listenHistory error: ${error.message} (code=${error.code})")
             }
         }
-        ref.orderByChild("waktu").limitToLast(50).addValueEventListener(listener)
+        ref.orderByChild("waktu").limitToLast(20).addValueEventListener(listener)
         return listener
     }
 
