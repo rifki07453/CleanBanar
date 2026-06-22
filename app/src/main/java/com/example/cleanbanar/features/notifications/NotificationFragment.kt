@@ -7,6 +7,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.example.cleanbanar.R
+import com.example.cleanbanar.core.data.AuthManager
 import com.example.cleanbanar.core.data.FirebaseManager
 import com.example.cleanbanar.core.ui.BaseFragment
 import com.example.cleanbanar.databinding.FragmentNotificationBinding
@@ -22,12 +23,14 @@ import java.util.Locale
 class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
 
     private var notifListener: ValueEventListener? = null
+    private lateinit var authManager: AuthManager
 
     override fun inflateBinding(inflater: LayoutInflater, container: ViewGroup?): FragmentNotificationBinding {
         return FragmentNotificationBinding.inflate(inflater, container, false)
     }
 
     override fun setupViews() {
+        authManager = AuthManager(requireContext())
         FirebaseManager.markAllNotificationsAsRead()
         binding.tvClearAll.setOnClickListener {
             MaterialAlertDialogBuilder(requireContext())
@@ -42,6 +45,7 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
     }
 
     override fun observeData() {
+        val userRole = authManager.getUserRole()
         // Mendengarkan data notifikasi dari Firebase
         notifListener = FirebaseManager.listenNotifications { notifData ->
             if (isAdded) {
@@ -49,12 +53,22 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
                 binding.tvNotifSubtitle.visibility = android.view.View.GONE
                 binding.notifListContainer.removeAllViews()
 
-                if (notifData.isEmpty()) {
+                val filteredNotifData = if (userRole.equals("Petugas", ignoreCase = true)) {
+                    notifData.filter { notif ->
+                        val judul = (notif["judul"] as? String ?: "").lowercase()
+                        // Hilangkan notifikasi sistem (seperti config ulang wifi, restart alat) untuk Petugas
+                        !judul.contains("config") && !judul.contains("restart")
+                    }
+                } else {
+                    notifData
+                }
+
+                if (filteredNotifData.isEmpty()) {
                     binding.tvClearAll.visibility = android.view.View.GONE
                     addEmptyState()
                 } else {
                     binding.tvClearAll.visibility = android.view.View.VISIBLE
-                    for (notif in notifData) {
+                    for (notif in filteredNotifData) {
                         val waktu = notif["waktu"] as? Long ?: 0L
                         addNotificationCard(
                             title = notif["judul"] as? String ?: "Notifikasi",
