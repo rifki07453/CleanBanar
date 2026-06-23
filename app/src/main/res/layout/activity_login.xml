@@ -21,12 +21,15 @@
         app:layout_constraintEnd_toEndOf="parent">
 
         <ImageView
+            android:id="@+id/ivLogo"
             android:layout_width="@dimen/margin_100"
             android:layout_height="@dimen/margin_100"
             android:src="@mipmap/ic_logo_cleanbanar"
             android:scaleType="fitCenter"
             android:layout_marginBottom="@dimen/margin_24"
-            android:contentDescription="Logo CleanBanar" />
+            android:contentDescription="Logo CleanBanar"
+            android:clickable="true"
+            android:focusable="true" />
 
         <TextView
             android:layout_width="wrap_content"

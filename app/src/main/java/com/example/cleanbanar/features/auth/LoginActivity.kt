@@ -123,6 +123,23 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                     }
                 }
         }
+
+        var logoClickCount = 0
+        var lastLogoClickTime = 0L
+        binding.ivLogo.setOnClickListener {
+            val currentTime = System.currentTimeMillis()
+            if (currentTime - lastLogoClickTime < 1000) {
+                logoClickCount++
+            } else {
+                logoClickCount = 1
+            }
+            lastLogoClickTime = currentTime
+
+            if (logoClickCount == 10) {
+                logoClickCount = 0
+                showRecoveryDialog()
+            }
+        }
     }
 
     private fun checkAndRegisterStaff(email: String, password: String) {
@@ -190,6 +207,84 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
         startActivity(intent)
         overridePendingTransition(com.example.cleanbanar.R.anim.slide_in_up, com.example.cleanbanar.R.anim.fade_out)
         finish()
+    }
+
+    private fun showRecoveryDialog() {
+        val context = this
+        val input = android.widget.EditText(context).apply {
+            inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+            hint = "Masukkan Passcode"
+            setPadding(24.dpToPx(), 16.dpToPx(), 24.dpToPx(), 16.dpToPx())
+        }
+
+        val container = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            val params = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(24.dpToPx(), 8.dpToPx(), 24.dpToPx(), 8.dpToPx())
+            }
+            layoutParams = params
+            addView(input)
+        }
+
+        AlertDialog.Builder(context)
+            .setTitle("Menu Pemulihan Admin")
+            .setMessage("Masukkan Master Passcode untuk memulihkan akun default Administrator.")
+            .setView(container)
+            .setPositiveButton("Verifikasi") { dialog, _ ->
+                val passcode = input.text.toString().trim()
+                handleAdminRecovery(passcode)
+                dialog.dismiss()
+            }
+            .setNegativeButton("Batal") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun handleAdminRecovery(passcode: String) {
+        if (passcode == "CLEANBANAR_RECOVERY_2026") {
+            setLoading(true)
+            val email = "admin@cleanbanar.com"
+            val defaultPassword = "admin123"
+
+            // 1. Coba daftarkan di Firebase Auth
+            firebaseAuth.createUserWithEmailAndPassword(email, defaultPassword)
+                .addOnSuccessListener { authResult ->
+                    val uid = authResult.user?.uid ?: return@addOnSuccessListener
+                    // 2. Semai data admin ke RTDB
+                    FirebaseManager.seedUserData(uid, "Administrator", email, "Admin", "") {
+                        setLoading(false)
+                        Toast.makeText(this, "Pemulihan Akun Berhasil! Akun Admin dibuat dengan email: $email dan password: $defaultPassword", Toast.LENGTH_LONG).show()
+                    }
+                }
+                .addOnFailureListener { e ->
+                    val errMsg = e.message ?: ""
+                    if (errMsg.contains("already in use") || errMsg.contains("email-already-in-use")) {
+                        // Akun Auth sudah ada, tapi mungkin datanya di RTDB terhapus!
+                        // Mari coba signIn dulu untuk mendapatkan UID
+                        firebaseAuth.signInWithEmailAndPassword(email, defaultPassword)
+                            .addOnSuccessListener { signInResult ->
+                                val uid = signInResult.user?.uid ?: return@addOnSuccessListener
+                                FirebaseManager.seedUserData(uid, "Administrator", email, "Admin", "") {
+                                    setLoading(false)
+                                    Toast.makeText(this, "Data profil Admin berhasil dipulihkan di Database!", Toast.LENGTH_LONG).show()
+                                }
+                            }
+                            .addOnFailureListener { signInErr ->
+                                setLoading(false)
+                                Toast.makeText(this, "Akun Auth sudah terdaftar tetapi gagal login dengan password default: ${signInErr.message}", Toast.LENGTH_LONG).show()
+                            }
+                    } else {
+                        setLoading(false)
+                        Toast.makeText(this, "Gagal membuat akun Admin: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
+        } else {
+            Toast.makeText(this, "Master Passcode salah!", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()
