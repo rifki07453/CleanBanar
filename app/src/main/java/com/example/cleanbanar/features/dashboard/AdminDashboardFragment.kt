@@ -201,7 +201,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
             val jarakTangan = etBatasJarakTangan.text.toString().toDoubleOrNull() ?: 15.0
 
             FirebaseManager.addDevice(id, nama, pins)
-            FirebaseManager.updateDeviceConfig(id, tinggi, batas, jarakTangan)
+            FirebaseManager.updateDeviceConfig(id, tinggi, batas, jarakTangan, 3)
             Toast.makeText(requireContext(), "Perangkat ditambahkan", Toast.LENGTH_SHORT).show()
             dialog.dismiss()
             showDeviceListBottomSheet()
@@ -262,6 +262,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         val etDetailTinggiTong = view.findViewById<TextInputEditText>(R.id.etDetailTinggiTong)
         val etDetailBatasPenuh = view.findViewById<TextInputEditText>(R.id.etDetailBatasPenuh)
         val etDetailBatasJarakTangan = view.findViewById<TextInputEditText>(R.id.etDetailBatasJarakTangan)
+        val etDetailDelayTutup = view.findViewById<TextInputEditText>(R.id.etDetailDelayTutup)
 
         // Servo derajat — terpisah per jenis servo
         val etServoDerajatBukaOrg = view.findViewById<TextInputEditText>(R.id.etServoDerajatBukaOrg)
@@ -282,6 +283,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         etDetailTinggiTong.setText(device.config.tinggiTong.toString())
         etDetailBatasPenuh.setText(device.config.batasPenuh.toString())
         etDetailBatasJarakTangan.setText(device.config.batasJarakTangan.toString())
+        etDetailDelayTutup.setText(device.config.delayTutup.toString())
 
         // Isi nilai derajat servo yang tersimpan
         etServoDerajatBukaOrg.setText(device.config.servoDerajatBukaOrganik.toString())
@@ -305,9 +307,10 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
             val tinggi = etDetailTinggiTong.text.toString().toDoubleOrNull() ?: 50.0
             val batas = etDetailBatasPenuh.text.toString().toDoubleOrNull() ?: 5.0
             val jarakTangan = etDetailBatasJarakTangan.text.toString().toDoubleOrNull() ?: 15.0
+            val delayTutup = etDetailDelayTutup.text.toString().toIntOrNull() ?: 3
             
             FirebaseManager.updateDevicePins(device.id, pins)
-            FirebaseManager.updateDeviceConfig(device.id, tinggi, batas, jarakTangan)
+            FirebaseManager.updateDeviceConfig(device.id, tinggi, batas, jarakTangan, delayTutup)
             Toast.makeText(requireContext(), "Konfigurasi pin berhasil diperbarui", Toast.LENGTH_SHORT).show()
         }
 

@@ -22,7 +22,8 @@ data class DeviceConfig(
     val servoDerajatBukaOrganik: Int = 90,
     val servoDerajatTutupOrganik: Int = 0,
     val servoDerajatBukaNonOrganik: Int = 90,
-    val servoDerajatTutupNonOrganik: Int = 0
+    val servoDerajatTutupNonOrganik: Int = 0,
+    val delayTutup: Int = 3
 )
 
 data class DeviceModel(

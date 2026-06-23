@@ -127,6 +127,8 @@ object FirebaseManager {
                         val servoDerajatBukaNon = child.child("config").child("servoDerajatBukaNonOrganik").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 90
                         val servoDerajatTutupNon = child.child("config").child("servoDerajatTutupNonOrganik").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 0
                         
+                        val delayTutup = child.child("config").child("delayTutup").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 3
+                        
                         val ipAddr = child.child("ipAddress").getValue(String::class.java) ?: "-"
                         val fbSsid = child.child("ssid").getValue(String::class.java) ?: "-"
                         val sinyal = child.child("kekuatanSinyal").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 0
@@ -134,7 +136,8 @@ object FirebaseManager {
                         devices.add(DeviceModel(id, nama, status, terakhir, tipe, ipAddr, fbSsid, sinyal,
                             DeviceConfig(pins, tinggiTong, batasPenuh, batasJarakTangan,
                                 servoDerajatBukaOrg, servoDerajatTutupOrg,
-                                servoDerajatBukaNon, servoDerajatTutupNon)))
+                                servoDerajatBukaNon, servoDerajatTutupNon,
+                                delayTutup)))
                     } catch (e: Exception) {
                         Log.e(TAG, "Gagal memproses device ${child.key}: ${e.message}")
                     }
@@ -176,10 +179,12 @@ object FirebaseManager {
         rootRef?.child("devices")?.child(id)?.child("config")?.child("pins")?.setValue(pins)
     }
 
-    fun updateDeviceConfig(id: String, tinggiTong: Double, batasPenuh: Double, batasJarakTangan: Double) {
-        rootRef?.child("devices")?.child(id)?.child("config")?.child("tinggiTong")?.setValue(tinggiTong)
-        rootRef?.child("devices")?.child(id)?.child("config")?.child("batasPenuh")?.setValue(batasPenuh)
-        rootRef?.child("devices")?.child(id)?.child("config")?.child("batasJarakTangan")?.setValue(batasJarakTangan)
+    fun updateDeviceConfig(id: String, tinggiTong: Double, batasPenuh: Double, batasJarakTangan: Double, delayTutup: Int) {
+        val cfg = rootRef?.child("devices")?.child(id)?.child("config") ?: return
+        cfg.child("tinggiTong").setValue(tinggiTong)
+        cfg.child("batasPenuh").setValue(batasPenuh)
+        cfg.child("batasJarakTangan").setValue(batasJarakTangan)
+        cfg.child("delayTutup").setValue(delayTutup)
     }
 
     fun updateServoDerajat(
