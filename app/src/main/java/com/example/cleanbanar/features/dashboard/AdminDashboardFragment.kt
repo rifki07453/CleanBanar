@@ -82,9 +82,10 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
     override fun observeData() {
         usersListener = FirebaseManager.listenUsers { users ->
             if (!isAdded) return@listenUsers
-            val staffCount = users.count { it["peran"] == "Petugas" }
-            binding.tvTotalPetugasCount.text = staffCount.toString()
+            val accountCount = users.size
+            binding.tvTotalPetugasCount.text = accountCount.toString()
         }
+
 
         devicesListener = FirebaseManager.listenDevices { devices ->
             if (!isAdded) return@listenDevices

@@ -66,7 +66,7 @@
             android:id="@+id/tvTotalStaffLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Total Petugas"
+            android:text="Total Akun"
             android:textColor="#A7F3D0"
             android:textSize="@dimen/text_12"
             android:layout_marginTop="@dimen/margin_24"
@@ -157,7 +157,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Manajemen\nPetugas"
+                            android:text="Manajemen\nAkun"
                             android:textColor="@color/text_primary"
                             android:textSize="@dimen/text_14"
                             android:textStyle="bold"
@@ -229,7 +229,6 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
-
 
             <!-- Row 2: Aktivitas Terbaru Section -->
             <com.google.android.material.card.MaterialCardView
