@@ -80,30 +80,40 @@ class BluetoothProgressActivity : AppCompatActivity() {
         ivStatusIcon.setImageResource(R.drawable.ic_check_circle_24dp)
         ivStatusIcon.setColorFilter(ContextCompat.getColor(this, R.color.emerald_600))
         
-        tvStatusTitle.text = "Konfigurasi Berhasil Dikirim!"
-        tvStatusTitle.setTextColor(ContextCompat.getColor(this, R.color.emerald_600))
-        tvStatusMessage.text = "Membuka halaman pemantauan..."
+        val isRestart = configStr == "RESTART\n"
+        
+        if (isRestart) {
+            tvStatusTitle.text = "Perintah Restart Berhasil Dikirim!"
+            tvStatusTitle.setTextColor(ContextCompat.getColor(this, R.color.emerald_600))
+            tvStatusMessage.text = "Alat sedang memproses restart..."
+        } else {
+            tvStatusTitle.text = "Konfigurasi Berhasil Dikirim!"
+            tvStatusTitle.setTextColor(ContextCompat.getColor(this, R.color.emerald_600))
+            tvStatusMessage.text = "Membuka halaman pemantauan..."
+        }
         
         btnKembali.visibility = View.GONE
         
         // Ekstrak SSID dan Device ID dari configStr ("SET_WIFI:ssid,pass,deviceId")
         var ssid = "-"
-        var deviceId = ""
-        try {
-            val parts = configStr.substringAfter("SET_WIFI:").split(",")
-            if (parts.size >= 3) {
-                ssid = parts[0]
-                deviceId = parts[2].trim()
-            }
-        } catch (e: Exception) {}
+        var targetDeviceId = intent.getStringExtra("device_id") ?: ""
+        if (!isRestart) {
+            try {
+                val parts = configStr.substringAfter("SET_WIFI:").split(",")
+                if (parts.size >= 3) {
+                    ssid = parts[0]
+                    targetDeviceId = parts[2].trim()
+                }
+            } catch (e: Exception) {}
+        }
 
         Handler(Looper.getMainLooper()).postDelayed({
             bluetoothHelper.close()
             
             // Perbarui data WiFi di Firebase agar bersih & tidak menampilkan SSID/IP lama
-            if (deviceId.isNotEmpty()) {
+            if (!isRestart && targetDeviceId.isNotEmpty()) {
                 val dbRef = com.google.firebase.database.FirebaseDatabase.getInstance()
-                    .getReference("cleanbanar/devices/$deviceId")
+                    .getReference("cleanbanar/devices/$targetDeviceId")
                 val updates = mapOf(
                     "statusKoneksi" to "OFFLINE",
                     "ipAddress" to "-",
@@ -113,7 +123,7 @@ class BluetoothProgressActivity : AppCompatActivity() {
             }
 
             val intent = Intent(this, DeviceProvisionSuccessActivity::class.java)
-            intent.putExtra("device_id", deviceId)
+            intent.putExtra("device_id", targetDeviceId)
             intent.putExtra("ssid", ssid)
             startActivity(intent)
             finish()

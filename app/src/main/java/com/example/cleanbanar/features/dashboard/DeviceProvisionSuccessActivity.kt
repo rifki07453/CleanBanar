@@ -54,6 +54,7 @@ class DeviceProvisionSuccessActivity : AppCompatActivity() {
     private var deviceId: String = ""
     private var ssid: String = ""
     private var isRestartLoading = false
+    private var isDeviceOnline = false
 
     private val bluetoothHelper by lazy { BluetoothHelper() }
     private var pendingBtSsid: String? = null
@@ -136,7 +137,11 @@ class DeviceProvisionSuccessActivity : AppCompatActivity() {
                 showSnackbar("ID Perangkat tidak ditemukan", isError = true)
                 return@setOnClickListener
             }
-            performRestart()
+            if (isDeviceOnline) {
+                performRestart()
+            } else {
+                showRestartFallbackDialog()
+            }
         }
     }
 
@@ -379,10 +384,11 @@ class DeviceProvisionSuccessActivity : AppCompatActivity() {
                     tipe = "info"
                 )
 
-                val intent = Intent(this, BluetoothProgressActivity::class.java)
+                val intent = Intent(this@DeviceProvisionSuccessActivity, BluetoothProgressActivity::class.java)
                 intent.putExtra("bluetooth_device", selectedDevice)
                 intent.putExtra("config_str", configStr)
                 startActivity(intent)
+                finish()
             }
             .setNegativeButton("Batal", null)
             .show()
@@ -396,6 +402,13 @@ class DeviceProvisionSuccessActivity : AppCompatActivity() {
                 val s = pendingBtSsid ?: return
                 val p = pendingBtPass ?: ""
                 performBluetoothSend(s, p)
+            } else {
+                showSnackbar("Izin Bluetooth ditolak", isError = true)
+            }
+        }
+        if (requestCode == 2003) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                performBluetoothRestart()
             } else {
                 showSnackbar("Izin Bluetooth ditolak", isError = true)
             }
@@ -441,7 +454,8 @@ class DeviceProvisionSuccessActivity : AppCompatActivity() {
                     statusKoneksi = "OFFLINE"
                 }
                 val isOnline = statusKoneksi == "ONLINE"
-
+                isDeviceOnline = isOnline
+                
                 if (isOnline) {
                     tvCloudConnection.text = "Online"
                     tvCloudConnection.setTextColor(ContextCompat.getColor(this@DeviceProvisionSuccessActivity, R.color.emerald_600))
@@ -496,6 +510,61 @@ class DeviceProvisionSuccessActivity : AppCompatActivity() {
         if (millis <= 0) return "Belum sinkron"
         val sdf = java.text.SimpleDateFormat("dd MMM yyyy, HH:mm", java.util.Locale("id", "ID"))
         return sdf.format(java.util.Date(millis))
+    }
+
+    private fun showRestartFallbackDialog() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Alat Sedang Offline")
+            .setMessage("Alat saat ini Offline (Cloud: X). Perintah restart via Cloud tidak dapat langsung diterima.\n\nApakah Anda ingin mengirim perintah restart langsung via Bluetooth?")
+            .setPositiveButton("Kirim via Bluetooth") { _, _ ->
+                performBluetoothRestart()
+            }
+            .setNegativeButton("Kirim via Cloud") { _, _ ->
+                performRestart()
+            }
+            .setNeutralButton("Batal", null)
+            .show()
+    }
+
+    private fun performBluetoothRestart() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            @Suppress("DEPRECATION")
+            requestPermissions(
+                arrayOf(Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN),
+                2003
+            )
+            return
+        }
+        val pairedDevices = bluetoothHelper.getPairedDevices()
+        if (pairedDevices.isEmpty()) {
+            showSnackbar("Tidak ada perangkat Bluetooth yang terpasang", isError = true)
+            return
+        }
+        val deviceNames = pairedDevices.map { it.name ?: it.address }.toTypedArray()
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Pilih Perangkat Bluetooth")
+            .setItems(deviceNames) { _, which ->
+                val selectedDevice = pairedDevices[which]
+                val configStr = "RESTART\n"
+
+                // Catat ke Riwayat Aktivitas
+                logActivity(
+                    judul = "Restart Alat via BT",
+                    pesan = "Mengirim perintah restart langsung ke perangkat $deviceId via Bluetooth",
+                    tipe = "info"
+                )
+
+                val intent = Intent(this@DeviceProvisionSuccessActivity, BluetoothProgressActivity::class.java)
+                intent.putExtra("bluetooth_device", selectedDevice)
+                intent.putExtra("config_str", configStr)
+                intent.putExtra("device_id", deviceId)
+                startActivity(intent)
+                finish()
+            }
+            .setNegativeButton("Batal", null)
+            .show()
     }
 
     override fun onDestroy() {
