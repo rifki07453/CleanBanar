@@ -76,17 +76,38 @@ class StatisticsFragment : BaseFragment<FragmentStatisticsBinding>() {
     // Firebase Real-Time Listeners
     // ==========================================
     override fun observeData() {
-        // Listen to daily statistics for chart and averages
-        statsListener = FirebaseManager.listenDailyStats { stats ->
-            if (!isAdded) return@listenDailyStats
-            allDailyStats = stats
-            updateUI()
-        }
+        // DUMMY DATA UNTUK SCREENSHOT - Ganti ke true untuk memakai dummy, false untuk real data
+        val useDummyData = true
 
-        // Listen to history node for "total penuh" count (last 7 days)
-        penuhListener = FirebaseManager.countPenuhEvents { count ->
-            if (!isAdded) return@countPenuhEvents
-            binding.tvTotalPenuh.animateCount(0, count.toInt())
+        if (useDummyData) {
+            val dummyStats = mutableListOf<Map<String, Any>>()
+            val dates = getPastDates(35)
+            val random = java.util.Random()
+            dates.forEach { date ->
+                dummyStats.add(mapOf(
+                    "tanggal" to date,
+                    "organik" to (40 + random.nextInt(40)),
+                    "nonOrganik" to (30 + random.nextInt(50)),
+                    "organikEmptyCount" to random.nextInt(5),
+                    "nonOrganikEmptyCount" to random.nextInt(4)
+                ))
+            }
+            allDailyStats = dummyStats
+            binding.tvTotalPenuh.animateCount(0, 24)
+            updateUI()
+        } else {
+            // Listen to daily statistics for chart and averages
+            statsListener = FirebaseManager.listenDailyStats { stats ->
+                if (!isAdded) return@listenDailyStats
+                allDailyStats = stats
+                updateUI()
+            }
+
+            // Listen to history node for "total penuh" count (last 7 days)
+            penuhListener = FirebaseManager.countPenuhEvents { count ->
+                if (!isAdded) return@countPenuhEvents
+                binding.tvTotalPenuh.animateCount(0, count.toInt())
+            }
         }
     }
 
