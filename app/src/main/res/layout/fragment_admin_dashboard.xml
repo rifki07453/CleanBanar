@@ -25,7 +25,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="OVERVIEW SISTEM"
-            android:textColor="#A7F3D0" 
+            android:textColor="#99e9c4ff" 
+            
             android:textSize="@dimen/text_10"
             android:textStyle="bold"
             android:layout_marginStart="@dimen/margin_24"
