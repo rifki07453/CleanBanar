@@ -85,6 +85,16 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/margin_1"
             android:background="#F3F4F6"
+            android:layout_marginBottom="@dimen/margin_16" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnViewOverview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Overview"
+            android:textColor="@color/white"
+            app:backgroundTint="@color/primary"
+            app:cornerRadius="8dp"
             android:layout_marginBottom="@dimen/margin_24" />
 
         <!-- QR Code Section -->
@@ -183,6 +193,33 @@
                     android:inputType="numberDecimal" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/margin_12"
+            android:hint="Jarak Tangan (cm)">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etDetailBatasJarakTangan"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/margin_12"
+            android:hint="Lama Terbuka Servo (detik)">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etDetailDelayTutup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number" />
+        </com.google.android.material.textfield.TextInputLayout>
+
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -358,7 +395,136 @@
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Update Konfigurasi"
+            android:text="Update Konfigurasi Pin"
+            android:textColor="#10B981"
+            app:strokeColor="#10B981"
+            android:layout_marginTop="@dimen/margin_8" />
+
+        <!-- SERVO DEGREE SECTION -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/margin_1"
+            android:background="#F3F4F6"
+            android:layout_marginVertical="@dimen/margin_20" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="KONFIGURASI DERAJAT SERVO"
+            android:textColor="@color/text_tertiary"
+            android:textSize="@dimen/text_10"
+            android:textStyle="bold"
+            android:layout_marginBottom="@dimen/margin_4" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Atur terpisah agar kompatibel dengan berbagai jenis servo (0°–360°)"
+            android:textColor="@color/text_tertiary"
+            android:textSize="@dimen/text_10"
+            android:layout_marginBottom="@dimen/margin_12" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:baselineAligned="false">
+
+            <!-- Organik -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginEnd="@dimen/margin_8">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Servo Organik"
+                    android:textColor="#16A34A"
+                    android:textSize="@dimen/text_12"
+                    android:layout_marginBottom="@dimen/margin_8" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/margin_8"
+                    android:hint="Derajat Buka (°)">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etServoDerajatBukaOrg"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:maxLength="3" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Derajat Tutup (°)">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etServoDerajatTutupOrg"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:maxLength="3" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
+            <!-- Non-Organik -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="@dimen/margin_8">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Servo Non-Organik"
+                    android:textColor="#2563EB"
+                    android:textSize="@dimen/text_12"
+                    android:layout_marginBottom="@dimen/margin_8" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/margin_8"
+                    android:hint="Derajat Buka (°)">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etServoDerajatBukaNon"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:maxLength="3" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Derajat Tutup (°)">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etServoDerajatTutupNon"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:maxLength="3" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnUpdateServoDerajat"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Simpan Derajat Servo"
             android:textColor="#10B981"
             app:strokeColor="#10B981"
             android:layout_marginTop="@dimen/margin_8" />
@@ -393,7 +559,7 @@
                 android:id="@+id/etSsid"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="text" />
+                android:inputType="textNoSuggestions" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout

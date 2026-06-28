@@ -10,10 +10,12 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import com.example.cleanbanar.R
+import com.example.cleanbanar.core.data.AuthManager
 import com.example.cleanbanar.core.data.FirebaseManager
 import com.example.cleanbanar.core.ui.BaseFragment
 import com.example.cleanbanar.databinding.FragmentStaffManagementBinding
 import com.google.firebase.database.ValueEventListener
+import com.bumptech.glide.Glide
 
 /**
  * Fragment untuk manajemen petugas lapangan oleh Admin.
@@ -21,6 +23,8 @@ import com.google.firebase.database.ValueEventListener
 class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
 
     private var usersListener: ValueEventListener? = null
+    private lateinit var authManager: AuthManager
+    private var allUsers: List<Map<String, Any>> = emptyList()
 
     override fun inflateBinding(
         inflater: LayoutInflater,
@@ -30,6 +34,7 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
     }
 
     override fun setupViews() {
+        authManager = AuthManager(requireContext())
         binding.btnBack.setOnClickListener {
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
@@ -39,49 +44,67 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
             val email = binding.etNewEmail.text.toString().trim()
             val phone = binding.etNewPhone.text.toString().trim()
             val password = binding.etNewPassword.text.toString().trim()
+            val role = if (binding.rbAdmin.isChecked) "Admin" else "Petugas"
 
             when {
                 name.isEmpty() -> toast("Harap isi Nama Lengkap")
                 email.isEmpty() -> toast("Harap isi Email")
                 !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> toast("Format email tidak valid")
                 password.length < 6 -> toast("Password minimal 6 karakter")
-                else -> createStaffAccount(name, email, password, phone)
+                else -> createStaffAccount(name, email, password, phone, role)
             }
         }
+
+        binding.chipAll.setOnClickListener { filterAndRenderUsers() }
+        binding.chipAdmin.setOnClickListener { filterAndRenderUsers() }
+        binding.chipPetugas.setOnClickListener { filterAndRenderUsers() }
     }
 
     override fun observeData() {
         usersListener = FirebaseManager.listenUsers { users ->
-            binding.staffListContainer.removeAllViews()
-            // Hanya tampilkan akun dengan peran "Petugas", kecualikan Admin/Administrator
-            val petugasList = users.filter { user ->
-                val peran = (user["peran"] as? String ?: "").trim()
-                peran.equals("Petugas", ignoreCase = true)
+            allUsers = users
+            filterAndRenderUsers()
+        }
+    }
+
+    private fun filterAndRenderUsers() {
+        if (!isAdded) return
+        binding.staffListContainer.removeAllViews()
+
+        val filteredList = allUsers.filter { user ->
+            val peran = (user["peran"] as? String ?: "").trim()
+            val matchesRole = when {
+                binding.chipAdmin.isChecked -> peran.equals("Admin", ignoreCase = true)
+                binding.chipPetugas.isChecked -> peran.equals("Petugas", ignoreCase = true)
+                else -> peran.equals("Petugas", ignoreCase = true) || peran.equals("Admin", ignoreCase = true)
             }
-            if (petugasList.isEmpty()) {
-                binding.emptyState.visibility = android.view.View.VISIBLE
-            } else {
-                binding.emptyState.visibility = android.view.View.GONE
-                for (user in petugasList) {
-                    addStaffCard(
-                        userId = user["id"] as? String ?: "",
-                        name = user["nama"] as? String ?: "",
-                        email = user["email"] as? String ?: ""
-                    )
-                }
+            matchesRole
+        }
+
+        if (filteredList.isEmpty()) {
+            binding.emptyState.visibility = android.view.View.VISIBLE
+        } else {
+            binding.emptyState.visibility = android.view.View.GONE
+            for (user in filteredList) {
+                addStaffCard(
+                    userId = user["id"] as? String ?: "",
+                    name = user["nama"] as? String ?: "",
+                    email = user["email"] as? String ?: "",
+                    role = user["peran"] as? String ?: "Petugas",
+                    photoUrl = user["photoUrl"] as? String ?: ""
+                )
             }
         }
     }
 
-    private fun createStaffAccount(name: String, email: String, password: String, phone: String) {
+    private fun createStaffAccount(name: String, email: String, password: String, phone: String, role: String) {
         binding.btnCreateAccount.isEnabled = false
         binding.btnCreateAccount.text = "Memproses..."
 
-        // Menggunakan nama parameter baru (nama, peran)
         FirebaseManager.addUser(
             nama = name,
             email = email,
-            peran = "Petugas",
+            peran = role,
             nomorHp = phone,
             onSuccess = {
                 binding.etNewName.text.clear()
@@ -89,30 +112,35 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
                 binding.etNewPhone.text.clear()
                 binding.etNewPassword.text?.clear()
                 binding.btnCreateAccount.isEnabled = true
-                binding.btnCreateAccount.text = "Buat Akun Petugas"
-                toast("✓ Akun petugas $name berhasil ditambahkan")
+                binding.btnCreateAccount.text = "Buat Akun Baru"
+                toast("✓ Akun $name ($role) berhasil ditambahkan")
             },
             onFailure = { errorMsg ->
                 binding.btnCreateAccount.isEnabled = true
-                binding.btnCreateAccount.text = "Buat Akun Petugas"
+                binding.btnCreateAccount.text = "Buat Akun Baru"
                 toast("Gagal: $errorMsg")
             }
         )
     }
 
     private fun showDeleteDialog(userId: String, name: String) {
+        if (userId == authManager.getUserId()) {
+            toast("Anda tidak dapat menghapus akun Anda sendiri")
+            return
+        }
+
         AlertDialog.Builder(requireContext())
-            .setTitle("Hapus Petugas")
+            .setTitle("Hapus Akun")
             .setMessage("Yakin ingin menghapus akses \"$name\"?\n\nCatatan: Data akan dihapus secara permanen.")
+
             .setPositiveButton("Hapus") { _, _ ->
                 FirebaseManager.deleteUser(userId)
-                toast("$name berhasil dihapus")
             }
             .setNegativeButton("Batal", null)
             .show()
     }
 
-    private fun addStaffCard(userId: String, name: String, email: String) {
+    private fun addStaffCard(userId: String, name: String, email: String, role: String, photoUrl: String = "") {
         val cardView = com.google.android.material.card.MaterialCardView(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -147,7 +175,25 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
             textSize = 18f
             setTypeface(typeface, android.graphics.Typeface.BOLD)
         }
+        val avatarImg = ImageView(requireContext()).apply {
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+        }
         avatarBg.addView(avatarTv)
+        avatarBg.addView(avatarImg)
+
+        if (photoUrl.isNotEmpty()) {
+            avatarTv.visibility = android.view.View.GONE
+            Glide.with(requireContext())
+                .load(photoUrl)
+                .circleCrop()
+                .into(avatarImg)
+        } else {
+            avatarTv.visibility = android.view.View.VISIBLE
+            Glide.with(requireContext()).clear(avatarImg)
+        }
 
         val info = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL
@@ -161,7 +207,7 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
             setTypeface(typeface, android.graphics.Typeface.BOLD)
         }
         val tvEmail = TextView(requireContext()).apply {
-            text = email
+            text = "$email • $role"
             setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_tertiary))
             textSize = 12f
             setPadding(0, 4.dp, 0, 0)

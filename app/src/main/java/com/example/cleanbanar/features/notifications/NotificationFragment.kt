@@ -7,6 +7,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.example.cleanbanar.R
+import com.example.cleanbanar.core.data.AuthManager
 import com.example.cleanbanar.core.data.FirebaseManager
 import com.example.cleanbanar.core.ui.BaseFragment
 import com.example.cleanbanar.databinding.FragmentNotificationBinding
@@ -22,12 +23,15 @@ import java.util.Locale
 class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
 
     private var notifListener: ValueEventListener? = null
+    private lateinit var authManager: AuthManager
 
     override fun inflateBinding(inflater: LayoutInflater, container: ViewGroup?): FragmentNotificationBinding {
         return FragmentNotificationBinding.inflate(inflater, container, false)
     }
 
     override fun setupViews() {
+        authManager = AuthManager(requireContext())
+        FirebaseManager.markAllNotificationsAsRead()
         binding.tvClearAll.setOnClickListener {
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Hapus Semua Notifikasi")
@@ -41,6 +45,7 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
     }
 
     override fun observeData() {
+        val userRole = authManager.getUserRole()
         // Mendengarkan data notifikasi dari Firebase
         notifListener = FirebaseManager.listenNotifications { notifData ->
             if (isAdded) {
@@ -48,12 +53,22 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
                 binding.tvNotifSubtitle.visibility = android.view.View.GONE
                 binding.notifListContainer.removeAllViews()
 
-                if (notifData.isEmpty()) {
+                val filteredNotifData = if (userRole.equals("Petugas", ignoreCase = true)) {
+                    notifData.filter { notif ->
+                        val judul = (notif["judul"] as? String ?: "").lowercase()
+                        // Hilangkan notifikasi sistem (seperti config ulang wifi, restart alat) untuk Petugas
+                        !judul.contains("config") && !judul.contains("restart")
+                    }
+                } else {
+                    notifData
+                }
+
+                if (filteredNotifData.isEmpty()) {
                     binding.tvClearAll.visibility = android.view.View.GONE
                     addEmptyState()
                 } else {
                     binding.tvClearAll.visibility = android.view.View.VISIBLE
-                    for (notif in notifData) {
+                    for (notif in filteredNotifData) {
                         val waktu = notif["waktu"] as? Long ?: 0L
                         addNotificationCard(
                             title = notif["judul"] as? String ?: "Notifikasi",
@@ -98,17 +113,32 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
         }
 
         val isNonOrganik = title.lowercase().contains("non")
-        val (iconRes, iconBgColor, iconTintColor) = when (type) {
-            "danger" -> Triple(R.drawable.ic_trash_modern, "#FEF2F2", resources.getColor(R.color.red_500, null))
-            "warning" -> Triple(R.drawable.ic_trash_modern, "#FEFCE8", resources.getColor(R.color.amber_600, null))
-            "success" -> {
-                if (isNonOrganik) {
-                    Triple(R.drawable.ic_trash_modern, "#EFF6FF", androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.blue_600))
-                } else {
-                    Triple(R.drawable.ic_trash_modern, "#ECFDF5", androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.green_600))
+        val isRestart = title.lowercase().contains("restart")
+        val isConfig = title.lowercase().contains("config")
+
+        val (iconRes, iconBgColor, iconTintColor) = when {
+            isRestart -> Triple(
+                R.drawable.ic_power_settings_new_24dp,
+                "#FEF2F2",
+                androidx.core.content.ContextCompat.getColor(requireContext(), R.color.red_500)
+            )
+            isConfig -> Triple(
+                R.drawable.ic_bluetooth_24dp,
+                "#EFF6FF",
+                androidx.core.content.ContextCompat.getColor(requireContext(), R.color.blue_600)
+            )
+            else -> when (type) {
+                "danger" -> Triple(R.drawable.ic_trash_modern, "#FEF2F2", resources.getColor(R.color.red_500, null))
+                "warning" -> Triple(R.drawable.ic_trash_modern, "#FEFCE8", resources.getColor(R.color.amber_600, null))
+                "success" -> {
+                    if (isNonOrganik) {
+                        Triple(R.drawable.ic_trash_modern, "#EFF6FF", androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.blue_600))
+                    } else {
+                        Triple(R.drawable.ic_trash_modern, "#ECFDF5", androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.green_600))
+                    }
                 }
+                else -> Triple(R.drawable.ic_trash_modern, "#F9FAFB", androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_secondary))
             }
-            else -> Triple(R.drawable.ic_trash_modern, "#F9FAFB", androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.text_secondary))
         }
 
         val iconFrame = android.widget.FrameLayout(requireContext()).apply {
@@ -161,13 +191,6 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
             gravity = Gravity.END
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT)
         }
-        if (isUnread) {
-            val dot = android.view.View(requireContext()).apply {
-                layoutParams = LinearLayout.LayoutParams(8.dpToPx(), 8.dpToPx()).apply { topMargin = 4.dpToPx() }
-                background = getCircleDrawable(iconTintColor)
-            }
-            rightCol.addView(dot)
-        }
 
         row.addView(iconFrame)
         row.addView(info)
@@ -187,8 +210,14 @@ class NotificationFragment : BaseFragment<FragmentNotificationBinding>() {
         val container = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
-            setPadding(0, 48.dpToPx(), 0, 48.dpToPx())
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+            // Gunakan weight atau margins agar ke tengah
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, 
+                LinearLayout.LayoutParams.MATCH_PARENT
+            ).apply {
+                // Menambahkan margin atas agak besar agar turun ke tengah
+                topMargin = 120.dpToPx()
+            }
         }
 
         val icon = ImageView(requireContext()).apply {

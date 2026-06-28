@@ -1,7 +1,3 @@
 {
-    "java.configuration.updateBuildConfiguration": "disabled",
-    "java.import.gradle.enabled": false,
-    "java.project.importOnFirstTimeStartup": "disabled",
-    "java.server.launchMode": "LightWeight",
-    "gradle.autoDetect": "off"
+    "java.configuration.updateBuildConfiguration": "interactive"
 }

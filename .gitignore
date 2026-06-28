@@ -13,7 +13,8 @@
 .externalNativeBuild
 .cxx
 local.properties
-
+/Arduino
+/platformio
 
 # IDE
 .idea/

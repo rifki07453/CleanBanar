@@ -16,7 +16,14 @@ data class PinConfig(
 data class DeviceConfig(
     val pins: PinConfig = PinConfig(),
     val tinggiTong: Double = 50.0,
-    val batasPenuh: Double = 5.0
+    val batasPenuh: Double = 5.0,
+    val batasJarakTangan: Double = 15.0,
+    // Derajat buka servo masing-masing (terpisah agar bisa berbeda jenis servo)
+    val servoDerajatBukaOrganik: Int = 90,
+    val servoDerajatTutupOrganik: Int = 0,
+    val servoDerajatBukaNonOrganik: Int = 90,
+    val servoDerajatTutupNonOrganik: Int = 0,
+    val delayTutup: Int = 3
 )
 
 data class DeviceModel(
@@ -25,5 +32,8 @@ data class DeviceModel(
     val statusKoneksi: String = "OFFLINE",
     val terakhirTerlihat: Long = 0L,
     val tipeJaringan: String = "WIFI",
+    val ipAddress: String = "-",
+    val ssid: String = "-",
+    val kekuatanSinyal: Int = 0,
     val config: DeviceConfig = DeviceConfig()
 )

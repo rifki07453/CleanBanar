@@ -63,11 +63,11 @@
 
         <!-- Total Petugas -->
         <TextView
-            android:id="@+id/tvTotalPetugasLabel"
+            android:id="@+id/tvTotalStaffLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Total Petugas Aktif"
-            android:textColor="#D1FAE5"
+            android:text="Total Akun"
+            android:textColor="#A7F3D0"
             android:textSize="@dimen/text_12"
             android:layout_marginTop="@dimen/margin_24"
             app:layout_constraintStart_toStartOf="@id/tvOverviewTitle"
@@ -77,9 +77,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:baselineAligned="true"
+            android:layout_marginTop="@dimen/margin_8"
             app:layout_constraintStart_toStartOf="@id/tvOverviewTitle"
-            app:layout_constraintTop_toBottomOf="@id/tvTotalPetugasLabel">
+            app:layout_constraintTop_toBottomOf="@id/tvTotalStaffLabel">
 
             <TextView
                 android:id="@+id/tvTotalPetugasCount"
@@ -157,7 +157,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Manajemen\nPetugas"
+                            android:text="Manajemen\nAkun"
                             android:textColor="@color/text_primary"
                             android:textSize="@dimen/text_14"
                             android:textStyle="bold"
@@ -218,36 +218,17 @@
                             android:textStyle="bold"
                             android:textAlignment="center" />
 
-                        <LinearLayout
-                            android:layout_width="wrap_content"
+                        <TextView
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:background="@drawable/bg_badge_green"
-                            android:gravity="center_vertical"
-                            android:paddingHorizontal="@dimen/margin_8"
-                            android:paddingVertical="@dimen/margin_4"
-                            android:layout_marginTop="@dimen/margin_6">
-                            
-                            <View
-                                android:id="@+id/dotStatus"
-                                android:layout_width="@dimen/margin_6"
-                                android:layout_height="@dimen/margin_6"
-                                android:layout_marginEnd="@dimen/margin_4"
-                                android:background="@drawable/dot_timeline_green" />
-                                
-                            <TextView
-                                android:id="@+id/tvDeviceStatusOverview"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="ONLINE"
-                                android:textColor="#059669"
-                                android:textSize="@dimen/text_9"
-                                android:textStyle="bold" />
-                        </LinearLayout>
+                            android:text="Atur &amp; Kelola"
+                            android:textColor="@color/text_tertiary"
+                            android:textSize="@dimen/text_10"
+                            android:textAlignment="center"
+                            android:layout_marginTop="@dimen/margin_4" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
-
 
             <!-- Row 2: Aktivitas Terbaru Section -->
             <com.google.android.material.card.MaterialCardView

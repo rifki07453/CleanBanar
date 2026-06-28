@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Jaringan yang tersedia"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/gray_900"
+            android:layout_centerVertical="true" />
+
+        <ImageView
+            android:id="@+id/btnRefreshWifi"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="4dp"
+            android:src="@drawable/ic_refresh_24dp"
+            app:tint="@color/primary" />
+    </RelativeLayout>
+
+    <ProgressBar
+        android:id="@+id/pbWifiLoading"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        android:layout_margin="16dp"/>
+
+    <ListView
+        android:id="@+id/lvWifi"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="8dp" />
+
+</LinearLayout>

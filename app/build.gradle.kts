@@ -12,8 +12,8 @@ android {
         applicationId = "com.example.cleanbanar"
         minSdk = 28
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -82,5 +82,8 @@ dependencies {
     // Chart & Animation
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     implementation("com.airbnb.android:lottie:6.4.0")
+    
+    // Image Cropper
+    implementation("com.github.yalantis:ucrop:2.2.8")
 }
 

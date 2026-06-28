@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F7FA"
+    android:fillViewport="true"
+    android:fitsSystemWindows="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- HEADER SUKSES -->
+        <LinearLayout
+            android:id="@+id/llSuccessHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/emerald_600"
+            android:padding="16dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_check_circle_24dp"
+                app:tint="@color/white"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Konfigurasi dan koneksi WiFi berhasil dikirim."
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                android:layout_marginStart="12dp"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/llContentContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginTop="12dp">
+
+            <!-- CARD DEVICE OVERVIEW -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    
+                    <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="16dp">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ringkasan Perangkat" android:textStyle="bold" android:textSize="16sp" android:textColor="@color/gray_900"/>
+                        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:gravity="center_vertical">
+                            <View android:id="@+id/dotOnlineStatus" android:layout_width="8dp" android:layout_height="8dp" android:background="@drawable/dot_timeline_green" android:layout_marginEnd="6dp"/>
+                            <TextView android:id="@+id/tvOnlineStatus" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Menunggu..." android:textSize="12sp" android:textColor="@color/gray_500" android:textStyle="bold"/>
+                        </LinearLayout>
+                    </RelativeLayout>
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="16dp" android:baselineAligned="false">
+                            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="NAMA PERANGKAT" android:textSize="10sp" android:textColor="@color/gray_500" android:textStyle="bold"/>
+                                <TextView android:id="@+id/tvDeviceName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="-" android:textSize="14sp" android:textColor="@color/gray_900" android:textStyle="bold"/>
+                            </LinearLayout>
+                            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="SERIAL NUMBER / ID" android:textSize="10sp" android:textColor="@color/gray_500" android:textStyle="bold"/>
+                                <TextView android:id="@+id/tvDeviceId" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="-" android:textSize="14sp" android:textColor="@color/gray_900"/>
+                            </LinearLayout>
+                        </LinearLayout>
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:baselineAligned="false">
+                            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="TERAKHIR DILIHAT" android:textSize="10sp" android:textColor="@color/gray_500" android:textStyle="bold"/>
+                                <TextView android:id="@+id/tvLastSeen" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Belum sinkron" android:textSize="14sp" android:textColor="@color/gray_900"/>
+                            </LinearLayout>
+
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- CARD NETWORK INFO -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Informasi Jaringan" android:textStyle="bold" android:textSize="16sp" android:textColor="@color/gray_900" android:layout_marginBottom="16dp"/>
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="12dp">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="SSID" android:textColor="@color/gray_600"/>
+                        <TextView android:id="@+id/tvSSID" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="-" android:textStyle="bold" android:textColor="@color/gray_900"/>
+                    </LinearLayout>
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/gray_100" android:layout_marginBottom="12dp"/>
+                    
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="12dp">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="IP Address" android:textColor="@color/gray_600"/>
+                        <TextView android:id="@+id/tvIpAddress" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Menunggu..." android:textColor="@color/gray_900"/>
+                    </LinearLayout>
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/gray_100" android:layout_marginBottom="12dp"/>
+                    
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="12dp">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Kekuatan Sinyal" android:textColor="@color/gray_600"/>
+                        <TextView android:id="@+id/tvSignal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Menunggu..." android:textColor="@color/emerald_600" android:textStyle="bold"/>
+                    </LinearLayout>
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/gray_100" android:layout_marginBottom="12dp"/>
+                    
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Koneksi Cloud" android:textColor="@color/gray_600"/>
+                        <TextView android:id="@+id/tvCloudConnection" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Menunggu Sinkronisasi" android:textColor="@color/primary" android:textStyle="bold"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+
+            <!-- QUICK ACTIONS -->
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Aksi Cepat" android:textSize="12sp" android:textStyle="bold" android:textColor="@color/gray_500" android:layout_marginBottom="8dp" android:textAllCaps="true"/>
+            
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:baselineAligned="false" android:layout_marginBottom="16dp">
+                <com.google.android.material.card.MaterialCardView android:id="@+id/btnReconfigure" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="8dp" app:strokeColor="@color/gray_100" app:strokeWidth="1dp" app:cardElevation="0dp" app:cardCornerRadius="8dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center" android:padding="12dp">
+                        <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/ic_bluetooth_24dp" app:tint="@color/gray_800" android:layout_marginEnd="8dp"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Config Ulang" android:textColor="@color/gray_900" android:textStyle="bold"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+                
+                <com.google.android.material.card.MaterialCardView android:id="@+id/btnRestart" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="8dp" app:strokeColor="@color/gray_100" app:strokeWidth="1dp" app:cardElevation="0dp" app:cardCornerRadius="8dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center" android:padding="12dp">
+                        <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/ic_power_settings_new_24dp" app:tint="@color/gray_800" android:layout_marginEnd="8dp"/>
+                        <TextView android:id="@+id/tvRestartLabel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Restart Alat" android:textColor="@color/gray_900" android:textStyle="bold"/>
+                        <ProgressBar
+                            android:id="@+id/pbRestart"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_marginStart="8dp"
+                            android:visibility="gone"
+                            style="?android:attr/progressBarStyleSmall"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <!-- TIMELINE -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Riwayat Aktivitas" android:textStyle="bold" android:textSize="16sp" android:textColor="@color/gray_900" android:layout_marginBottom="16dp"/>
+
+                    <!-- Step 1 -->
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                        <LinearLayout android:layout_width="24dp" android:layout_height="match_parent" android:orientation="vertical" android:gravity="center_horizontal">
+                            <View android:layout_width="12dp" android:layout_height="12dp" android:background="@drawable/dot_timeline_green" android:layout_marginTop="4dp"/>
+                            <View android:layout_width="2dp" android:layout_height="0dp" android:layout_weight="1" android:background="@color/gray_100" android:layout_marginTop="4dp" android:layout_marginBottom="4dp"/>
+                        </LinearLayout>
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:paddingBottom="16dp" android:paddingStart="12dp">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Konfigurasi Terkirim" android:textStyle="bold" android:textColor="@color/gray_900"/>
+                            <TextView android:id="@+id/tvTimeConfig" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Baru saja - Pengiriman Bluetooth berhasil" android:textColor="@color/gray_500" android:textSize="12sp"/>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Step 2 -->
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                        <LinearLayout android:layout_width="24dp" android:layout_height="match_parent" android:orientation="vertical" android:gravity="center_horizontal">
+                            <View android:id="@+id/dotRestart" android:layout_width="12dp" android:layout_height="12dp" android:background="@drawable/dot_timeline_gray" android:layout_marginTop="4dp"/>
+                            <View android:layout_width="2dp" android:layout_height="0dp" android:layout_weight="1" android:background="@color/gray_100" android:layout_marginTop="4dp" android:layout_marginBottom="4dp"/>
+                        </LinearLayout>
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:paddingBottom="16dp" android:paddingStart="12dp">
+                            <TextView android:id="@+id/tvTitleRestart" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Menunggu Perangkat Restart" android:textStyle="bold" android:textColor="@color/gray_500"/>
+                            <TextView android:id="@+id/tvDescRestart" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Menunggu ESP32 menyala ulang..." android:textColor="@color/gray_400" android:textSize="12sp"/>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Step 3 -->
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                        <LinearLayout android:layout_width="24dp" android:layout_height="match_parent" android:orientation="vertical" android:gravity="center_horizontal">
+                            <View android:id="@+id/dotOnline" android:layout_width="12dp" android:layout_height="12dp" android:background="@drawable/dot_timeline_gray" android:layout_marginTop="4dp"/>
+                        </LinearLayout>
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:paddingStart="12dp">
+                            <TextView android:id="@+id/tvTitleOnline" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Perangkat Online di Cloud" android:textStyle="bold" android:textColor="@color/gray_500"/>
+                            <TextView android:id="@+id/tvDescOnline" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Menunggu ping pertama dari perangkat" android:textColor="@color/gray_400" android:textSize="12sp"/>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSelesai"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="Kembali ke Dashboard Admin"
+                android:layout_marginBottom="24dp"
+                app:cornerRadius="12dp"
+                style="@style/Widget.MaterialComponents.Button.TextButton"/>
+
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

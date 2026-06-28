@@ -39,15 +39,14 @@
                 android:background="@drawable/bg_circle_glass"
                 android:padding="@dimen/margin_2">
                 
-                <com.google.android.material.imageview.ShapeableImageView
+                <ImageView
                     android:id="@+id/ivUserAvatar"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:src="@drawable/ic_profile"
                     app:tint="@color/white"
                     android:padding="@dimen/margin_12"
-                    android:scaleType="centerCrop"
-                    app:shapeAppearanceOverlay="@style/CircleImageView" />
+                    android:scaleType="centerCrop" />
             </FrameLayout>
 
             <!-- Edit Icon Badge -->

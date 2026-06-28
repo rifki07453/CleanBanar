@@ -29,6 +29,7 @@ import com.example.cleanbanar.features.admin.StaffManagementFragment
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.database.ValueEventListener
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.google.zxing.BarcodeFormat
@@ -44,10 +45,17 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
     
     private var devicesListener: ValueEventListener? = null
     private var notifListener: ValueEventListener? = null
+    private var usersListener: ValueEventListener? = null
 
     
     private var cachedDevices = listOf<DeviceModel>()
     private var lastKnownHistory: List<Map<String, Any>> = emptyList()
+
+    // Untuk retry aksi setelah izin diberikan
+    private var pendingWifiSsidView: com.google.android.material.textfield.TextInputEditText? = null
+    private var pendingBtSsid: String? = null
+    private var pendingBtPass: String? = null
+    private var pendingBtDeviceId: String? = null
 
     override fun inflateBinding(inflater: LayoutInflater, container: ViewGroup?): FragmentAdminDashboardBinding {
         return FragmentAdminDashboardBinding.inflate(inflater, container, false)
@@ -67,30 +75,21 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         binding.cardStatusPerangkat.setOnClickListener {
             showDeviceListBottomSheet()
         }
-
-
     }
 
 
 
     override fun observeData() {
+        usersListener = FirebaseManager.listenUsers { users ->
+            if (!isAdded) return@listenUsers
+            val accountCount = users.size
+            binding.tvTotalPetugasCount.text = accountCount.toString()
+        }
+
+
         devicesListener = FirebaseManager.listenDevices { devices ->
             if (!isAdded) return@listenDevices
             cachedDevices = devices
-            
-            val isOnline = devices.any { it.statusKoneksi == "ONLINE" }
-            
-            if (isOnline) {
-                binding.tvDeviceStatusOverview.text = "ONLINE"
-                binding.tvDeviceStatusOverview.setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.green_600))
-                binding.dotStatus.setBackgroundResource(R.drawable.dot_timeline_green)
-                (binding.dotStatus.parent as android.widget.LinearLayout).setBackgroundResource(R.drawable.bg_badge_green)
-            } else {
-                binding.tvDeviceStatusOverview.text = "OFFLINE"
-                binding.tvDeviceStatusOverview.setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.red_600))
-                binding.dotStatus.setBackgroundResource(R.drawable.dot_timeline_red)
-                (binding.dotStatus.parent as android.widget.LinearLayout).setBackgroundResource(R.drawable.badge_red_bg)
-            }
         }
 
 
@@ -169,6 +168,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         val etServoNonOrg = view.findViewById<TextInputEditText>(R.id.etServoNonOrg)
         val etTinggiTong = view.findViewById<TextInputEditText>(R.id.etTinggiTong)
         val etBatasPenuh = view.findViewById<TextInputEditText>(R.id.etBatasPenuh)
+        val etBatasJarakTangan = view.findViewById<TextInputEditText>(R.id.etBatasJarakTangan)
 
         view.findViewById<MaterialButton>(R.id.btnCancel).setOnClickListener {
             dialog.dismiss()
@@ -198,9 +198,10 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
             
             val tinggi = etTinggiTong.text.toString().toDoubleOrNull() ?: 50.0
             val batas = etBatasPenuh.text.toString().toDoubleOrNull() ?: 5.0
+            val jarakTangan = etBatasJarakTangan.text.toString().toDoubleOrNull() ?: 15.0
 
             FirebaseManager.addDevice(id, nama, pins)
-            FirebaseManager.updateDeviceConfig(id, tinggi, batas)
+            FirebaseManager.updateDeviceConfig(id, tinggi, batas, jarakTangan, 3)
             Toast.makeText(requireContext(), "Perangkat ditambahkan", Toast.LENGTH_SHORT).show()
             dialog.dismiss()
             showDeviceListBottomSheet()
@@ -220,6 +221,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         val ivDeviceQrCode = view.findViewById<android.widget.ImageView>(R.id.ivDeviceQrCode)
         val tvDeviceId = view.findViewById<android.widget.TextView>(R.id.tvDeviceId)
         val btnPrintQr = view.findViewById<MaterialButton>(R.id.btnPrintQr)
+        val btnViewOverview = view.findViewById<MaterialButton>(R.id.btnViewOverview)
         
         tvDetailDeviceName.text = device.nama
         tvDeviceId.text = "ID: ${device.id}"
@@ -259,6 +261,14 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         val etDetailServoNonOrg = view.findViewById<TextInputEditText>(R.id.etDetailServoNonOrg)
         val etDetailTinggiTong = view.findViewById<TextInputEditText>(R.id.etDetailTinggiTong)
         val etDetailBatasPenuh = view.findViewById<TextInputEditText>(R.id.etDetailBatasPenuh)
+        val etDetailBatasJarakTangan = view.findViewById<TextInputEditText>(R.id.etDetailBatasJarakTangan)
+        val etDetailDelayTutup = view.findViewById<TextInputEditText>(R.id.etDetailDelayTutup)
+
+        // Servo derajat — terpisah per jenis servo
+        val etServoDerajatBukaOrg = view.findViewById<TextInputEditText>(R.id.etServoDerajatBukaOrg)
+        val etServoDerajatTutupOrg = view.findViewById<TextInputEditText>(R.id.etServoDerajatTutupOrg)
+        val etServoDerajatBukaNon = view.findViewById<TextInputEditText>(R.id.etServoDerajatBukaNon)
+        val etServoDerajatTutupNon = view.findViewById<TextInputEditText>(R.id.etServoDerajatTutupNon)
 
         etDetailTrigOrg.setText(device.config.pins.trigOrganik.toString())
         etDetailEchoOrg.setText(device.config.pins.echoOrganik.toString())
@@ -272,6 +282,14 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         etDetailServoNonOrg.setText(device.config.pins.servoNonOrganik.toString())
         etDetailTinggiTong.setText(device.config.tinggiTong.toString())
         etDetailBatasPenuh.setText(device.config.batasPenuh.toString())
+        etDetailBatasJarakTangan.setText(device.config.batasJarakTangan.toString())
+        etDetailDelayTutup.setText(device.config.delayTutup.toString())
+
+        // Isi nilai derajat servo yang tersimpan
+        etServoDerajatBukaOrg.setText(device.config.servoDerajatBukaOrganik.toString())
+        etServoDerajatTutupOrg.setText(device.config.servoDerajatTutupOrganik.toString())
+        etServoDerajatBukaNon.setText(device.config.servoDerajatBukaNonOrganik.toString())
+        etServoDerajatTutupNon.setText(device.config.servoDerajatTutupNonOrganik.toString())
 
         view.findViewById<MaterialButton>(R.id.btnUpdatePins).setOnClickListener {
             val pins = PinConfig(
@@ -288,10 +306,31 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
             )
             val tinggi = etDetailTinggiTong.text.toString().toDoubleOrNull() ?: 50.0
             val batas = etDetailBatasPenuh.text.toString().toDoubleOrNull() ?: 5.0
+            val jarakTangan = etDetailBatasJarakTangan.text.toString().toDoubleOrNull() ?: 15.0
+            val delayTutup = etDetailDelayTutup.text.toString().toIntOrNull() ?: 3
             
             FirebaseManager.updateDevicePins(device.id, pins)
-            FirebaseManager.updateDeviceConfig(device.id, tinggi, batas)
-            Toast.makeText(requireContext(), "Konfigurasi berhasil diperbarui", Toast.LENGTH_SHORT).show()
+            FirebaseManager.updateDeviceConfig(device.id, tinggi, batas, jarakTangan, delayTutup)
+            Toast.makeText(requireContext(), "Konfigurasi pin berhasil diperbarui", Toast.LENGTH_SHORT).show()
+        }
+
+        view.findViewById<MaterialButton>(R.id.btnUpdateServoDerajat).setOnClickListener {
+            val bukaOrg = etServoDerajatBukaOrg.text.toString().toIntOrNull()
+            val tutupOrg = etServoDerajatTutupOrg.text.toString().toIntOrNull()
+            val bukaNon = etServoDerajatBukaNon.text.toString().toIntOrNull()
+            val tutupNon = etServoDerajatTutupNon.text.toString().toIntOrNull()
+
+            if (bukaOrg == null || tutupOrg == null || bukaNon == null || tutupNon == null) {
+                Toast.makeText(requireContext(), "Semua field derajat harus diisi (0–360)", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            if (listOf(bukaOrg, tutupOrg, bukaNon, tutupNon).any { it !in 0..360 }) {
+                Toast.makeText(requireContext(), "Derajat harus antara 0° dan 360°", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            FirebaseManager.updateServoDerajat(device.id, bukaOrg, tutupOrg, bukaNon, tutupNon)
+            Toast.makeText(requireContext(), "✓ Derajat servo berhasil disimpan", Toast.LENGTH_SHORT).show()
         }
 
         btnDeleteDevice.setOnClickListener {
@@ -308,9 +347,20 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
                 .show()
         }
 
-        val etSsid = view.findViewById<TextInputEditText>(R.id.etSsid)
+        val etSsid = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etSsid)
         val etPassword = view.findViewById<TextInputEditText>(R.id.etPassword)
         val btnSendConfig = view.findViewById<MaterialButton>(R.id.btnSendConfig)
+
+        btnViewOverview.setOnClickListener {
+            dialog.dismiss()
+            val intent = Intent(requireContext(), DeviceProvisionSuccessActivity::class.java)
+            intent.putExtra("device_id", device.id)
+            intent.putExtra("ssid", device.ssid)
+            intent.putExtra("is_provisioning", false)
+            startActivity(intent)
+        }
+
+        setupWifiDropdown(etSsid)
 
         btnSendConfig.setOnClickListener {
             val ssid = etSsid.text.toString().trim()
@@ -321,55 +371,181 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
                 return@setOnClickListener
             }
 
-            checkBluetoothAndSend(ssid, pass)
+            checkBluetoothAndSend(ssid, pass, device.id)
         }
 
         dialog.show()
     }
 
     @Suppress("DEPRECATION")
-    private fun checkBluetoothAndSend(ssid: String, pass: String) {
+    private fun checkBluetoothAndSend(ssid: String, pass: String, deviceId: String) {
+        pendingBtSsid = ssid
+        pendingBtPass = pass
+        pendingBtDeviceId = deviceId
+
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(arrayOf(Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.ACCESS_FINE_LOCATION), 1001)
             return
         }
 
-        val devices = bluetoothHelper.getPairedDevices()
+        performBluetoothConnectAndSend(ssid, pass, deviceId)
+    }
 
+    private fun performBluetoothConnectAndSend(ssid: String, pass: String, deviceId: String) {
+        val devices = bluetoothHelper.getPairedDevices()
         if (devices.isEmpty()) {
-            Toast.makeText(context, "Tidak ada perangkat Bluetooth yang terpasang (paired). Silakan pasangkan dulu di Pengaturan HP Anda.", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Tidak ada perangkat Bluetooth yang terpasang (paired).", Toast.LENGTH_LONG).show()
             return
         }
 
-        val deviceNames = devices.map { it.name ?: "Unknown Device (${it.address})" }.toTypedArray()
+        val deviceNames = devices.map { it.name ?: it.address }.toTypedArray()
+        val pairedList = devices
 
-        android.app.AlertDialog.Builder(requireContext())
-            .setTitle("Pilih Perangkat (Sudah Paired)")
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Pilih Perangkat Bluetooth")
             .setItems(deviceNames) { _, which ->
-                val selectedDevice = devices[which]
-                Toast.makeText(context, "Menghubungkan ke ${selectedDevice.name}...", Toast.LENGTH_SHORT).show()
+                val selectedDevice = pairedList[which]
+                val configStr = "SET_WIFI:$ssid,$pass,$deviceId\n"
                 
-                bluetoothHelper.connect(selectedDevice) { success, message ->
-                    activity?.runOnUiThread {
-                        if (success) {
-                            val configStr = "SET_WIFI:$ssid,$pass\n"
-                            if (bluetoothHelper.sendData(configStr)) {
-                                Toast.makeText(context, "Konfigurasi terkirim!", Toast.LENGTH_LONG).show()
-                                // Beri jeda sedikit agar ESP32 sempat membaca seluruh data sebelum koneksi ditutup
-                                android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                                    bluetoothHelper.close()
-                                }, 1500)
-                            } else {
-                                Toast.makeText(context, "Gagal mengirim data", Toast.LENGTH_SHORT).show()
-                            }
-                        } else {
-                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
+                val intent = Intent(requireContext(), BluetoothProgressActivity::class.java)
+                intent.putExtra("bluetooth_device", selectedDevice)
+                intent.putExtra("config_str", configStr)
+                startActivity(intent)
             }
             .setNegativeButton("Batal", null)
             .show()
+    }
+
+    private fun setupWifiDropdown(etSsid: com.google.android.material.textfield.TextInputEditText) {
+        pendingWifiSsidView = etSsid
+        
+        val locationManager = requireContext().getSystemService(android.content.Context.LOCATION_SERVICE) as android.location.LocationManager
+        val isGpsEnabled = locationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)
+        if (!isGpsEnabled) {
+            Toast.makeText(requireContext(), "Harap nyalakan GPS/Lokasi di HP Anda untuk memindai daftar WiFi", Toast.LENGTH_LONG).show()
+        }
+
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_WIFI_STATE), 1002)
+        } else {
+            val wifiManager = requireContext().applicationContext.getSystemService(android.content.Context.WIFI_SERVICE) as android.net.wifi.WifiManager
+            
+            // 1. Ambil WiFi yang sedang terhubung
+            val info = wifiManager.connectionInfo
+            var currentSsid = info.ssid ?: ""
+            if (currentSsid.startsWith("\"") && currentSsid.endsWith("\"")) {
+                currentSsid = currentSsid.substring(1, currentSsid.length - 1)
+            }
+            if (currentSsid != "<unknown ssid>" && currentSsid.isNotEmpty()) {
+                etSsid.setText(currentSsid)
+            }
+        }
+        
+        etSsid.isFocusable = false
+        etSsid.isClickable = true
+        etSsid.isCursorVisible = false
+        
+        etSsid.setOnClickListener {
+            showWifiListDialog(etSsid)
+        }
+    }
+
+    private fun getScannedWifiList(): List<String> {
+        val wifiManager = requireContext().applicationContext.getSystemService(android.content.Context.WIFI_SERVICE) as android.net.wifi.WifiManager
+        val ssidList = mutableListOf<String>()
+        
+        try {
+            val results = wifiManager.scanResults
+            val scannedList = results.mapNotNull { it.SSID }.filter { it.isNotEmpty() }.distinct()
+            ssidList.addAll(scannedList)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return ssidList
+    }
+
+    private fun showWifiListDialog(etSsid: com.google.android.material.textfield.TextInputEditText) {
+        val dialogView = android.view.LayoutInflater.from(requireContext()).inflate(R.layout.dialog_wifi_list, null)
+        val btnRefreshWifi = dialogView.findViewById<android.widget.ImageView>(R.id.btnRefreshWifi)
+        val pbWifiLoading = dialogView.findViewById<android.widget.ProgressBar>(R.id.pbWifiLoading)
+        val lvWifi = dialogView.findViewById<android.widget.ListView>(R.id.lvWifi)
+        
+        val wifiManager = requireContext().applicationContext.getSystemService(android.content.Context.WIFI_SERVICE) as android.net.wifi.WifiManager
+        
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .show()
+            
+        fun updateWifiList() {
+            pbWifiLoading.visibility = android.view.View.VISIBLE
+            lvWifi.visibility = android.view.View.GONE
+            
+            // Lakukan scan
+            try {
+                wifiManager.startScan()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            
+            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                if (!isAdded) return@postDelayed
+                
+                pbWifiLoading.visibility = android.view.View.GONE
+                lvWifi.visibility = android.view.View.VISIBLE
+                
+                val list = getScannedWifiList()
+                if (list.isEmpty()) {
+                    val locationManager = requireContext().getSystemService(android.content.Context.LOCATION_SERVICE) as android.location.LocationManager
+                    if (!locationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)) {
+                        Toast.makeText(requireContext(), "GPS mati. Nyalakan GPS agar daftar WiFi muncul.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                
+                val adapter = android.widget.ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, list)
+                lvWifi.adapter = adapter
+            }, 1500) // Delay sedikit agar loading terlihat dan scan selesai
+        }
+        
+        btnRefreshWifi.setOnClickListener {
+            updateWifiList()
+        }
+        
+        lvWifi.setOnItemClickListener { _, _, position, _ ->
+            val selectedSsid = lvWifi.adapter.getItem(position) as String
+            etSsid.setText(selectedSsid)
+            dialog.dismiss()
+        }
+        
+        // Initial load
+        updateWifiList()
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 1001) { // Bluetooth
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (pendingBtSsid != null && pendingBtPass != null && pendingBtDeviceId != null) {
+                    performBluetoothConnectAndSend(pendingBtSsid!!, pendingBtPass!!, pendingBtDeviceId!!)
+                }
+            } else {
+                Toast.makeText(requireContext(), "Izin Bluetooth ditolak", Toast.LENGTH_SHORT).show()
+            }
+        } else if (requestCode == 1002) { // WiFi / Location
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                pendingWifiSsidView?.let { 
+                    val wifiManager = requireContext().applicationContext.getSystemService(android.content.Context.WIFI_SERVICE) as android.net.wifi.WifiManager
+                    try {
+                        wifiManager.startScan()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+
+            } else {
+                Toast.makeText(requireContext(), "Izin Lokasi ditolak, daftar WiFi tidak dapat dimuat otomatis", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun printQrCode(device: DeviceModel, qrBitmap: Bitmap) {
@@ -426,13 +602,20 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         }
 
         val isNonOrganik = title.lowercase().contains("non")
-        val (iconRes, iconBg, iconColor) = when (type) {
-            "danger" -> Triple(R.drawable.ic_trash_modern, R.drawable.badge_red_bg, "#EF4444")
-            "success" -> {
-                if (isNonOrganik) Triple(R.drawable.ic_trash_modern, R.drawable.bg_rounded_light_blue, "#2563EB")
-                else Triple(R.drawable.ic_trash_modern, R.drawable.bg_badge_green, "#16A34A")
+        val isRestart = title.lowercase().contains("restart")
+        val isConfig = title.lowercase().contains("config")
+
+        val (iconRes, iconBg, iconColor) = when {
+            isRestart -> Triple(R.drawable.ic_power_settings_new_24dp, R.drawable.badge_red_bg, "#EF4444")
+            isConfig -> Triple(R.drawable.ic_bluetooth_24dp, R.drawable.bg_rounded_light_blue, "#2563EB")
+            else -> when (type) {
+                "danger" -> Triple(R.drawable.ic_trash_modern, R.drawable.badge_red_bg, "#EF4444")
+                "success" -> {
+                    if (isNonOrganik) Triple(R.drawable.ic_trash_modern, R.drawable.bg_rounded_light_blue, "#2563EB")
+                    else Triple(R.drawable.ic_trash_modern, R.drawable.bg_badge_green, "#16A34A")
+                }
+                else -> Triple(android.R.drawable.ic_popup_reminder, R.drawable.bg_rounded_light_blue, "#3B82F6")
             }
-            else -> Triple(android.R.drawable.ic_popup_reminder, R.drawable.bg_rounded_light_blue, "#3B82F6")
         }
 
         val frame = android.widget.FrameLayout(context).apply {
@@ -499,6 +682,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
     private fun addEmptyActivity() {
         binding.lottieEmptyState.visibility = android.view.View.VISIBLE
         binding.tvEmptyStateText.visibility = android.view.View.VISIBLE
+        com.example.cleanbanar.core.utils.AnimationUtils.applyFloatingEffect(binding.lottieEmptyState)
     }
 
     private fun hideEmptyActivity() {
@@ -530,7 +714,7 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
     override fun onDestroyView() {
         devicesListener?.let { FirebaseManager.removeDeviceListener(it) }
         notifListener?.let { FirebaseManager.removeNotificationListener(it) }
+        usersListener?.let { FirebaseManager.removeUsersListener(it) }
         super.onDestroyView()
     }
-
 }

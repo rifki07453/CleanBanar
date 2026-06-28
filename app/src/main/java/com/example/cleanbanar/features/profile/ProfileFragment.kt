@@ -15,6 +15,7 @@ import com.example.cleanbanar.core.data.AuthManager
 import com.example.cleanbanar.core.data.FirebaseManager
 import com.example.cleanbanar.core.ui.BaseFragment
 import com.example.cleanbanar.databinding.FragmentProfileBinding
+import com.google.firebase.database.ValueEventListener
 import com.example.cleanbanar.features.auth.LoginActivity
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
@@ -26,10 +27,45 @@ import android.net.Uri
 class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
 
     private lateinit var authManager: AuthManager
+    private var userListener: ValueEventListener? = null
+
+    private val cropImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK && result.data != null) {
+            val resultUri = com.yalantis.ucrop.UCrop.getOutput(result.data!!)
+            if (resultUri != null) {
+                uploadAndSetProfilePicture(resultUri)
+            }
+        } else if (result.resultCode == com.yalantis.ucrop.UCrop.RESULT_ERROR && result.data != null) {
+            val cropError = com.yalantis.ucrop.UCrop.getError(result.data!!)
+            Toast.makeText(requireContext(), "Gagal memotong foto: ${cropError?.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     private val pickMedia = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         if (uri != null) {
-            uploadAndSetProfilePicture(uri)
+            // Setup destinasi file hasil crop
+            val destinationUri = Uri.fromFile(java.io.File(requireContext().cacheDir, "cropped_profile_${System.currentTimeMillis()}.jpg"))
+            
+            // Konfigurasi uCrop untuk bentuk bulat dan tema hijau
+            val options = com.yalantis.ucrop.UCrop.Options()
+            options.setCircleDimmedLayer(true) // Memunculkan bingkai potong bulat
+            options.setShowCropGrid(false) // Hilangkan kotak-kotak grid
+            options.setToolbarTitle("Atur Foto Profil")
+            options.setToolbarColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary))
+            options.setStatusBarColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary_dark))
+            options.setActiveControlsWidgetColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary))
+            options.setHideBottomControls(false) // Tampilkan kontrol bawah
+            options.setCompressionFormat(android.graphics.Bitmap.CompressFormat.JPEG) 
+            options.setCompressionQuality(100) // Kualitas maksimal 100%
+            
+            // Mulai Intent uCrop
+            val uCropIntent = com.yalantis.ucrop.UCrop.of(uri, destinationUri)
+                .withOptions(options)
+                .withAspectRatio(1f, 1f) // Wajib persegi/bulat sempurna
+                .withMaxResultSize(1080, 1080) // Resolusi 1080p (HD) tajam dan ukurannya optimal
+                .getIntent(requireContext())
+                
+            cropImageLauncher.launch(uCropIntent)
         }
     }
 
@@ -38,39 +74,95 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
     }
 
     // ==========================================
+    // Lifecycle - Cleanup
+    // ==========================================
+    override fun onDestroyView() {
+        userListener?.let { FirebaseManager.removeUserListener(authManager.getUserId(), it) }
+        super.onDestroyView()
+    }
+
+    // ==========================================
     // View Setup & User Info
     // ==========================================
     override fun setupViews() {
         authManager = AuthManager(requireContext())
 
-        // Tampilkan data user dari sesi lokal
-        binding.tvProfileName.text = authManager.getUserName()
-        binding.tvProfileEmail.text = authManager.getUserEmail()
-        
-        val phone = authManager.getUserPhone()
-        if (phone.isNotEmpty()) {
-            binding.tvProfilePhone.text = phone
-            binding.tvProfilePhone.visibility = View.VISIBLE
-        } else {
-            binding.tvProfilePhone.visibility = View.GONE
-        }
-
-        // Load foto profil (jika ada)
-        val photoUrl = authManager.getUserPhotoUrl()
-        if (photoUrl.isNotEmpty()) {
-            Glide.with(this)
-                .load(photoUrl)
-                .transform(CircleCrop())
-                .placeholder(R.drawable.ic_profile)
-                .into(binding.ivUserAvatar)
-        }
-
-        // Klik pada Edit Photo (atau flAvatarContainer)
+        // Data profil sekarang akan diambil secara live di observeData()
+        // Klik pada ikon kamera untuk ganti foto
         binding.flEditPhoto.setOnClickListener {
-            pickMedia.launch("image/*")
+            val bottomSheetDialog = com.google.android.material.bottomsheet.BottomSheetDialog(requireContext())
+            
+            val container = android.widget.LinearLayout(requireContext())
+            container.orientation = android.widget.LinearLayout.VERTICAL
+            container.setPadding(0, 48, 0, 48)
+            
+            // Title
+            val title = android.widget.TextView(requireContext())
+            title.text = "Atur Foto Profil"
+            title.textSize = 18f
+            title.setTypeface(null, android.graphics.Typeface.BOLD)
+            title.setTextColor(android.graphics.Color.parseColor("#1F2937"))
+            title.setPadding(64, 16, 64, 48)
+            container.addView(title)
+            
+            // Pilih Foto
+            val btnPilih = android.widget.TextView(requireContext())
+            btnPilih.text = "Pilih Foto dari Galeri"
+            btnPilih.textSize = 16f
+            btnPilih.setTextColor(android.graphics.Color.parseColor("#374151"))
+            btnPilih.setPadding(64, 32, 64, 32)
+            val outValue = android.util.TypedValue()
+            requireContext().theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)
+            btnPilih.setBackgroundResource(outValue.resourceId)
+            btnPilih.setOnClickListener {
+                bottomSheetDialog.dismiss()
+                pickMedia.launch("image/*")
+            }
+            container.addView(btnPilih)
+            
+            if (authManager.getUserPhotoUrl().isNotEmpty()) {
+                // Divider
+                val divider = android.view.View(requireContext())
+                divider.setBackgroundColor(android.graphics.Color.parseColor("#E5E7EB"))
+                val divParams = android.widget.LinearLayout.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, 2)
+                divParams.setMargins(0, 16, 0, 16)
+                container.addView(divider, divParams)
+                
+                // Hapus Foto
+                val btnHapus = android.widget.TextView(requireContext())
+                btnHapus.text = "Hapus Foto Profil"
+                btnHapus.setTextColor(android.graphics.Color.parseColor("#EF4444")) // Merah
+                btnHapus.textSize = 16f
+                btnHapus.setPadding(64, 32, 64, 32)
+                btnHapus.setBackgroundResource(outValue.resourceId)
+                btnHapus.setOnClickListener {
+                    bottomSheetDialog.dismiss()
+                    // Hapus dari cache lokal
+                    authManager.updatePhotoUrl("")
+                    // Hapus murni dari Realtime Database (mengosongkan datanya sehingga ringan kembali)
+                    com.example.cleanbanar.core.data.FirebaseManager.updateUserPhotoUrl(authManager.getUserId(), "")
+                    
+                    binding.ivUserAvatar.setImageResource(R.drawable.ic_profile)
+                    binding.ivUserAvatar.setPadding(resources.getDimensionPixelSize(R.dimen.margin_12), resources.getDimensionPixelSize(R.dimen.margin_12), resources.getDimensionPixelSize(R.dimen.margin_12), resources.getDimensionPixelSize(R.dimen.margin_12))
+                    binding.ivUserAvatar.imageTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.WHITE)
+                    Toast.makeText(requireContext(), "Foto profil dihapus", Toast.LENGTH_SHORT).show()
+                }
+                container.addView(btnHapus)
+            }
+            
+            bottomSheetDialog.setContentView(container)
+            bottomSheetDialog.show()
         }
+        
+        // Klik pada avatar untuk melihat foto besar
         binding.flAvatarContainer.setOnClickListener {
-            pickMedia.launch("image/*")
+            val photoUrl = authManager.getUserPhotoUrl()
+            if (photoUrl.isNotEmpty()) {
+                showFullScreenProfilePicture(photoUrl)
+            } else {
+                // Jika belum ada foto, tawarkan untuk upload
+                pickMedia.launch("image/*")
+            }
         }
 
         // Edit Profil — dinamis & tersimpan ke Firebase
@@ -109,33 +201,117 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>() {
         val userId = authManager.getUserId()
         if (userId.isEmpty()) return
 
-        Toast.makeText(requireContext(), "Mengunggah foto...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(requireContext(), "Memproses foto...", Toast.LENGTH_SHORT).show()
 
-        FirebaseManager.uploadProfilePicture(userId, uri,
-            onSuccess = { photoUrl ->
-                // Update cache lokal
-                authManager.updatePhotoUrl(photoUrl)
-
-                if (isAdded) {
-                    // Update tampilan dengan Glide
-                    Glide.with(this)
-                        .load(photoUrl)
-                        .transform(CircleCrop())
-                        .placeholder(R.drawable.ic_profile)
-                        .into(binding.ivUserAvatar)
-
-                    Toast.makeText(requireContext(), "Foto profil berhasil diperbarui", Toast.LENGTH_SHORT).show()
+        try {
+            // Kita gunakan ImageDecoder dengan ALLOCATOR_SOFTWARE agar terhindar dari bug "gambar putih/blank" dari Google Photos
+            var bitmap: android.graphics.Bitmap? = null
+            if (android.os.Build.VERSION.SDK_INT >= 28) {
+                val source = android.graphics.ImageDecoder.createSource(requireContext().contentResolver, uri)
+                bitmap = android.graphics.ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
+                    decoder.allocator = android.graphics.ImageDecoder.ALLOCATOR_SOFTWARE
+                    decoder.isMutableRequired = true
                 }
-            },
-            onFailure = { e ->
-                if (isAdded) {
-                    Toast.makeText(requireContext(), "Gagal mengunggah foto: ${e.message}", Toast.LENGTH_LONG).show()
-                }
+            } else {
+                @Suppress("DEPRECATION")
+                bitmap = android.provider.MediaStore.Images.Media.getBitmap(requireContext().contentResolver, uri)
             }
-        )
+
+            if (bitmap != null) {
+                // Mengubah ke byte array tanpa menurunkan resolusi (100% quality) agar gambar tajam
+                val baos = java.io.ByteArrayOutputStream()
+                bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 100, baos)
+                val data = baos.toByteArray()
+                FirebaseManager.uploadProfilePictureBytes(userId, data,
+                    onSuccess = { photoUrl ->
+                        authManager.updatePhotoUrl(photoUrl)
+                        if (isAdded) {
+                            binding.ivUserAvatar.imageTintList = null
+                            binding.ivUserAvatar.setPadding(0, 0, 0, 0) // Hapus padding agar foto penuh di lingkaran
+                            Glide.with(this)
+                                .load(photoUrl)
+                                .transform(com.bumptech.glide.load.resource.bitmap.CircleCrop())
+                                .placeholder(R.drawable.ic_profile)
+                                .into(binding.ivUserAvatar)
+                            Toast.makeText(requireContext(), "Foto profil berhasil diperbarui", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    onFailure = { e ->
+                        if (isAdded) {
+                            Toast.makeText(requireContext(), "Gagal mengunggah foto: ${e.message}", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                )
+            } else {
+                Toast.makeText(requireContext(), "Gagal membaca file foto", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(requireContext(), "Gagal memproses foto: ${e.message}", Toast.LENGTH_LONG).show()
+        }
     }
 
-    override fun observeData() {}
+    private fun showFullScreenProfilePicture(url: String) {
+        val dialog = android.app.Dialog(requireContext(), android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+        
+        val imageView = android.widget.ImageView(requireContext())
+        imageView.layoutParams = android.view.ViewGroup.LayoutParams(
+            android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+            android.view.ViewGroup.LayoutParams.MATCH_PARENT
+        )
+        imageView.setBackgroundColor(android.graphics.Color.BLACK)
+        
+        Glide.with(this)
+            .load(url)
+            .override(com.bumptech.glide.request.target.Target.SIZE_ORIGINAL, com.bumptech.glide.request.target.Target.SIZE_ORIGINAL)
+            .into(imageView)
+            
+        imageView.setOnClickListener {
+            dialog.dismiss()
+        }
+        
+        dialog.setContentView(imageView)
+        dialog.show()
+    }
+
+    override fun observeData() {
+        val userId = authManager.getUserId()
+        userListener = FirebaseManager.listenUser(userId) { user ->
+            if (!isAdded || user == null) return@listenUser
+            
+            // Perbarui UI dengan data terbaru dari Firebase
+            binding.tvProfileName.text = user["nama"] as? String ?: ""
+            binding.tvProfileEmail.text = user["email"] as? String ?: ""
+            
+            val phone = user["nomorHp"] as? String ?: ""
+            if (phone.isNotEmpty()) {
+                binding.tvProfilePhone.text = phone
+                binding.tvProfilePhone.visibility = View.VISIBLE
+            } else {
+                binding.tvProfilePhone.visibility = View.GONE
+            }
+
+            // Sync foto profil
+            val photoUrl = user["photoUrl"] as? String ?: ""
+            if (photoUrl.isNotEmpty()) {
+                binding.ivUserAvatar.imageTintList = null
+                binding.ivUserAvatar.setPadding(0, 0, 0, 0) // Hapus padding agar foto penuh
+                Glide.with(this)
+                    .load(photoUrl)
+                    .transform(com.bumptech.glide.load.resource.bitmap.CircleCrop())
+                    .placeholder(R.drawable.ic_profile)
+                    .into(binding.ivUserAvatar)
+                    
+                // Update ke sesi lokal juga biar konsisten saat pindah halaman
+                authManager.updatePhotoUrl(photoUrl)
+            } else {
+                binding.ivUserAvatar.setImageResource(R.drawable.ic_profile)
+                binding.ivUserAvatar.imageTintList = androidx.core.content.ContextCompat.getColorStateList(requireContext(), R.color.text_secondary)
+                binding.ivUserAvatar.setPadding(32.dpToPx(), 32.dpToPx(), 32.dpToPx(), 32.dpToPx())
+                authManager.updatePhotoUrl("")
+            }
+        }
+    }
 
     // ==========================================
     // Edit Profil Dialog (Dinamis → Firebase)

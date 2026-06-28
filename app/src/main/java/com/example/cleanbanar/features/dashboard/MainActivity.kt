@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import androidx.fragment.app.Fragment
 import com.example.cleanbanar.R
 import com.example.cleanbanar.core.data.AuthManager
+import com.example.cleanbanar.core.data.FirebaseManager
 import com.example.cleanbanar.core.ui.BaseActivity
 import com.example.cleanbanar.databinding.ActivityMainBinding
 import com.example.cleanbanar.features.admin.StaffManagementFragment
@@ -24,6 +25,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     private lateinit var authManager: AuthManager
     private var userRole: String = "Admin"
+    private var notifListener: com.google.firebase.database.ValueEventListener? = null
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
@@ -78,6 +80,17 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         BinObserverService.startService(this)
 
         askNotificationPermission()
+
+        notifListener = FirebaseManager.listenNotifications { notifData ->
+            val unreadCount = notifData.count { !(it["sudahDibaca"] as? Boolean ?: true) }
+            if (unreadCount > 0) {
+                binding.bottomNavigation.getOrCreateBadge(R.id.nav_notification).apply {
+                    isVisible = true
+                }
+            } else {
+                binding.bottomNavigation.removeBadge(R.id.nav_notification)
+            }
+        }
     }
 
     private fun askNotificationPermission() {
@@ -193,6 +206,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     // ==========================================
     override fun onDestroy() {
         BinObserver.stop()
+        notifListener?.let { FirebaseManager.removeNotificationListener(it) }
         super.onDestroy()
     }
 }

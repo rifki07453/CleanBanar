@@ -29,6 +29,10 @@ object FirebaseManager {
     private val rootRef: DatabaseReference? by lazy {
         database?.getReference("cleanbanar")
     }
+    
+    private val storage: FirebaseStorage by lazy {
+        FirebaseStorage.getInstance()
+    }
 
     // ==========================================
     // Status Tempat Sampah
@@ -37,10 +41,10 @@ object FirebaseManager {
         val ref = rootRef?.child("devices")?.child(deviceId)?.child("bins")?.child(binType) ?: return null
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val persentase = snapshot.child("persentaseIsi").getValue(Int::class.java) ?: 0
+                val persentase = snapshot.child("persentaseIsi").getValue(Any::class.java)?.toString()?.toDoubleOrNull()?.toInt() ?: 0
                 val status = snapshot.child("status").getValue(String::class.java) ?: "Normal"
-                val terakhirUpdate = snapshot.child("terakhirUpdate").getValue(Long::class.java) ?: 0L
-                val terakhirDikosongkan = snapshot.child("terakhirDikosongkan").getValue(Long::class.java) ?: 0L
+                val terakhirUpdate = snapshot.child("terakhirUpdate").getValue(Any::class.java)?.toString()?.toDoubleOrNull()?.toLong() ?: 0L
+                val terakhirDikosongkan = snapshot.child("terakhirDikosongkan").getValue(Any::class.java)?.toString()?.toDoubleOrNull()?.toLong() ?: 0L
                 callback(persentase, status, terakhirUpdate, terakhirDikosongkan)
             }
             override fun onCancelled(error: DatabaseError) {
@@ -93,8 +97,11 @@ object FirebaseManager {
                     try {
                         val id = child.child("id").getValue(String::class.java) ?: child.key ?: ""
                         val nama = child.child("nama").getValue(String::class.java) ?: ""
-                        val status = child.child("statusKoneksi").getValue(String::class.java) ?: "OFFLINE"
+                        var status = child.child("statusKoneksi").getValue(String::class.java) ?: "OFFLINE"
                         val terakhir = child.child("terakhirTerlihat").getValue(Any::class.java)?.toString()?.toLongOrNull() ?: 0L
+                        if (status == "ONLINE" && terakhir > 0 && (System.currentTimeMillis() - terakhir > 15000)) {
+                            status = "OFFLINE"
+                        }
                         val tipe = child.child("tipeJaringan").getValue(String::class.java) ?: "WIFI"
                         
                         val pinsNode = child.child("config").child("pins")
@@ -113,8 +120,24 @@ object FirebaseManager {
                         
                         val tinggiTong = child.child("config").child("tinggiTong").getValue(Any::class.java)?.toString()?.toDoubleOrNull() ?: 50.0
                         val batasPenuh = child.child("config").child("batasPenuh").getValue(Any::class.java)?.toString()?.toDoubleOrNull() ?: 5.0
+                        val batasJarakTangan = child.child("config").child("batasJarakTangan").getValue(Any::class.java)?.toString()?.toDoubleOrNull() ?: 15.0
+
+                        val servoDerajatBukaOrg = child.child("config").child("servoDerajatBukaOrganik").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 90
+                        val servoDerajatTutupOrg = child.child("config").child("servoDerajatTutupOrganik").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 0
+                        val servoDerajatBukaNon = child.child("config").child("servoDerajatBukaNonOrganik").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 90
+                        val servoDerajatTutupNon = child.child("config").child("servoDerajatTutupNonOrganik").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 0
                         
-                        devices.add(DeviceModel(id, nama, status, terakhir, tipe, DeviceConfig(pins, tinggiTong, batasPenuh)))
+                        val delayTutup = child.child("config").child("delayTutup").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 3
+                        
+                        val ipAddr = child.child("ipAddress").getValue(String::class.java) ?: "-"
+                        val fbSsid = child.child("ssid").getValue(String::class.java) ?: "-"
+                        val sinyal = child.child("kekuatanSinyal").getValue(Any::class.java)?.toString()?.toIntOrNull() ?: 0
+                        
+                        devices.add(DeviceModel(id, nama, status, terakhir, tipe, ipAddr, fbSsid, sinyal,
+                            DeviceConfig(pins, tinggiTong, batasPenuh, batasJarakTangan,
+                                servoDerajatBukaOrg, servoDerajatTutupOrg,
+                                servoDerajatBukaNon, servoDerajatTutupNon,
+                                delayTutup)))
                     } catch (e: Exception) {
                         Log.e(TAG, "Gagal memproses device ${child.key}: ${e.message}")
                     }
@@ -139,6 +162,11 @@ object FirebaseManager {
         ref.child("config").child("pins").setValue(pins)
         ref.child("config").child("tinggiTong").setValue(50.0)
         ref.child("config").child("batasPenuh").setValue(5.0)
+        ref.child("config").child("batasJarakTangan").setValue(15.0)
+        ref.child("config").child("servoDerajatBukaOrganik").setValue(90)
+        ref.child("config").child("servoDerajatTutupOrganik").setValue(0)
+        ref.child("config").child("servoDerajatBukaNonOrganik").setValue(90)
+        ref.child("config").child("servoDerajatTutupNonOrganik").setValue(0)
         ref.child("bins").child("organik").setValue(mapOf("persentaseIsi" to 0, "status" to "Normal", "terakhirUpdate" to 0L, "terakhirDikosongkan" to 0L))
         ref.child("bins").child("nonOrganik").setValue(mapOf("persentaseIsi" to 0, "status" to "Normal", "terakhirUpdate" to 0L, "terakhirDikosongkan" to 0L))
     }
@@ -151,9 +179,24 @@ object FirebaseManager {
         rootRef?.child("devices")?.child(id)?.child("config")?.child("pins")?.setValue(pins)
     }
 
-    fun updateDeviceConfig(id: String, tinggiTong: Double, batasPenuh: Double) {
-        rootRef?.child("devices")?.child(id)?.child("config")?.child("tinggiTong")?.setValue(tinggiTong)
-        rootRef?.child("devices")?.child(id)?.child("config")?.child("batasPenuh")?.setValue(batasPenuh)
+    fun updateDeviceConfig(id: String, tinggiTong: Double, batasPenuh: Double, batasJarakTangan: Double, delayTutup: Int) {
+        val cfg = rootRef?.child("devices")?.child(id)?.child("config") ?: return
+        cfg.child("tinggiTong").setValue(tinggiTong)
+        cfg.child("batasPenuh").setValue(batasPenuh)
+        cfg.child("batasJarakTangan").setValue(batasJarakTangan)
+        cfg.child("delayTutup").setValue(delayTutup)
+    }
+
+    fun updateServoDerajat(
+        id: String,
+        bukaOrganik: Int, tutupOrganik: Int,
+        bukaNonOrganik: Int, tutupNonOrganik: Int
+    ) {
+        val cfg = rootRef?.child("devices")?.child(id)?.child("config") ?: return
+        cfg.child("servoDerajatBukaOrganik").setValue(bukaOrganik.coerceIn(0, 360))
+        cfg.child("servoDerajatTutupOrganik").setValue(tutupOrganik.coerceIn(0, 360))
+        cfg.child("servoDerajatBukaNonOrganik").setValue(bukaNonOrganik.coerceIn(0, 360))
+        cfg.child("servoDerajatTutupNonOrganik").setValue(tutupNonOrganik.coerceIn(0, 360))
     }
 
     fun updateDeviceNetworkType(deviceId: String, tipe: String) {
@@ -184,7 +227,7 @@ object FirebaseManager {
                 Log.e(TAG, "listenNotifications error: ${error.message} (code=${error.code})")
             }
         }
-        ref.orderByChild("waktu").limitToLast(30).addValueEventListener(listener)
+        ref.orderByChild("waktu").limitToLast(10).addValueEventListener(listener)
         return listener
     }
 
@@ -195,10 +238,47 @@ object FirebaseManager {
         ref.child("tipe").setValue(tipe)
         ref.child("waktu").setValue(System.currentTimeMillis())
         ref.child("sudahDibaca").setValue(false)
+        pruneNotifications()
+    }
+
+    private fun pruneNotifications() {
+        val ref = rootRef?.child("notifications") ?: return
+        ref.orderByChild("waktu").addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.childrenCount > 30) {
+                    var toDelete = snapshot.childrenCount - 30
+                    for (child in snapshot.children) {
+                        if (toDelete > 0) {
+                            child.ref.removeValue()
+                            toDelete--
+                        } else {
+                            break
+                        }
+                    }
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {
+                Log.e(TAG, "pruneNotifications error: ${error.message}")
+            }
+        })
     }
 
     fun clearAllNotifications() {
         rootRef?.child("notifications")?.removeValue()
+    }
+
+    fun markAllNotificationsAsRead() {
+        val ref = rootRef?.child("notifications") ?: return
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                for (child in snapshot.children) {
+                    child.ref.child("sudahDibaca").setValue(true)
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {
+                Log.e(TAG, "markAllNotificationsAsRead error: ${error.message}")
+            }
+        })
     }
 
     // ==========================================
@@ -225,7 +305,7 @@ object FirebaseManager {
                 Log.e(TAG, "listenHistory error: ${error.message} (code=${error.code})")
             }
         }
-        ref.orderByChild("waktu").limitToLast(50).addValueEventListener(listener)
+        ref.orderByChild("waktu").limitToLast(20).addValueEventListener(listener)
         return listener
     }
 
@@ -236,6 +316,29 @@ object FirebaseManager {
         ref.child("idPengguna").setValue(idPengguna)
         ref.child("namaLengkap").setValue(namaLengkap)
         ref.child("waktu").setValue(System.currentTimeMillis())
+        pruneHistoryLogs()
+    }
+
+    private fun pruneHistoryLogs() {
+        val ref = rootRef?.child("historyLogs") ?: return
+        ref.orderByChild("waktu").addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.childrenCount > 50) {
+                    var toDelete = snapshot.childrenCount - 50
+                    for (child in snapshot.children) {
+                        if (toDelete > 0) {
+                            child.ref.removeValue()
+                            toDelete--
+                        } else {
+                            break
+                        }
+                    }
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {
+                Log.e(TAG, "pruneHistoryLogs error: ${error.message}")
+            }
+        })
     }
 
     // ==========================================
@@ -264,6 +367,36 @@ object FirebaseManager {
         }
         ref.addValueEventListener(listener)
         return listener
+    }
+
+    fun listenUser(userId: String, callback: (Map<String, Any>?) -> Unit): ValueEventListener? {
+        val ref = rootRef?.child("users")?.child(userId) ?: return null
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    val user = mapOf(
+                        "id" to (snapshot.key ?: ""),
+                        "nama" to (snapshot.child("nama").getValue(String::class.java) ?: ""),
+                        "email" to (snapshot.child("email").getValue(String::class.java) ?: ""),
+                        "peran" to (snapshot.child("peran").getValue(String::class.java) ?: ""),
+                        "nomorHp" to (snapshot.child("nomorHp").getValue(String::class.java) ?: ""),
+                        "photoUrl" to (snapshot.child("photoUrl").getValue(String::class.java) ?: "")
+                    )
+                    callback(user)
+                } else {
+                    callback(null)
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {
+                Log.e(TAG, "listenUser error: ${error.message} (code=${error.code})")
+            }
+        }
+        ref.addValueEventListener(listener)
+        return listener
+    }
+
+    fun removeUserListener(userId: String, listener: ValueEventListener) {
+        rootRef?.child("users")?.child(userId)?.removeEventListener(listener)
     }
 
     fun addUser(nama: String, email: String, peran: String, nomorHp: String = "", onSuccess: () -> Unit = {}, onFailure: (String) -> Unit = {}) {
@@ -319,10 +452,10 @@ object FirebaseManager {
         rootRef?.child("users")?.child(userId)?.removeValue()
     }
 
-    fun getUserData(uid: String, callback: (nama: String, peran: String, nomorHp: String) -> Unit) {
+    fun getUserData(uid: String, callback: (nama: String, peran: String, nomorHp: String, photoUrl: String) -> Unit) {
         val ref = rootRef?.child("users")?.child(uid)
         if (ref == null) {
-            callback("", "", "")
+            callback("", "", "", "")
             return
         }
         ref.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -330,10 +463,11 @@ object FirebaseManager {
                 callback(
                     snapshot.child("nama").getValue(String::class.java) ?: "",
                     snapshot.child("peran").getValue(String::class.java) ?: "",
-                    snapshot.child("nomorHp").getValue(String::class.java) ?: ""
+                    snapshot.child("nomorHp").getValue(String::class.java) ?: "",
+                    snapshot.child("photoUrl").getValue(String::class.java) ?: ""
                 )
             }
-            override fun onCancelled(error: DatabaseError) { callback("", "", "") }
+            override fun onCancelled(error: DatabaseError) { callback("", "", "", "") }
         })
     }
 
@@ -373,6 +507,31 @@ object FirebaseManager {
             }
     }
 
+    fun uploadProfilePictureBytes(userId: String, data: ByteArray, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
+        try {
+            // Trik Pamungkas: Simpan foto sebagai Data URI murni (Base64) langsung ke Realtime Database!
+            // 1. Tidak butuh server pihak ketiga (bebas blokir, bebas error koneksi)
+            // 2. Tidak butuh Firebase Storage (100% gratis, tanpa syarat apapun)
+            // 3. Resolusi 100% utuh, tidak ada server yang akan mengompresnya.
+            
+            val base64String = android.util.Base64.encodeToString(data, android.util.Base64.NO_WRAP)
+            val dataUri = "data:image/jpeg;base64,$base64String"
+            
+            // Simpan langsung ke Realtime Database
+            updateUserPhotoUrl(userId, dataUri)
+            
+            // Panggil sukses langsung di Main Thread
+            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                onSuccess(dataUri)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                onFailure(e)
+            }
+        }
+    }
+
     fun updateUserPhotoUrl(userId: String, photoUrl: String) {
         val ref = rootRef?.child("users")?.child(userId) ?: return
         ref.child("photoUrl").setValue(photoUrl)
@@ -389,10 +548,10 @@ object FirebaseManager {
                 for (child in snapshot.children) {
                     stats.add(mapOf(
                         "tanggal" to (child.key ?: ""),
-                        "organik" to (child.child("organik").getValue(Int::class.java) ?: 0),
-                        "nonOrganik" to (child.child("nonOrganik").getValue(Int::class.java) ?: 0),
-                        "organikEmptyCount" to (child.child("organikEmptyCount").getValue(Int::class.java) ?: 0),
-                        "nonOrganikEmptyCount" to (child.child("nonOrganikEmptyCount").getValue(Int::class.java) ?: 0)
+                        "organik" to (child.child("organik").getValue(Any::class.java)?.toString()?.toDoubleOrNull()?.toInt() ?: 0),
+                        "nonOrganik" to (child.child("nonOrganik").getValue(Any::class.java)?.toString()?.toDoubleOrNull()?.toInt() ?: 0),
+                        "organikEmptyCount" to (child.child("organikEmptyCount").getValue(Any::class.java)?.toString()?.toDoubleOrNull()?.toInt() ?: 0),
+                        "nonOrganikEmptyCount" to (child.child("nonOrganikEmptyCount").getValue(Any::class.java)?.toString()?.toDoubleOrNull()?.toInt() ?: 0)
                     ))
                 }
                 callback(stats)
@@ -437,7 +596,7 @@ object FirebaseManager {
         
         ref.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val currentMax = snapshot.getValue(Int::class.java) ?: 0
+                val currentMax = snapshot.getValue(Any::class.java)?.toString()?.toDoubleOrNull()?.toInt() ?: 0
                 if (percentage > currentMax) {
                     ref.setValue(percentage)
                 }
@@ -452,7 +611,7 @@ object FirebaseManager {
         val ref = rootRef?.child("statistics")?.child("daily")?.child(dateKey)?.child(field) ?: return
         ref.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val currentCount = snapshot.getValue(Int::class.java) ?: 0
+                val currentCount = snapshot.getValue(Any::class.java)?.toString()?.toDoubleOrNull()?.toInt() ?: 0
                 ref.setValue(currentCount + 1)
             }
             override fun onCancelled(error: DatabaseError) {}

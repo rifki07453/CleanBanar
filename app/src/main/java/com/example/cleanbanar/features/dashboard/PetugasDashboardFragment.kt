@@ -71,6 +71,17 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
             showVerificationOptions(null)
         }
         
+        binding.swipeRefresh.setColorSchemeResources(R.color.primary, R.color.emerald_500)
+        binding.swipeRefresh.setOnRefreshListener {
+            // Walaupun Firebase Realtime, kita beri efek visual refresh
+            rebuildCards()
+            updateOverallStatus()
+            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                binding.swipeRefresh.isRefreshing = false
+                Toast.makeText(requireContext(), "Data diperbarui", Toast.LENGTH_SHORT).show()
+            }, 1000)
+        }
+        
         rebuildCards()
     }
 
@@ -276,9 +287,11 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
                 bottomMargin = 4.dpToPx()
             }
             max = 100
-            progress = percent
             progressDrawable = resources.getDrawable(actualProgressDrawableRes, null)
             scaleY = 1.0f 
+            
+            // Animasi halus dari 0 ke persen
+            com.example.cleanbanar.core.utils.AnimationUtils.animateProgressBar(this, percent)
         }
 
         row.addView(topLayout)
@@ -395,35 +408,79 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
 
         val dialogView = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(24.dpToPx(), 16.dpToPx(), 24.dpToPx(), 16.dpToPx())
+            setPadding(24.dpToPx(), 8.dpToPx(), 24.dpToPx(), 0)
         }
+
+        // Lokasi / Keterangan Tempat
+        val tvLocation = TextView(requireContext()).apply {
+            text = "Lokasi: ${bin.deviceName}"
+            setTypeface(typeface, Typeface.BOLD)
+            textSize = 16f
+            setTextColor(resources.getColor(R.color.emerald_600, null))
+            setPadding(0, 0, 0, 8.dpToPx())
+        }
+        dialogView.addView(tvLocation)
 
         val tvDesc = TextView(requireContext()).apply {
             text = "Pilih bak sampah yang telah selesai dikosongkan:"
-            textSize = 12f
+            textSize = 14f
             setTextColor(resources.getColor(R.color.gray_600, null))
             setPadding(0, 0, 0, 16.dpToPx())
         }
         dialogView.addView(tvDesc)
 
-        // Checkbox Organik
+        // Wrapper for Checkbox Organik
+        val cbOrganikContainer = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { bottomMargin = 12.dpToPx() }
+            setBackgroundResource(R.drawable.edit_text_bg)
+            setPadding(8.dpToPx(), 12.dpToPx(), 8.dpToPx(), 12.dpToPx())
+        }
+
         val cbOrganik = CheckBox(requireContext()).apply {
             text = "Bak Organik ($orgPercent% terisi)"
-            textSize = 14f
+            textSize = 15f
+            setTypeface(typeface, if (orgPercent >= 80) Typeface.BOLD else Typeface.NORMAL)
             isChecked = bin.type == "organik" || orgPercent >= 80
-            setTextColor(resources.getColor(R.color.gray_900, null))
+            setTextColor(resources.getColor(if (orgPercent >= 80) R.color.red_500 else R.color.gray_900, null))
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
         }
-        dialogView.addView(cbOrganik)
+        cbOrganikContainer.addView(cbOrganik)
+        dialogView.addView(cbOrganikContainer)
 
-        // Checkbox Non-Organik
+        // Wrapper for Checkbox Non-Organik
+        val cbNonOrganikContainer = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { bottomMargin = 12.dpToPx() }
+            setBackgroundResource(R.drawable.edit_text_bg)
+            setPadding(8.dpToPx(), 12.dpToPx(), 8.dpToPx(), 12.dpToPx())
+        }
+
         val cbNonOrganik = CheckBox(requireContext()).apply {
             text = "Bak Non-Organik ($nonOrgPercent% terisi)"
-            textSize = 14f
+            textSize = 15f
+            setTypeface(typeface, if (nonOrgPercent >= 80) Typeface.BOLD else Typeface.NORMAL)
             isChecked = bin.type == "nonOrganik" || nonOrgPercent >= 80
-            setTextColor(resources.getColor(R.color.gray_900, null))
-            setPadding(0, 8.dpToPx(), 0, 0)
+            setTextColor(resources.getColor(if (nonOrgPercent >= 80) R.color.red_500 else R.color.gray_900, null))
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
         }
-        dialogView.addView(cbNonOrganik)
+        cbNonOrganikContainer.addView(cbNonOrganik)
+        dialogView.addView(cbNonOrganikContainer)
+
+        cbOrganikContainer.setOnClickListener { cbOrganik.isChecked = !cbOrganik.isChecked }
+        cbNonOrganikContainer.setOnClickListener { cbNonOrganik.isChecked = !cbNonOrganik.isChecked }
 
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Konfirmasi Pengosongan")
