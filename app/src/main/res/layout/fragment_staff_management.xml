@@ -4,8 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F3F4F6"
-    android:fitsSystemWindows="true">
+    android:background="#F3F4F6">
 
     <!-- Header -->
     <LinearLayout
@@ -29,12 +28,11 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Manajemen Akun"
+            android:text="Manajemen Petugas"
             android:textStyle="bold"
             android:textSize="@dimen/text_20"
             android:layout_marginStart="@dimen/margin_16"
             android:textColor="@color/text_primary" />
-
     </LinearLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -42,7 +40,7 @@
         android:layout_height="match_parent"
         android:fillViewport="true">
         
-        <LinearLayout
+        <LinearLayout  
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -67,12 +65,11 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Tambah Akun Baru"
+                        android:text="Tambah Petugas Baru"
                         android:textSize="@dimen/text_14"
                         android:textStyle="bold"
                         android:textColor="@color/text_primary"
                         android:layout_marginBottom="@dimen/margin_16"/>
-
 
                     <EditText
                         android:id="@+id/etNewName"
@@ -112,69 +109,31 @@
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
-                        android:layout_height="@dimen/margin_50"
+                        android:layout_height="wrap_content"
                         app:hintEnabled="false"
                         app:endIconMode="password_toggle"
                         app:endIconTint="@color/text_tertiary"
                         app:boxBackgroundMode="none"
-                        android:background="@drawable/edit_text_bg"
-                        android:layout_marginBottom="@dimen/margin_12">
-
-                        <EditText
-                            android:id="@+id/etNewPassword"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:background="@android:color/transparent"
-                            android:hint="Kata Sandi Akun"
-                            android:inputType="textPassword"
-                            android:paddingStart="@dimen/margin_16"
-                            android:paddingEnd="@dimen/margin_48"
-                            android:textSize="@dimen/text_14"
-                            android:textColorHint="@color/text_tertiary"
-                            android:textColor="@color/text_primary" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="PERAN PENGGUNA (ROLE)"
-                        android:textSize="@dimen/text_10"
-                        android:textStyle="bold"
-                        android:textColor="@color/text_secondary"
-                        android:layout_marginBottom="@dimen/margin_6" />
-
-                    <RadioGroup
-                        android:id="@+id/rgRole"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
                         android:layout_marginBottom="@dimen/margin_16">
 
-                        <RadioButton
-                            android:id="@+id/rbPetugas"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Petugas"
-                            android:checked="true"
-                            android:textColor="@color/text_primary"
-                            android:layout_marginEnd="@dimen/margin_24" />
-
-                        <RadioButton
-                            android:id="@+id/rbAdmin"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Admin"
-                            android:textColor="@color/text_primary" />
-                    </RadioGroup>
-
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etNewPassword"
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/margin_50"
+                            android:background="@drawable/edit_text_bg"
+                            android:hint="Password Sistem"
+                            android:inputType="textPassword"
+                            android:paddingHorizontal="@dimen/margin_16"
+                            android:textSize="@dimen/text_14"
+                            android:textColorHint="@color/text_tertiary" />
+                    </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Using #059669 for Green instead of Indigo to match Admin preview style -->
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnCreateAccount"
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/margin_50"
-                        android:text="Buat Akun Baru"
+                        android:text="Buat Akun Petugas"
                         android:textColor="@color/white"
                         android:textSize="@dimen/text_14"
                         android:textStyle="bold"
@@ -188,48 +147,13 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="DAFTAR AKUN (ADMIN &amp; PETUGAS)"
+                android:text="DAFTAR PETUGAS LAPANGAN"
                 android:textStyle="bold"
                 android:textSize="@dimen/text_10"
                 android:textColor="@color/text_secondary"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="@dimen/margin_32"
                 android:layout_marginBottom="@dimen/margin_16" />
-
-
-            <!-- Filters -->
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/cgFilter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="@dimen/margin_16"
-                app:singleSelection="true"
-                app:selectionRequired="true">
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipAll"
-                    style="@style/Widget.MaterialComponents.Chip.Choice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Semua"
-                    android:checked="true" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipAdmin"
-                    style="@style/Widget.MaterialComponents.Chip.Choice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Admin" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipPetugas"
-                    style="@style/Widget.MaterialComponents.Chip.Choice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Petugas" />
-
-            </com.google.android.material.chip.ChipGroup>
 
             <!-- Staff List -->
             <LinearLayout
