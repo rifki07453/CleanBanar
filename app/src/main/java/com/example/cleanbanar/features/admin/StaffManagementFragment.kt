@@ -7,8 +7,10 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.RadioButton
 import android.widget.TextView
 import android.widget.Toast
+import com.google.android.material.chip.Chip
 import com.example.cleanbanar.R
 import com.example.cleanbanar.core.data.AuthManager
 import com.example.cleanbanar.core.data.FirebaseManager
@@ -44,7 +46,8 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
             val email = binding.etNewEmail.text.toString().trim()
             val phone = binding.etNewPhone.text.toString().trim()
             val password = binding.etNewPassword.text.toString().trim()
-            val role = if (binding.rbAdmin.isChecked) "Admin" else "Petugas"
+            val rbAdmin = binding.root.findViewById<RadioButton>(R.id.rbAdmin)
+            val role = if (rbAdmin?.isChecked == true) "Admin" else "Petugas"
 
             when {
                 name.isEmpty() -> toast("Harap isi Nama Lengkap")
@@ -55,9 +58,13 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
             }
         }
 
-        binding.chipAll.setOnClickListener { filterAndRenderUsers() }
-        binding.chipAdmin.setOnClickListener { filterAndRenderUsers() }
-        binding.chipPetugas.setOnClickListener { filterAndRenderUsers() }
+        val chipAll = binding.root.findViewById<Chip>(R.id.chipAll)
+        val chipAdmin = binding.root.findViewById<Chip>(R.id.chipAdmin)
+        val chipPetugas = binding.root.findViewById<Chip>(R.id.chipPetugas)
+
+        chipAll?.setOnClickListener { filterAndRenderUsers() }
+        chipAdmin?.setOnClickListener { filterAndRenderUsers() }
+        chipPetugas?.setOnClickListener { filterAndRenderUsers() }
     }
 
     override fun observeData() {
@@ -73,9 +80,11 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
 
         val filteredList = allUsers.filter { user ->
             val peran = (user["peran"] as? String ?: "").trim()
+            val chipAdmin = binding.root.findViewById<Chip>(R.id.chipAdmin)
+            val chipPetugas = binding.root.findViewById<Chip>(R.id.chipPetugas)
             val matchesRole = when {
-                binding.chipAdmin.isChecked -> peran.equals("Admin", ignoreCase = true)
-                binding.chipPetugas.isChecked -> peran.equals("Petugas", ignoreCase = true)
+                chipAdmin?.isChecked == true -> peran.equals("Admin", ignoreCase = true)
+                chipPetugas?.isChecked == true -> peran.equals("Petugas", ignoreCase = true)
                 else -> peran.equals("Petugas", ignoreCase = true) || peran.equals("Admin", ignoreCase = true)
             }
             matchesRole
