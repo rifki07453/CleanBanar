@@ -128,6 +128,39 @@
                             android:textColorHint="@color/text_tertiary" />
                     </com.google.android.material.textfield.TextInputLayout>
 
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="PERAN PENGGUNA (ROLE)"
+                        android:textSize="@dimen/text_10"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_secondary"
+                        android:layout_marginBottom="@dimen/margin_6" />
+
+                    <RadioGroup
+                        android:id="@+id/rgRole"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="@dimen/margin_16">
+
+                        <RadioButton
+                            android:id="@+id/rbPetugas"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Petugas"
+                            android:checked="true"
+                            android:textColor="@color/text_primary"
+                            android:layout_marginEnd="@dimen/margin_24" />
+
+                        <RadioButton
+                            android:id="@+id/rbAdmin"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Admin"
+                            android:textColor="@color/text_primary" />
+                    </RadioGroup>
+
                     <!-- Using #059669 for Green instead of Indigo to match Admin preview style -->
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnCreateAccount"
@@ -154,6 +187,40 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="@dimen/margin_32"
                 android:layout_marginBottom="@dimen/margin_16" />
+
+            <!-- Filters -->
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/cgFilter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="@dimen/margin_16"
+                app:singleSelection="true"
+                app:selectionRequired="true">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipAll"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Semua"
+                    android:checked="true" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipAdmin"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Admin" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipPetugas"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Petugas" />
+
+            </com.google.android.material.chip.ChipGroup>
 
             <!-- Staff List -->
             <LinearLayout
