@@ -58,11 +58,11 @@ class StaffManagementFragment : BaseFragment<FragmentStaffManagementBinding>() {
             }
         }
 
-        val chipAll = binding.root.findViewById<Chip>(R.id.chipAll)
+        val chipSemua = binding.root.findViewById<Chip>(R.id.chipSemua)
         val chipAdmin = binding.root.findViewById<Chip>(R.id.chipAdmin)
         val chipPetugas = binding.root.findViewById<Chip>(R.id.chipPetugas)
 
-        chipAll?.setOnClickListener { filterAndRenderUsers() }
+        chipSemua?.setOnClickListener { filterAndRenderUsers() }
         chipAdmin?.setOnClickListener { filterAndRenderUsers() }
         chipPetugas?.setOnClickListener { filterAndRenderUsers() }
     }
