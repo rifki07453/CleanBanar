@@ -296,12 +296,15 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
             } ?: Toast.makeText(requireContext(), "QR Code belum tersedia", Toast.LENGTH_SHORT).show()
         }
 
+        val llWifiProvisioning = view.findViewById<android.widget.LinearLayout>(R.id.llWifiProvisioning)
         if (device.statusKoneksi == "ONLINE") {
             tvConnectionStatus.text = "ONLINE"
             tvConnectionStatus.setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.green_600))
+            llWifiProvisioning.visibility = android.view.View.GONE
         } else {
             tvConnectionStatus.text = "OFFLINE"
             tvConnectionStatus.setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), com.example.cleanbanar.R.color.red_600))
+            llWifiProvisioning.visibility = android.view.View.VISIBLE
         }
 
         val etDetailTrigOrg = view.findViewById<TextInputEditText>(R.id.etDetailTrigOrg)
