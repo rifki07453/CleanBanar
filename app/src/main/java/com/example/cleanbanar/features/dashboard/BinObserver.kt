@@ -60,13 +60,23 @@ object BinObserver {
                     previousNonOrganikMap[device.id] = -1
                     
                     val orgListener = FirebaseManager.listenBinStatus(device.id, "organik") { persentase, _, _, terakhirDikosongkan ->
-                        handleThreshold(device.id, device.nama, "organik", persentase, previousOrganikMap[device.id] ?: -1)
+                        val prevOrg = previousOrganikMap[device.id] ?: -1
+                        FirebaseManager.updateDailyStats("organik", persentase)
+                        if (prevOrg != -1 && prevOrg >= 50 && persentase <= 20) {
+                            FirebaseManager.incrementEmptyCount("organik")
+                        }
+                        handleThreshold(device.id, device.nama, "organik", persentase, prevOrg)
                         handleStaleWaste(device.id, "organik", terakhirDikosongkan, 3)
                         previousOrganikMap[device.id] = persentase
                     }
                     
                     val nonOrgListener = FirebaseManager.listenBinStatus(device.id, "nonOrganik") { persentase, _, _, terakhirDikosongkan ->
-                        handleThreshold(device.id, device.nama, "nonOrganik", persentase, previousNonOrganikMap[device.id] ?: -1)
+                        val prevNonOrg = previousNonOrganikMap[device.id] ?: -1
+                        FirebaseManager.updateDailyStats("nonOrganik", persentase)
+                        if (prevNonOrg != -1 && prevNonOrg >= 50 && persentase <= 20) {
+                            FirebaseManager.incrementEmptyCount("nonOrganik")
+                        }
+                        handleThreshold(device.id, device.nama, "nonOrganik", persentase, prevNonOrg)
                         handleStaleWaste(device.id, "nonOrganik", terakhirDikosongkan, 7)
                         previousNonOrganikMap[device.id] = persentase
                     }

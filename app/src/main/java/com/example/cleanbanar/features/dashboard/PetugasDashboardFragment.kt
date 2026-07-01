@@ -120,26 +120,38 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
                 if (!binListeners.containsKey(device.id)) {
                     val orgListener = FirebaseManager.listenBinStatus(device.id, "organik") { fillPercentage, status, lastUpdate, lastEmptied ->
                         if (!isAdded) return@listenBinStatus
-                        binDataMap["${device.id}_organik"]?.apply {
-                            this.fillPercentage = fillPercentage
-                            this.status = status
-                            this.lastUpdate = lastUpdate
-                            this.lastEmptied = lastEmptied
+                        val binData = binDataMap["${device.id}_organik"]
+                        if (binData != null) {
+                            val isChanged = (binData.fillPercentage != fillPercentage) || (binData.status != status)
+                            binData.apply {
+                                this.fillPercentage = fillPercentage
+                                this.status = status
+                                this.lastUpdate = lastUpdate
+                                this.lastEmptied = lastEmptied
+                            }
+                            if (isChanged) {
+                                rebuildCards()
+                                updateOverallStatus()
+                            }
                         }
-                        rebuildCards()
-                        updateOverallStatus()
                     }
                     
                     val nonOrgListener = FirebaseManager.listenBinStatus(device.id, "nonOrganik") { fillPercentage, status, lastUpdate, lastEmptied ->
                         if (!isAdded) return@listenBinStatus
-                        binDataMap["${device.id}_nonOrganik"]?.apply {
-                            this.fillPercentage = fillPercentage
-                            this.status = status
-                            this.lastUpdate = lastUpdate
-                            this.lastEmptied = lastEmptied
+                        val binData = binDataMap["${device.id}_nonOrganik"]
+                        if (binData != null) {
+                            val isChanged = (binData.fillPercentage != fillPercentage) || (binData.status != status)
+                            binData.apply {
+                                this.fillPercentage = fillPercentage
+                                this.status = status
+                                this.lastUpdate = lastUpdate
+                                this.lastEmptied = lastEmptied
+                            }
+                            if (isChanged) {
+                                rebuildCards()
+                                updateOverallStatus()
+                            }
                         }
-                        rebuildCards()
-                        updateOverallStatus()
                     }
                     
                     if (orgListener != null && nonOrgListener != null) {
@@ -186,8 +198,7 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
             ).apply { bottomMargin = 16.dpToPx() }
             radius = 16f.dpToPxF()
             cardElevation = 0f.dpToPxF()
-            strokeWidth = 1.dpToPx()
-            strokeColor = 0x1A000000 
+            strokeWidth = 0
             setCardBackgroundColor(resources.getColor(R.color.white, null))
         }
 
