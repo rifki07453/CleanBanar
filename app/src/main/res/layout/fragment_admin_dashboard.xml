@@ -260,7 +260,7 @@
                         <ImageView
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:src="@drawable/ic_notification_modern"
+                            android:src="@drawable/ic_notification"
                             android:padding="@dimen/margin_12"
                             app:tint="#D97706" />
                     </FrameLayout>
@@ -286,11 +286,6 @@
                             android:textSize="@dimen/text_10"
                             android:layout_marginTop="@dimen/margin_4" />
                     </LinearLayout>
-                    <ImageView
-                        android:layout_width="@dimen/margin_24"
-                        android:layout_height="@dimen/margin_24"
-                        android:src="@drawable/ic_arrow_right_modern"
-                        app:tint="@color/gray_400" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
