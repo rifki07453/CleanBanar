@@ -97,8 +97,8 @@ class StatisticsFragment : BaseFragment<FragmentStatisticsBinding>() {
     private fun updateUI() {
         if (allDailyStats.isEmpty()) return
 
-        // Generate past 35 days in chronological order
-        val past35Dates = getPastDates(35)
+        // Generate 5 weeks of data (current week + 4 past weeks) aligned to Monday-Sunday
+        val past35Dates = getFixedWeeksDates(5)
         val statsMap = allDailyStats.associateBy { it["tanggal"] as? String ?: "" }
 
         // Process daily stats, fallback to 0 if no record exists
@@ -138,14 +138,20 @@ class StatisticsFragment : BaseFragment<FragmentStatisticsBinding>() {
     private fun updateAverages(currentWeekStats: List<Map<String, Any>>, compareWeekStats: List<Map<String, Any>>) {
         if (currentWeekStats.isEmpty()) return
 
-        val avgOrganik = currentWeekStats.map { (it["organik"] as? Int) ?: 0 }.average().toInt()
-        val avgNonOrganik = currentWeekStats.map { (it["nonOrganik"] as? Int) ?: 0 }.average().toInt()
+        val activeCurrentOrg = currentWeekStats.map { (it["organik"] as? Int) ?: 0 }.filter { it > 0 }
+        val activeCurrentNonOrg = currentWeekStats.map { (it["nonOrganik"] as? Int) ?: 0 }.filter { it > 0 }
+
+        val avgOrganik = if (activeCurrentOrg.isNotEmpty()) activeCurrentOrg.average().toInt() else 0
+        val avgNonOrganik = if (activeCurrentNonOrg.isNotEmpty()) activeCurrentNonOrg.average().toInt() else 0
 
         binding.tvOrganikAvg.animateCount(0, avgOrganik)
         binding.tvNonOrganikAvg.animateCount(0, avgNonOrganik)
 
-        val prevAvgOrganik = compareWeekStats.map { (it["organik"] as? Int) ?: 0 }.average().toInt()
-        val prevAvgNonOrganik = compareWeekStats.map { (it["nonOrganik"] as? Int) ?: 0 }.average().toInt()
+        val activeCompareOrg = compareWeekStats.map { (it["organik"] as? Int) ?: 0 }.filter { it > 0 }
+        val activeCompareNonOrg = compareWeekStats.map { (it["nonOrganik"] as? Int) ?: 0 }.filter { it > 0 }
+
+        val prevAvgOrganik = if (activeCompareOrg.isNotEmpty()) activeCompareOrg.average().toInt() else 0
+        val prevAvgNonOrganik = if (activeCompareNonOrg.isNotEmpty()) activeCompareNonOrg.average().toInt() else 0
 
         val diffOrg = avgOrganik - prevAvgOrganik
         val diffNonOrg = avgNonOrganik - prevAvgNonOrganik
@@ -173,14 +179,14 @@ class StatisticsFragment : BaseFragment<FragmentStatisticsBinding>() {
             return
         }
 
-        val allValues = stats.flatMap { entry ->
+        val activeValues = stats.flatMap { entry ->
             listOf(
                 (entry["organik"] as? Int) ?: 0,
                 (entry["nonOrganik"] as? Int) ?: 0
             )
-        }
+        }.filter { it > 0 }
 
-        val weeklyAvg = if (allValues.isNotEmpty()) allValues.average().toInt() else 0
+        val weeklyAvg = if (activeValues.isNotEmpty()) activeValues.average().toInt() else 0
         binding.tvWeeklyAvg.animateCount(0, weeklyAvg, "%")
     }
 
@@ -305,7 +311,7 @@ class StatisticsFragment : BaseFragment<FragmentStatisticsBinding>() {
             val orgBar = View(requireContext()).apply {
                 layoutParams = LinearLayout.LayoutParams(
                     12.dpToPx(),
-                    orgBarHeight.dpToPx()
+                    0 // Start from 0 for animation
                 ).apply { marginEnd = 2.dpToPx() }
                 setBackgroundColor(resources.getColor(R.color.emerald_600, null))
             }
@@ -314,9 +320,33 @@ class StatisticsFragment : BaseFragment<FragmentStatisticsBinding>() {
             val nonOrgBar = View(requireContext()).apply {
                 layoutParams = LinearLayout.LayoutParams(
                     12.dpToPx(),
-                    nonOrgBarHeight.dpToPx()
+                    0 // Start from 0 for animation
                 )
                 setBackgroundColor(resources.getColor(R.color.secondary, null))
+            }
+
+            // Animate organic bar
+            android.animation.ValueAnimator.ofInt(0, orgBarHeight.dpToPx()).apply {
+                duration = 1000
+                interpolator = android.view.animation.DecelerateInterpolator()
+                addUpdateListener { animation ->
+                    val param = orgBar.layoutParams
+                    param.height = animation.animatedValue as Int
+                    orgBar.layoutParams = param
+                }
+                start()
+            }
+
+            // Animate non-organic bar
+            android.animation.ValueAnimator.ofInt(0, nonOrgBarHeight.dpToPx()).apply {
+                duration = 1000
+                interpolator = android.view.animation.DecelerateInterpolator()
+                addUpdateListener { animation ->
+                    val param = nonOrgBar.layoutParams
+                    param.height = animation.animatedValue as Int
+                    nonOrgBar.layoutParams = param
+                }
+                start()
             }
 
             barGroup.addView(orgBar)
@@ -420,14 +450,22 @@ class StatisticsFragment : BaseFragment<FragmentStatisticsBinding>() {
     // ==========================================
     // Date & Local Day Helpers
     // ==========================================
-    private fun getPastDates(daysCount: Int): List<String> {
+    private fun getFixedWeeksDates(weeksCount: Int): List<String> {
         val dates = mutableListOf<String>()
         val calendar = Calendar.getInstance()
-        for (i in 0 until daysCount) {
+        // Set to Monday of the current week
+        calendar.firstDayOfWeek = Calendar.MONDAY
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+        // Go back (weeksCount - 1) weeks
+        calendar.add(Calendar.WEEK_OF_YEAR, -(weeksCount - 1))
+        
+        // Generate days chronologically from that Monday up to the end of the current week
+        val totalDays = weeksCount * 7
+        for (i in 0 until totalDays) {
             dates.add(SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.time))
-            calendar.add(Calendar.DAY_OF_YEAR, -1)
+            calendar.add(Calendar.DAY_OF_YEAR, 1)
         }
-        return dates.reversed()
+        return dates
     }
 
     private fun getDayLabel(dateString: String): String {

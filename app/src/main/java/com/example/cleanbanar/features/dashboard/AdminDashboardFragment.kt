@@ -75,6 +75,61 @@ class AdminDashboardFragment : BaseFragment<FragmentAdminDashboardBinding>() {
         binding.cardStatusPerangkat.setOnClickListener {
             showDeviceListBottomSheet()
         }
+
+        binding.cardPengaturanNotifikasi.setOnClickListener {
+            showNotificationSettingsDialog()
+        }
+    }
+
+    private fun showNotificationSettingsDialog() {
+        val bottomSheetDialog = com.google.android.material.bottomsheet.BottomSheetDialog(requireContext())
+        val view = layoutInflater.inflate(R.layout.bottom_sheet_notification_settings, null)
+        bottomSheetDialog.setContentView(view)
+
+        val etHampirPenuh = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etHampirPenuh)
+        val etPenuh = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etPenuh)
+        val btnSimpan = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnSimpan)
+
+        // Load current settings
+        FirebaseManager.getNotificationSettings(authManager.getUserId()) { settings ->
+            etHampirPenuh.setText(settings.hampirPenuhThreshold.toString())
+            etPenuh.setText(settings.penuhThreshold.toString())
+        }
+
+        btnSimpan.setOnClickListener {
+            val hampirStr = etHampirPenuh.text.toString()
+            val penuhStr = etPenuh.text.toString()
+            
+            val hampirVal = hampirStr.toIntOrNull()
+            val penuhVal = penuhStr.toIntOrNull()
+            
+            if (hampirVal == null || penuhVal == null) {
+                Toast.makeText(requireContext(), "Harap masukkan angka yang valid", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            
+            if (hampirVal < 0 || hampirVal > 100 || penuhVal < 0 || penuhVal > 100) {
+                Toast.makeText(requireContext(), "Angka harus antara 0 dan 100", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            
+            if (hampirVal >= penuhVal) {
+                Toast.makeText(requireContext(), "Batas hampir penuh harus lebih kecil dari batas penuh", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            
+            FirebaseManager.getNotificationSettings(authManager.getUserId()) { currentSettings ->
+                val newSettings = currentSettings.copy(
+                    hampirPenuhThreshold = hampirVal,
+                    penuhThreshold = penuhVal
+                )
+                FirebaseManager.saveNotificationSettings(authManager.getUserId(), newSettings)
+                Toast.makeText(requireContext(), "Pengaturan berhasil disimpan", Toast.LENGTH_SHORT).show()
+                bottomSheetDialog.dismiss()
+            }
+        }
+
+        bottomSheetDialog.show()
     }
 
 

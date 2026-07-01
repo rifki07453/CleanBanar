@@ -119,7 +119,7 @@ object BinObserver {
 
         val binLabel = if (binType == "organik") "Organik" else "Non-Organik"
 
-        if (currentPercent >= 95 && previousPercent < 95) {
+        if (currentPercent >= currentSettings.penuhThreshold && previousPercent < currentSettings.penuhThreshold) {
             FirebaseManager.addHistoryEntry(
                 aksi = "alert",
                 tipeSampah = binType,
@@ -142,7 +142,7 @@ object BinObserver {
             return
         }
 
-        if (currentPercent >= 80 && previousPercent < 80) {
+        if (currentPercent >= currentSettings.hampirPenuhThreshold && previousPercent < currentSettings.hampirPenuhThreshold) {
             if (currentSettings.hampirPenuh) {
                 val judul = "$binLabel Hampir Penuh"
                 val pesan = "Kapasitas $binLabel di $deviceName di angka $currentPercent%. Segera perhatikan."

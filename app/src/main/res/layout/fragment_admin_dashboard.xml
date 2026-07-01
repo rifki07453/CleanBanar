@@ -230,6 +230,70 @@
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
 
+            <!-- Row 1.5: Pengaturan Notifikasi -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardPengaturanNotifikasi"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/margin_20"
+                android:layout_marginTop="@dimen/margin_8"
+                app:cardCornerRadius="@dimen/margin_24"
+                app:cardElevation="@dimen/margin_2"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@color/bg_card"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground">
+                
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/margin_16"
+                    android:gravity="center_vertical">
+                    
+                    <FrameLayout
+                        android:layout_width="@dimen/margin_48"
+                        android:layout_height="@dimen/margin_48"
+                        android:background="@drawable/bg_rounded_light_blue"
+                        android:backgroundTint="#FEF3C7">
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:src="@drawable/ic_notification_modern"
+                            android:padding="@dimen/margin_12"
+                            app:tint="#D97706" />
+                    </FrameLayout>
+                    
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="@dimen/margin_16">
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Pengaturan Notifikasi"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_14"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Atur batas penuh &amp; hampir penuh"
+                            android:textColor="@color/text_tertiary"
+                            android:textSize="@dimen/text_10"
+                            android:layout_marginTop="@dimen/margin_4" />
+                    </LinearLayout>
+                    <ImageView
+                        android:layout_width="@dimen/margin_24"
+                        android:layout_height="@dimen/margin_24"
+                        android:src="@drawable/ic_arrow_right_modern"
+                        app:tint="@color/gray_400" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- Row 2: Aktivitas Terbaru Section -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"

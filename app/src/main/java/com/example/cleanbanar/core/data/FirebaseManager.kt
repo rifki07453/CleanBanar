@@ -622,7 +622,9 @@ object FirebaseManager {
         val hampirPenuh: Boolean = true,
         val penuh: Boolean = true,
         val selesai: Boolean = true,
-        val sistem: Boolean = true
+        val sistem: Boolean = true,
+        val hampirPenuhThreshold: Int = 80,
+        val penuhThreshold: Int = 95
     )
 
     fun saveNotificationSettings(userId: String, settings: NotificationSettings) {
@@ -631,6 +633,8 @@ object FirebaseManager {
         ref.child("penuh").setValue(settings.penuh)
         ref.child("selesai").setValue(settings.selesai)
         ref.child("sistem").setValue(settings.sistem)
+        ref.child("hampir_penuh_threshold").setValue(settings.hampirPenuhThreshold)
+        ref.child("penuh_threshold").setValue(settings.penuhThreshold)
     }
 
     fun listenNotificationSettings(userId: String, callback: (NotificationSettings) -> Unit): ValueEventListener? {
@@ -641,7 +645,9 @@ object FirebaseManager {
                     hampirPenuh = snapshot.child("hampir_penuh").getValue(Boolean::class.java) ?: true,
                     penuh = snapshot.child("penuh").getValue(Boolean::class.java) ?: true,
                     selesai = snapshot.child("selesai").getValue(Boolean::class.java) ?: true,
-                    sistem = snapshot.child("sistem").getValue(Boolean::class.java) ?: true
+                    sistem = snapshot.child("sistem").getValue(Boolean::class.java) ?: true,
+                    hampirPenuhThreshold = snapshot.child("hampir_penuh_threshold").getValue(Int::class.java) ?: 80,
+                    penuhThreshold = snapshot.child("penuh_threshold").getValue(Int::class.java) ?: 95
                 ))
             }
             override fun onCancelled(error: DatabaseError) {
@@ -664,7 +670,9 @@ object FirebaseManager {
                     hampirPenuh = snapshot.child("hampir_penuh").getValue(Boolean::class.java) ?: true,
                     penuh = snapshot.child("penuh").getValue(Boolean::class.java) ?: true,
                     selesai = snapshot.child("selesai").getValue(Boolean::class.java) ?: true,
-                    sistem = snapshot.child("sistem").getValue(Boolean::class.java) ?: true
+                    sistem = snapshot.child("sistem").getValue(Boolean::class.java) ?: true,
+                    hampirPenuhThreshold = snapshot.child("hampir_penuh_threshold").getValue(Int::class.java) ?: 80,
+                    penuhThreshold = snapshot.child("penuh_threshold").getValue(Int::class.java) ?: 95
                 ))
             }
             override fun onCancelled(error: DatabaseError) {

@@ -71,16 +71,7 @@ class PetugasDashboardFragment : BaseFragment<FragmentPetugasDashboardBinding>()
             showVerificationOptions(null)
         }
         
-        binding.swipeRefresh.setColorSchemeResources(R.color.primary, R.color.emerald_500)
-        binding.swipeRefresh.setOnRefreshListener {
-            // Walaupun Firebase Realtime, kita beri efek visual refresh
-            rebuildCards()
-            updateOverallStatus()
-            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                binding.swipeRefresh.isRefreshing = false
-                Toast.makeText(requireContext(), "Data diperbarui", Toast.LENGTH_SHORT).show()
-            }, 1000)
-        }
+
         
         rebuildCards()
     }
